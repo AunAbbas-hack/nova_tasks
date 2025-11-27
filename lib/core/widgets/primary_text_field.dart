@@ -63,7 +63,7 @@ class _PrimaryTextFieldState extends State<PrimaryTextField> {
           validator: widget.validator,
           obscureText: widget.isPassword ? _obscure : false,
           style: const TextStyle(color: Colors.white),
-
+autovalidateMode: AutovalidateMode.onUserInteraction,
           onChanged: widget.onChanged,
 
           decoration: InputDecoration(
