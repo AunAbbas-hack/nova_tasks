@@ -34,7 +34,7 @@ class OnboardingPageThree extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Get insights into your habits, see completion rates, and discover your most productive days.',
+            'Get insights into your habits, See completion rates, and discover your most productive days.',
             textAlign: TextAlign.center,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: AppColors.textSecondary,
@@ -42,9 +42,7 @@ class OnboardingPageThree extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          // PrimaryButton(label: 'Get Started', onPressed: onGetStarted),
-          // const SizedBox(height: 12),
-          // TextButton(onPressed: onSkip, child: const Text('Skip for now')),
+
         ],
       ),
     );
