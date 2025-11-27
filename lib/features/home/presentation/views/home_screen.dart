@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../../../../data/models/task_model.dart';
 import '../../../../data/repositories/task_repository.dart';
 import '../../../auth/viewmodels/signup_viewmodel.dart';
+import '../../../tasks/widgets/task_card.dart';
 import '../viewmodels/home_viewmodel.dart';
 import '../../../tasks/views/add_task_screen.dart';
 import '../../../tasks/viewmodels/add_task_viewmodel.dart';
@@ -136,7 +137,7 @@ class _HomeView extends StatelessWidget {
               ...homeVm.todayTasks.map(
                     (task) => Padding(
                   padding: const EdgeInsets.only(bottom: 12),
-                  child: _TaskCard(task: task),
+                  child: TaskCard(task: task),
                 ),
               ),
 
@@ -212,6 +213,9 @@ class _HomeView extends StatelessWidget {
             backgroundColor: Colors.transparent,
             builder: (sheetContext) {
               return DraggableScrollableSheet(
+                initialChildSize: 1,
+                maxChildSize: 1,
+                minChildSize: 0.3,
                 expand: true,
                 builder: (context, scrollController) {
                   // NOTE: AddTaskScreen already provides its own AddTaskViewModel
@@ -361,18 +365,22 @@ class _TaskCard extends StatelessWidget {
           ),
 
           // Checkbox
-          Checkbox(
-            value: task.completedAt != null,
-            onChanged: (_) {
-              context.read<HomeViewModel>().toggleComplete(task);
-            },
-            activeColor: priorityColor,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(6),
-            ),
+
+              Checkbox(
+                value: task.completedAt != null,
+                onChanged: (_) {
+                  context.read<HomeViewModel>().toggleComplete(task);
+                },
+                activeColor: priorityColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+
+
+
     );
   }
 }
