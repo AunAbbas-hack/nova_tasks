@@ -197,6 +197,9 @@ class TaskModel {
   TaskModel copyWith({
     String? title,
     DateTime? date,
+    List<SubtaskModel>? subTasks,
+    DateTime? completedAt
+
   }) {
     return TaskModel(
       id: id,

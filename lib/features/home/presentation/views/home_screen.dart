@@ -1,6 +1,7 @@
 // lib/features/home/presentation/views/home_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:nova_tasks/features/tasks/views/task_detail_screen.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../data/models/task_model.dart';
@@ -163,7 +164,7 @@ class _HomeView extends StatelessWidget {
               ],
 
               // ---------------- UPCOMING ----------------
-
+// 🔹 Upcoming Header
               if (homeVm.upcomingTasks.isNotEmpty)
                 const AppText(
                   "Upcoming",
@@ -171,12 +172,15 @@ class _HomeView extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                 ),
 
-              if (homeVm.upcomingTasks.isNotEmpty) const SizedBox(height: 12),
+              if (homeVm.upcomingTasks.isNotEmpty)
+                const SizedBox(height: 12),
 
+// 🔹 Upcoming Task Groups
               ...homeVm.upcomingTasks.entries.map(
                     (entry) => Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Date Heading
                     AppText(
                       "${_weekday(entry.key)}, ${entry.key.day}",
                       fontSize: 16,
@@ -184,18 +188,22 @@ class _HomeView extends StatelessWidget {
                       color: Colors.white70,
                     ),
                     const SizedBox(height: 8),
+
+                    // Tasks List
                     ...entry.value.map(
                           (task) => Padding(
                         padding: const EdgeInsets.only(bottom: 12),
-                        child: _TaskCard(task: task),
+                        child: TaskCard(task: task),   // 🔥 Now using TaskCard!
                       ),
                     ),
+
                     const SizedBox(height: 12),
                   ],
                 ),
               ),
 
               const SizedBox(height: 80),
+
             ],
           ),
         ),
@@ -283,103 +291,108 @@ class _TaskCard extends StatelessWidget {
     final priorityColor = _priorityColor(task.priority);
     final categoryChipColor = _categoryColor(task.category);
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: const Color(0xFF11151F),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Row(
-        children: [
-          // Priority bar
-          Container(
-            width: 4,
-            height: 48,
-            decoration: BoxDecoration(
-              color: priorityColor,
-              borderRadius: BorderRadius.circular(2),
+    return GestureDetector(
+      onTap: (){
+        Navigator.push(context, MaterialPageRoute(builder: (context)=>TaskDetailScreen(task: task)));
+      },
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: const Color(0xFF11151F),
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Row(
+          children: [
+            // Priority bar
+            Container(
+              width: 4,
+              height: 48,
+              decoration: BoxDecoration(
+                color: priorityColor,
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
-          ),
-          const SizedBox(width: 16),
+            const SizedBox(width: 16),
 
-          // Title + time + category
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AppText(
-                  task.title,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color:
-                  task.completedAt == null ? Colors.white : Colors.white54,
-                  decoration: task.completedAt != null
-                      ? TextDecoration.lineThrough
-                      : null,
-                ),
-                const SizedBox(height: 6),
-                AppText(
-                  task.time.isEmpty ? task.category : task.time,
-                  color: Colors.white54,
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: categoryChipColor.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: categoryChipColor.withOpacity(0.5),
-                          width: 0.6,
+            // Title + time + category
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AppText(
+                    task.title,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color:
+                    task.completedAt == null ? Colors.white : Colors.white54,
+                    decoration: task.completedAt != null
+                        ? TextDecoration.lineThrough
+                        : null,
+                  ),
+                  const SizedBox(height: 6),
+                  AppText(
+                    task.time.isEmpty ? task.category : task.time,
+                    color: Colors.white54,
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: categoryChipColor.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: categoryChipColor.withOpacity(0.5),
+                            width: 0.6,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.label_rounded,
+                              size: 14,
+                              color: categoryChipColor,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              task.category,
+                              style: TextStyle(
+                                color: categoryChipColor,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.label_rounded,
-                            size: 14,
-                            color: categoryChipColor,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            task.category,
-                            style: TextStyle(
-                              color: categoryChipColor,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            // Checkbox
+
+                Checkbox(
+                  value: task.completedAt != null,
+                  onChanged: (_) {
+                    context.read<HomeViewModel>().toggleComplete(task);
+                  },
+                  activeColor: priorityColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6),
+                  ),
                 ),
               ],
             ),
-          ),
-
-          // Checkbox
-
-              Checkbox(
-                value: task.completedAt != null,
-                onChanged: (_) {
-                  context.read<HomeViewModel>().toggleComplete(task);
-                },
-                activeColor: priorityColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
-                ),
-              ),
-            ],
-          ),
 
 
 
+      ),
     );
   }
 }

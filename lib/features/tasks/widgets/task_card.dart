@@ -245,9 +245,9 @@ class TaskCard extends StatelessWidget {
       backgroundColor: Colors.transparent,
       builder: (_) {
         return DraggableScrollableSheet(
-          initialChildSize: 0.9,
-          minChildSize: 0.4,
-          maxChildSize: 0,
+          initialChildSize: 0.8,
+          minChildSize: 0.1,
+          maxChildSize: 0.9,
           expand: false,
           builder: (context, scrollController) {
             // AddTaskScreen already handles edit vs create using initialTask

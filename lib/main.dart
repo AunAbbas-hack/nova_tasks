@@ -14,7 +14,8 @@ await Firebase.initializeApp(
 );
   runApp(
     MultiProvider(providers: [
-      ChangeNotifierProvider(create: (_)=>SignupViewModel())
+      ChangeNotifierProvider(create: (_)=>SignupViewModel()),
+
     ],child: const NovaTasksApp(),)
     
     
