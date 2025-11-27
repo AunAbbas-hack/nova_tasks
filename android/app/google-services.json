@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "75231049160",
+    "project_id": "novatasks-df483",
+    "storage_bucket": "novatasks-df483.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:75231049160:android:a954334b91c22b1855fcfd",
+        "android_client_info": {
+          "package_name": "com.example.nova_tasks"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBPrFuuWbe387QqbqiwqxB_iMRZhy9sDT0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

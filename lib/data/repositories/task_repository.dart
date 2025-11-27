@@ -1,0 +1,106 @@
+// import 'package:cloud_firestore/cloud_firestore.dart';
+// import '../models/task_model.dart';
+//
+// class TaskRepository {
+//   final _fire = FirebaseFirestore.instance;
+//
+//   Stream<List<TaskModel>> streamUserTasks(String userId) {
+//     return _fire
+//         .collection('users')
+//         .doc(userId)
+//         .collection('tasks')
+//         .orderBy('date')
+//         .snapshots()
+//         .map((snap) =>
+//         snap.docs.map((doc) => TaskModel.fromFirestore(doc, null)).toList());
+//   }
+//
+//   Future<void> addTask(TaskModel task) async {
+//     await _fire
+//         .collection('users')
+//         .doc(task.userId)
+//         .collection('tasks')
+//         .doc(task.id)
+//         .set(task.toFirestore());
+//   }
+//
+//   Future<void> updateTask(String userId, String taskId, Map<String, dynamic> data) async {
+//     await _fire
+//         .collection('users')
+//         .doc(userId)
+//         .collection('tasks')
+//         .doc(taskId)
+//         .update(data);
+//   }
+//
+//   Future<void> deleteTask(String userId, String taskId) async {
+//     await _fire
+//         .collection('users')
+//         .doc(userId)
+//         .collection('tasks')
+//         .doc(taskId)
+//         .delete();
+//   }
+// }
+
+
+// lib/features/tasks/data/task_repository.dart
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/task_model.dart';
+
+class TaskRepository {
+  final _fire = FirebaseFirestore.instance;
+
+  // ---------------- REAL-TIME STREAM ----------------
+
+  Stream<List<TaskModel>> streamUserTasks(String userId) {
+    return _fire
+        .collection('users')
+        .doc(userId)
+        .collection('tasks')
+        .orderBy('date')
+        .snapshots()
+        .map(
+          (snap) => snap.docs
+          .map((doc) => TaskModel.fromFirestore(doc, null))
+          .toList(),
+    );
+  }
+
+  // ---------------- ADD TASK ----------------
+
+  Future<void> addTask(TaskModel task) async {
+    await _fire
+        .collection('users')
+        .doc(task.userId)
+        .collection('tasks')
+        .doc(task.id)
+        .set(task.toFirestore());
+  }
+
+  // ---------------- UPDATE TASK ----------------
+
+  Future<void> updateTask(
+      String userId, String taskId, Map<String, dynamic> data) async {
+    data["updatedAt"] = Timestamp.fromDate(DateTime.now());
+
+    await _fire
+        .collection('users')
+        .doc(userId)
+        .collection('tasks')
+        .doc(taskId)
+        .update(data);
+  }
+
+  // ---------------- DELETE TASK ----------------
+
+  Future<void> deleteTask(String userId, String taskId) async {
+    await _fire
+        .collection('users')
+        .doc(userId)
+        .collection('tasks')
+        .doc(taskId)
+        .delete();
+  }
+}
