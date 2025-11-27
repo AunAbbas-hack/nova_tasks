@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import 'package:nova_tasks/core/widgets/app_text.dart';
@@ -7,17 +8,16 @@ import 'package:nova_tasks/features/home/presentation/viewmodels/home_viewmodel.
 import 'package:nova_tasks/features/tasks/views/add_task_screen.dart';
 
 class TaskCard extends StatelessWidget {
-  const TaskCard({
-    super.key,
-    required this.task,
-  });
+  const TaskCard({super.key, required this.task});
 
   final TaskModel task;
 
   @override
   Widget build(BuildContext context) {
     final homeVm = context.read<HomeViewModel>();
+    DateTime created = DateTime.parse(task.createdAt.toString());
 
+    String formattedTime = DateFormat('hh:mm a').format(task.createdAt);
     // Priority & category colors
     final priorityColor = _priorityColor(task.priority);
     final categoryChipColor = _categoryChipColor(task.category);
@@ -51,8 +51,9 @@ class TaskCard extends StatelessWidget {
                   task.title,
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color:
-                  task.completedAt == null ? Colors.white : Colors.white54,
+                  color: task.completedAt == null
+                      ? Colors.white
+                      : Colors.white54,
                   decoration: task.completedAt != null
                       ? TextDecoration.lineThrough
                       : null,
@@ -109,22 +110,29 @@ class TaskCard extends StatelessWidget {
           Column(
             children: [
               // ✅ Complete toggle
-              Align(
-                alignment: Alignment.centerRight,
-                child: Checkbox(
-                  value: task.completedAt != null,
-                  onChanged: (_) => homeVm.toggleComplete(task),
-                  activeColor: priorityColor,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
+              Row(
+                children: [
+                  Checkbox(
+                    value: task.completedAt != null,
+                    onChanged: (_) => homeVm.toggleComplete(task),
+                    activeColor: priorityColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6),
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 2),
+                  AppText(
+                    formattedTime.toString(),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ],
               ),
 
               // ✏️ Update button
               Row(
                 children: [
-
                   IconButton(
                     icon: const Icon(
                       Icons.edit,
@@ -162,7 +170,7 @@ class TaskCard extends StatelessWidget {
                     },
                   ),
                 ],
-              )
+              ),
             ],
           ),
         ],
@@ -200,32 +208,32 @@ class TaskCard extends StatelessWidget {
 
   static Future<bool> _confirmDelete(BuildContext context) async {
     return await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1F2B),
-        title: const Text(
-          'Delete Task?',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: const Text(
-          'Are you sure you want to delete this task?',
-          style: TextStyle(color: Colors.white70),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text(
-              'Delete',
-              style: TextStyle(color: Colors.redAccent),
+          context: context,
+          builder: (_) => AlertDialog(
+            backgroundColor: const Color(0xFF1A1F2B),
+            title: const Text(
+              'Delete Task?',
+              style: TextStyle(color: Colors.white),
             ),
+            content: const Text(
+              'Are you sure you want to delete this task?',
+              style: TextStyle(color: Colors.white70),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text(
+                  'Delete',
+                  style: TextStyle(color: Colors.redAccent),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-    ) ??
+        ) ??
         false;
   }
 
@@ -237,6 +245,9 @@ class TaskCard extends StatelessWidget {
       backgroundColor: Colors.transparent,
       builder: (_) {
         return DraggableScrollableSheet(
+          initialChildSize: 0.9,
+          minChildSize: 0.4,
+          maxChildSize: 0,
           expand: false,
           builder: (context, scrollController) {
             // AddTaskScreen already handles edit vs create using initialTask

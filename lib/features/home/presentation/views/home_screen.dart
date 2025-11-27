@@ -208,15 +208,14 @@ class _HomeView extends StatelessWidget {
           showModalBottomSheet<void>(
             context: context,
             isScrollControlled: true,
-            isDismissible: true,
             enableDrag: true,
             backgroundColor: Colors.transparent,
             builder: (sheetContext) {
               return DraggableScrollableSheet(
-                initialChildSize: 1,
+                initialChildSize: 0.9,
                 maxChildSize: 1,
                 minChildSize: 0.3,
-                expand: true,
+                expand: false,
                 builder: (context, scrollController) {
                   // NOTE: AddTaskScreen already provides its own AddTaskViewModel
                   return const AddTaskScreen();

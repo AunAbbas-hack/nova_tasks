@@ -50,9 +50,6 @@ class _LoginView extends StatelessWidget {
     context.read<LoginViewModel>().submit(
       onProgress: () => CircularProgressIndicator(),
       onSuccess: () {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Logged in successfully')));
         Navigator.of(context).pushReplacement(
           MaterialPageRoute<void>(builder: (_) => const NavigationWrapper()),
         );

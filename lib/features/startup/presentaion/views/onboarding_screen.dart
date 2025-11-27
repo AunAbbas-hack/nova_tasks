@@ -83,9 +83,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
       if (viewModel.hasCompleted && !_snackbarShown) {
         _snackbarShown = true;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Onboarding complete!')));
         Navigator.of(context).pushReplacement(
           MaterialPageRoute<void>(builder: (_) => const LoginScreen()),
         );
