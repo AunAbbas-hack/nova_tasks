@@ -16,6 +16,7 @@ class TaskCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final homeVm = context.read<HomeViewModel>();
     String formattedTime = DateFormat('hh:mm a').format(task.createdAt);
+
     // Priority & category colors
     final priorityColor = _priorityColor(task.priority);
     final categoryChipColor = _categoryChipColor(task.category);
@@ -32,7 +33,7 @@ class TaskCard extends StatelessWidget {
           // Priority bar
           Container(
             width: 4,
-            height: 48,
+            height: 88,
             decoration: BoxDecoration(
               color: priorityColor,
               borderRadius: BorderRadius.circular(2),
@@ -140,7 +141,7 @@ class TaskCard extends StatelessWidget {
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
                     onPressed: () {
-                      _openEditBottomSheet(context, task);
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=>AddTaskScreen(initialTask: task,)));
                     },
                   ),
                   const SizedBox(width: 2),
@@ -235,24 +236,5 @@ class TaskCard extends StatelessWidget {
         false;
   }
 
-  static void _openEditBottomSheet(BuildContext context, TaskModel task) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      enableDrag: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.8,
-          minChildSize: 0.1,
-          maxChildSize: 0.9,
-          expand: false,
-          builder: (context, scrollController) {
-            // AddTaskScreen already handles edit vs create using initialTask
-            return AddTaskScreen(initialTask: task);
-          },
-        );
-      },
-    );
-  }
+
 }

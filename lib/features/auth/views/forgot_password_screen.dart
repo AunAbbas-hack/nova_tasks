@@ -173,7 +173,9 @@ class _ForgotPasswordCard extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             PrimaryButton(
-              label: viewModel.isSubmitting ? 'Sending...' : 'Send Reset Link',
+              label: viewModel.isSubmitting ? 'Sending OTP...' : 'Send OTP',
+              icon: viewModel.isSubmitting ? Icons.hourglass_bottom_rounded : null,
+              isSpinning: viewModel.isSubmitting,
               onPressed: viewModel.isSubmitting ? null : onSubmit,
             ),
           ],

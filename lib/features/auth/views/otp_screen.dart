@@ -173,6 +173,8 @@ class _OtpCard extends StatelessWidget {
           const SizedBox(height: 24),
           PrimaryButton(
             label: viewModel.isSubmitting ? 'Verifying...' : 'Verify Code',
+            icon: viewModel.isSubmitting ? Icons.hourglass_bottom_rounded : null,
+            isSpinning: viewModel.isSubmitting,
             onPressed: viewModel.isSubmitting ? null : onVerify,
           ),
           const SizedBox(height: 16),

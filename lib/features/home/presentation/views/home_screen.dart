@@ -1,5 +1,6 @@
 // lib/features/home/presentation/views/home_screen.dart
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:nova_tasks/features/tasks/views/task_detail_screen.dart';
 import 'package:provider/provider.dart';
@@ -97,7 +98,7 @@ class _HomeView extends StatelessWidget {
               // ---------------- CATEGORY FILTER ROW ----------------
               if (categories.isNotEmpty) ...[
                 SizedBox(
-                  height: 34,
+                  height: 38,
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: categories.length,
@@ -110,9 +111,7 @@ class _HomeView extends StatelessWidget {
                           : _categoryColor(cat);
 
                       return ChoiceChip(
-                        label: Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: Text(cat),),
+                        label: Text(cat),
                         selected: selected,
                         onSelected: (_) => homeVm.setSelectedCategory(cat),
                         selectedColor: color,
@@ -259,24 +258,8 @@ class _HomeView extends StatelessWidget {
       // ---------------- FAB (UNCHANGED) ----------------
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          showModalBottomSheet<void>(
-            context: context,
-            isScrollControlled: true,
-            enableDrag: true,
-            backgroundColor: Colors.transparent,
-            builder: (sheetContext) {
-              return DraggableScrollableSheet(
-                initialChildSize: 0.9,
-                maxChildSize: 1,
-                minChildSize: 0.3,
-                expand: false,
-                builder: (context, scrollController) {
-                  // NOTE: AddTaskScreen already provides its own AddTaskViewModel
-                  return const AddTaskScreen();
-                },
-              );
-            },
-          );
+          Navigator.push(context, MaterialPageRoute(builder: (context)=>AddTaskScreen()));
+          Navigator.push(context, MaterialPageRoute(builder: (context)=>AddTaskScreen()));
         },
         backgroundColor: theme.colorScheme.primary,
         shape: const CircleBorder(),
@@ -295,9 +278,11 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final signupVm = context.read<SignupViewModel>();
-    final name = signupVm.nameController.text;
-    final display = name.isEmpty ? 'Guest' : name;
+    final user = FirebaseAuth.instance.currentUser;
+    final userName = (user?.displayName != null &&
+        user!.displayName!.trim().isNotEmpty)
+        ? user.displayName!.trim()
+        : 'Guest';
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -309,8 +294,8 @@ class _Header extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                AppText('Good Morning,', color: Colors.white70),
-                AppText(display, fontSize: 20, fontWeight: FontWeight.w700),
+                AppText('HI!,', color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
+                AppText(userName, fontSize: 20, fontWeight: FontWeight.w700),
               ],
             ),
           ],

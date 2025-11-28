@@ -1,14 +1,16 @@
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'package:nova_tasks/data/repositories/auth_repository.dart';
 
 class SignupViewModel extends ChangeNotifier {
   SignupViewModel({AuthRepository? authRepository})
-    : _authRepository = authRepository ?? AuthRepository();
+      : _authRepository = authRepository ?? AuthRepository();
 
   final AuthRepository _authRepository;
+
   final formKey = GlobalKey<FormState>();
   final nameController = TextEditingController();
   final emailController = TextEditingController();
@@ -17,6 +19,8 @@ class SignupViewModel extends ChangeNotifier {
 
   bool _isSubmitting = false;
   bool get isSubmitting => _isSubmitting;
+
+  // ------------ validators ------------
 
   String? validateName(String? value) {
     if (value == null || value.trim().isEmpty) {
@@ -59,21 +63,36 @@ class SignupViewModel extends ChangeNotifier {
     return null;
   }
 
+  // ------------ submit / sign up ------------
+
   Future<void> submit({
     required VoidCallback onSuccess,
     VoidCallback? onError,
   }) async {
+    // form validation
     if (!(formKey.currentState?.validate() ?? false)) return;
 
     _setSubmitting(true);
     try {
+      // 1) sign up via repository
       await _authRepository.signUp(
         name: nameController.text.trim(),
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
+
+      // 2) update displayName in FirebaseAuth
+      final user = FirebaseAuth.instance.currentUser;
+      final name = nameController.text.trim();
+
+      if (user != null && name.isNotEmpty) {
+        await user.updateDisplayName(name);
+        await user.reload(); // taake turant reflect ho
+      }
+
+      // 3) callback
       onSuccess();
-    } catch (_) {
+    } catch (e) {
       onError?.call();
     } finally {
       _setSubmitting(false);

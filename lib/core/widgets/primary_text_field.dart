@@ -13,6 +13,7 @@ class PrimaryTextField extends StatefulWidget {
     this.suffixIcon,
     this.isPassword = false,
     this.onChanged,
+
     super.key,
   });
 
@@ -25,6 +26,7 @@ class PrimaryTextField extends StatefulWidget {
   final IconData? prefixIcon;
   final Widget? suffixIcon;
   final bool isPassword;
+
   final ValueChanged<String>? onChanged;
 
   @override
@@ -65,6 +67,7 @@ class _PrimaryTextFieldState extends State<PrimaryTextField> {
           style: const TextStyle(color: Colors.white),
 autovalidateMode: AutovalidateMode.onUserInteraction,
           onChanged: widget.onChanged,
+
 
           decoration: InputDecoration(
             hintText: widget.hint,

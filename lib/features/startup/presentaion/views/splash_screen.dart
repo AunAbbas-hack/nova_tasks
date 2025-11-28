@@ -1,7 +1,9 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:nova_tasks/navigation_wrapper.dart';
+import 'package:nova_tasks/features/auth/views/login_screen.dart';
 import '../../../../core/theme/app_colors.dart';
 import 'onboarding_screen.dart';
 
@@ -13,25 +15,38 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  Timer? _timer;
-
   @override
   void initState() {
     super.initState();
-    _timer = Timer(const Duration(seconds: 3), _goToOnboarding);
+    _decideStartDestination();
   }
 
-  void _goToOnboarding() {
+  Future<void> _decideStartDestination() async {
+    // Thoda sa fake delay for splash effect
+    await Future.delayed(const Duration(seconds: 2));
+
+    final prefs = await SharedPreferences.getInstance();
+    final bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+    final bool hasSeenOnboarding = prefs.getBool('hasSeenOnboarding') ?? false;
+
     if (!mounted) return;
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(builder: (_) => const OnboardingScreen()),
-    );
-  }
 
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
+    if (!hasSeenOnboarding) {
+      // Pehli dafa app use kar raha hai → Onboarding
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute<void>(
+          builder: (_) => const OnboardingScreen(),
+        ),
+      );
+    }
+    else {
+      // Already logged in → Direct app (NavigationWrapper)
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute<void>(
+          builder: (_) => const NavigationWrapper(),
+        ),
+      );
+    }
   }
 
   @override
@@ -45,7 +60,7 @@ class _SplashScreenState extends State<SplashScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-               Center(
+              Center(
                 child: Container(
                   width: 72,
                   height: 72,
@@ -71,6 +86,8 @@ class _SplashScreenState extends State<SplashScreen> {
                   fontWeight: FontWeight.w600,
                 ),
               ),
+              const SizedBox(height: 24),
+              const CircularProgressIndicator(), // 👈 loading while prefs check
             ],
           ),
         ),
@@ -79,6 +96,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 }
 
+// Neeche wala badge agar use nahi kar rahe to hata bhi sakte ho
 class _TaskFlowBadge extends StatelessWidget {
   const _TaskFlowBadge();
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:nova_tasks/features/auth/views/login_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/widgets/primary_button.dart';
 import '../viewmodels/onboarding_viewmodel.dart';
@@ -78,11 +79,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     BuildContext context,
     OnboardingViewModel viewModel,
   ) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async{
       if (!mounted) return;
 
       if (viewModel.hasCompleted && !_snackbarShown) {
         _snackbarShown = true;
+        // 🔹 Mark onboarding as seen
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('hasSeenOnboarding', true);
         Navigator.of(context).pushReplacement(
           MaterialPageRoute<void>(builder: (_) => const LoginScreen()),
         );

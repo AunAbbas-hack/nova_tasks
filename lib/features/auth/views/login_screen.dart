@@ -48,7 +48,6 @@ class _LoginView extends StatelessWidget {
 
   void _handleLogin(BuildContext context) {
     context.read<LoginViewModel>().submit(
-      onProgress: () => CircularProgressIndicator(),
       onSuccess: () {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute<void>(builder: (_) => const NavigationWrapper()),
@@ -212,11 +211,12 @@ class _LoginFormCard extends StatelessWidget {
           const SizedBox(height: 8),
           PrimaryButton(
             label: viewModel.isSubmitting ? 'Logging In...' : 'Log In',
-            icon: viewModel.isSubmitting
-                ? Icons.hourglass_bottom_rounded
-                : null,
+            icon: viewModel.isSubmitting ? Icons.hourglass_bottom_rounded : null,
+            isSpinning: viewModel.isSubmitting,
             onPressed: viewModel.isSubmitting ? null : onSubmit,
           ),
+
+
           const SizedBox(height: 20),
           Row(
             children: const [

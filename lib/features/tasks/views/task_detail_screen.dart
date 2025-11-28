@@ -147,7 +147,7 @@ class _TaskDetailView extends StatelessWidget {
                   // Edit
                   IconButton(
                     onPressed: () {
-                      _openEditBottomSheet(context, task);
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=>AddTaskScreen(initialTask: task,)));
                     },
                     icon: const Icon(Icons.edit, color: Colors.white70),
                   ),
@@ -391,26 +391,7 @@ class _TaskDetailView extends StatelessWidget {
       ),
     );
   }
-  static void _openEditBottomSheet(BuildContext context, TaskModel task) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      enableDrag: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.8,
-          minChildSize: 0.1,
-          maxChildSize: 0.9,
-          expand: false,
-          builder: (context, scrollController) {
-            // AddTaskScreen already handles edit vs create using initialTask
-            return AddTaskScreen(initialTask: task);
-          },
-        );
-      },
-    );
-  }
+
 }
 
 // Small reusable row for "Due Date / Priority / Category"

@@ -7,6 +7,7 @@ import 'package:nova_tasks/core/widgets/primary_button.dart';
 import 'package:nova_tasks/core/widgets/primary_text_field.dart';
 import 'package:nova_tasks/features/auth/viewmodels/signup_viewmodel.dart';
 
+
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
 
@@ -194,12 +195,13 @@ class _SignupFormCard extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           PrimaryButton(
-            label: viewModel.isSubmitting ? 'Creating account...' : 'Sign Up',
+            label: viewModel.isSubmitting ? 'Signing Up...' : 'Sign Up',
+            icon: viewModel.isSubmitting ? Icons.hourglass_bottom_rounded : null,
+            isSpinning: viewModel.isSubmitting,
             onPressed: viewModel.isSubmitting ? null : onSubmit,
-            icon: viewModel.isSubmitting
-                ? Icons.hourglass_bottom_rounded
-                : null,
           ),
+
+
           const SizedBox(height: 20),
           Row(
             children: const [

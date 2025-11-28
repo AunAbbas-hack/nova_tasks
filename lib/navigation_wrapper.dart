@@ -1,15 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:nova_tasks/core/widgets/bottom_nav_bar.dart';
-import 'package:nova_tasks/features/me/presentation/views/me_screen.dart';
-import 'package:provider/provider.dart';
 
-import 'features/auth/viewmodels/signup_viewmodel.dart';
-import 'features/calendar/presentation/views/calendar_screen.dart';
-import 'features/home/presentation/views/home_screen.dart';
+import 'package:nova_tasks/core/widgets/bottom_nav_bar.dart';
+import 'package:nova_tasks/features/calendar/presentation/views/calendar_screen.dart';
+import 'package:nova_tasks/features/home/presentation/views/home_screen.dart';
+import 'package:nova_tasks/features/me/presentation/views/me_screen.dart';
+import 'package:nova_tasks/features/auth/views/login_screen.dart';
 
 class NavigationWrapper extends StatefulWidget {
   const NavigationWrapper({super.key});
@@ -45,28 +43,42 @@ class _NavigationWrapperState extends State<NavigationWrapper> {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
-    final String userID = user?.uid ?? "";
+
+    // 🔹 Safety: If user is null, send them to LoginScreen instead of just showing a text
     if (user == null) {
-      return const Center(child: Text("Not Logged in"));
+      // We use Future.microtask so that navigation frame-safe ho
+      Future.microtask(() {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+              (route) => false,
+        );
+      });
+
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
     }
 
-    final List<Widget> _screens = [
+    final String userID = user.uid;
+
+    final List<Widget> screens = [
       HomeScreen(userId: userID),
       const CalendarScreen(),
       const MeScreen(),
     ];
+
     return PopScope(
       canPop: false,
-      onPopInvokedWithResult: (didPop,result)async{
-        if(didPop)return;
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
 
-        bool exit=await _showExitDialog();
-        if(exit){
+        final exit = await _showExitDialog();
+        if (exit) {
           SystemNavigator.pop();
         }
       },
       child: Scaffold(
-        body: _screens[currentIndex],
+        body: screens[currentIndex],
         bottomNavigationBar: BottomNavBar(
           currentIndex: currentIndex,
           onTap: (index) {
@@ -76,7 +88,6 @@ class _NavigationWrapperState extends State<NavigationWrapper> {
           },
         ),
       ),
-
     );
   }
 }

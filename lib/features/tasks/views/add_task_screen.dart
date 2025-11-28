@@ -12,25 +12,26 @@ import '../../../data/models/task_model.dart';
 class AddTaskScreen extends StatelessWidget {
   const AddTaskScreen({super.key, this.initialTask});
 
-  // 🔹 null => create, not-null => edit
+  /// null => Create, not-null => Edit
   final TaskModel? initialTask;
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => AddTaskViewModel(initialTask: initialTask),
-      child: const _AddTaskContent(),
+      child: const _AddTaskPage(),
     );
   }
 }
 
-class _AddTaskContent extends StatelessWidget {
-  const _AddTaskContent();
+class _AddTaskPage extends StatelessWidget {
+  const _AddTaskPage();
 
   Future<void> _pickDate(
       BuildContext context,
       AddTaskViewModel viewModel,
       ) async {
+    FocusScope.of(context).unfocus();
     final now = DateTime.now();
     final picked = await showDatePicker(
       context: context,
@@ -47,6 +48,7 @@ class _AddTaskContent extends StatelessWidget {
       BuildContext context,
       AddTaskViewModel viewModel,
       ) async {
+    FocusScope.of(context).unfocus();
     final picked = await showTimePicker(
       context: context,
       initialTime: viewModel.dueTime ?? TimeOfDay.now(),
@@ -83,357 +85,360 @@ class _AddTaskContent extends StatelessWidget {
     );
   }
 
+  String _formatDate(DateTime? date) {
+    if (date == null) return 'Select date';
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  }
+
+  String _formatTime(TimeOfDay? time) {
+    if (time == null) return 'Select time';
+    final hour = time.hourOfPeriod == 0 ? 12 : time.hourOfPeriod;
+    final suffix = time.period == DayPeriod.am ? 'AM' : 'PM';
+    return '$hour:${time.minute.toString().padLeft(2, '0')} $suffix';
+  }
+
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<AddTaskViewModel>();
-    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
-
-    String formatDate(DateTime? date) {
-      if (date == null) return 'Select date';
-      return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-    }
-
-    String formatTime(TimeOfDay? time) {
-      if (time == null) return 'Select time';
-      final hour = time.hourOfPeriod == 0 ? 12 : time.hourOfPeriod;
-      final suffix = time.period == DayPeriod.am ? 'AM' : 'PM';
-      return '$hour:${time.minute.toString().padLeft(2, '0')} $suffix';
-    }
-
+    final theme = Theme.of(context);
     final isEditing = viewModel.isEditing;
 
-    return Padding(
-      padding: EdgeInsets.only(left: 1, right: 1, bottom: bottomInset),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).scaffoldBackgroundColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          onPressed: () => Navigator.pop(context),
         ),
-        child: SafeArea(
-          top: false,
-          child: GestureDetector(
-            onTap: () => FocusScope.of(context).unfocus(),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Header
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        title: AppText(
+          isEditing ? 'Edit Task' : 'New Task',
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+        ),
+        centerTitle: false,
+      ),
+      body: SafeArea(
+        child: GestureDetector(
+          onTap: () => FocusScope.of(context).unfocus(),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // ---------------- TITLE + DESCRIPTION ----------------
+                _SectionCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      AppText(
-                        isEditing ? 'Edit Task' : 'New Task',
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
+                      const AppText(
+                        'Task Title',
+                        fontWeight: FontWeight.w600,
                       ),
-                      IconButton(
-                        onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.close),
+                      const SizedBox(height: 8),
+                      PrimaryTextField(
+                        label: '',
+                        hint: 'e.g., Design the new dashboard',
+                        controller: viewModel.titleController,
+                      ),
+                      const SizedBox(height: 16),
+                      const AppText(
+                        'Description',
+                        fontWeight: FontWeight.w600,
+                      ),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        focusNode: FocusNode(
+                        ),
+                        controller: viewModel.descriptionController,
+                        maxLines: 4,
+                        keyboardType: TextInputType.multiline,
+                        decoration: InputDecoration(
+                          hintText: 'Add a description for your task',
+                          hintStyle: TextStyle(
+                            color: Colors.white.withOpacity(0.4),
+                            fontSize: 14,
+                          ),
+
+                          filled: true,
+                          fillColor: const Color(0xFF151A24),
+
+
+
+                          contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide:
+                            BorderSide(color: Colors.white.withOpacity(0.15)),
+                          ),
+
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(
+                              color: theme.colorScheme.primary,
+                              width: 1.2,
+                            ),
+                          ),
+                        ),
+                      )],
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // ---------------- DATE + TIME ----------------
+                _SectionCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const AppText('Due Date', fontWeight: FontWeight.w600),
+                      const SizedBox(height: 8),
+                      _PickerTile(
+                        icon: Icons.calendar_today_outlined,
+                        label: _formatDate(viewModel.dueDate),
+                        onTap: () => _pickDate(context, viewModel),
+                      ),
+                      const SizedBox(height: 16),
+                      const AppText('Time', fontWeight: FontWeight.w600),
+                      const SizedBox(height: 8),
+                      _PickerTile(
+                        icon: Icons.access_time_rounded,
+                        label: _formatTime(viewModel.dueTime),
+                        onTap: () => _pickTime(context, viewModel),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                ),
+                const SizedBox(height: 16),
 
-                  // Title + Description
-                  _SectionCard(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const AppText(
-                          'Task Title',
-                          fontWeight: FontWeight.w600,
-                        ),
-                        const SizedBox(height: 8),
-                        PrimaryTextField(
-                          label: '',
-                          hint: 'e.g., Design the new dashboard',
-                          controller: viewModel.titleController,
-                        ),
-                        const SizedBox(height: 16),
-                        const AppText(
-                          'Description',
-                          fontWeight: FontWeight.w600,
-                        ),
-                        const SizedBox(height: 8),
-                        PrimaryTextField(
-                          label: '',
-                          hint: 'Add details about the task...',
-                          controller: viewModel.descriptionController,
-                          keyboardType: TextInputType.multiline,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Date + Time
-                  _SectionCard(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const AppText('Due Date', fontWeight: FontWeight.w600),
-                        const SizedBox(height: 8),
-                        _PickerTile(
-                          icon: Icons.calendar_today_outlined,
-                          label: formatDate(viewModel.dueDate),
-                          onTap: () => _pickDate(context, viewModel),
-                        ),
-                        const SizedBox(height: 16),
-                        const AppText('Time', fontWeight: FontWeight.w600),
-                        const SizedBox(height: 8),
-                        _PickerTile(
-                          icon: Icons.access_time_rounded,
-                          label: formatTime(viewModel.dueTime),
-                          onTap: () => _pickTime(context, viewModel),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Priority + Category
-                  _SectionCard(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const AppText('Priority', fontWeight: FontWeight.w600),
-                        const SizedBox(height: 12),
-                        Wrap(
-                          spacing: 8,
-                          children: [
-                            _PriorityChip(
-                              label: 'Low',
-                              color: Colors.blueGrey,
-                              selected: viewModel.priority == TaskPriority.low,
-                              onTap: () =>
-                                  viewModel.setPriority(TaskPriority.low),
-                            ),
-                            _PriorityChip(
-                              label: 'Medium',
-                              color: Colors.blue,
-                              selected:
-                              viewModel.priority == TaskPriority.medium,
-                              onTap: () =>
-                                  viewModel.setPriority(TaskPriority.medium),
-                            ),
-                            _PriorityChip(
-                              label: 'High',
-                              color: Colors.orange,
-                              selected: viewModel.priority == TaskPriority.high,
-                              onTap: () =>
-                                  viewModel.setPriority(TaskPriority.high),
-                            ),
-                            _PriorityChip(
-                              label: 'Urgent',
-                              color: Colors.red,
-                              selected:
-                              viewModel.priority == TaskPriority.urgent,
-                              onTap: () =>
-                                  viewModel.setPriority(TaskPriority.urgent),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-
-                        const AppText('Category', fontWeight: FontWeight.w600),
-                        const SizedBox(height: 8),
-
-                        // Dropdown
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 12,
+                // ---------------- PRIORITY + CATEGORY ----------------
+                _SectionCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const AppText('Priority', fontWeight: FontWeight.w600),
+                      const SizedBox(height: 12),
+                      Wrap(
+                        spacing: 8,
+                        children: [
+                          _PriorityChip(
+                            label: 'Low',
+                            color: Colors.blueGrey,
+                            selected: viewModel.priority == TaskPriority.low,
+                            onTap: () => viewModel.setPriority(TaskPriority.low),
                           ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF151A24),
-                            borderRadius: BorderRadius.circular(14),
+                          _PriorityChip(
+                            label: 'Medium',
+                            color: Colors.blue,
+                            selected:
+                            viewModel.priority == TaskPriority.medium,
+                            onTap: () =>
+                                viewModel.setPriority(TaskPriority.medium),
                           ),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton<String>(
-                              dropdownColor: const Color(0xFF151A24),
-                              value: viewModel.category,
-                              isExpanded: true,
-                              icon: const Icon(
-                                Icons.keyboard_arrow_down,
-                                color: Colors.white70,
-                              ),
-                              items: const [
-                                DropdownMenuItem(
-                                  value: 'Work',
-                                  child: Text('Work'),
-                                ),
-                                DropdownMenuItem(
-                                  value: 'Personal',
-                                  child: Text('Personal'),
-                                ),
-                                DropdownMenuItem(
-                                  value: 'Custom',
-                                  child: Text('Custom'),
-                                ),
-                              ],
-                              onChanged: (value) {
-                                if (value != null) {
-                                  viewModel.setCategory(value);
-                                }
-                              },
-                              style:
-                              const TextStyle(color: Colors.white),
-                            ),
+                          _PriorityChip(
+                            label: 'High',
+                            color: Colors.orange,
+                            selected: viewModel.priority == TaskPriority.high,
+                            onTap: () => viewModel.setPriority(TaskPriority.high),
                           ),
-                        ),
-
-                        if (viewModel.isCustomSelected) ...[
-                          const SizedBox(height: 12),
-                          PrimaryTextField(
-                            label: '',
-                            hint: 'Enter custom category',
-                            controller:
-                            viewModel.customCategoryController,
+                          _PriorityChip(
+                            label: 'Urgent',
+                            color: Colors.red,
+                            selected:
+                            viewModel.priority == TaskPriority.urgent,
+                            onTap: () =>
+                                viewModel.setPriority(TaskPriority.urgent),
                           ),
                         ],
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
+                      ),
+                      const SizedBox(height: 16),
 
-                  // Recurring switch
-                  _SectionCard(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment:
-                          CrossAxisAlignment.start,
-                          children: const [
-                            AppText(
-                              'Recurring Task',
-                              fontWeight: FontWeight.w600,
-                            ),
-                            SizedBox(height: 4),
-                            AppText(
-                              'Set task to repeat',
+                      const AppText('Category', fontWeight: FontWeight.w600),
+                      const SizedBox(height: 8),
+
+                      // Dropdown
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF151A24),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            dropdownColor: const Color(0xFF151A24),
+                            value: viewModel.category,
+                            isExpanded: true,
+                            icon: const Icon(
+                              Icons.keyboard_arrow_down,
                               color: Colors.white70,
                             ),
-                          ],
-                        ),
-                        Switch(
-                          value: viewModel.isRecurring,
-                          onChanged: viewModel.toggleRecurring,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Subtasks
-                  _SectionCard(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const AppText('Subtasks',
-                            fontWeight: FontWeight.w600),
-                        const SizedBox(height: 12),
-                        Row(
-                          mainAxisAlignment:
-                          MainAxisAlignment.spaceBetween,
-                          children: [
-                            const AppText('Progress'),
-                            AppText(
-                              '${(viewModel.progress * 100).round()}% Completed',
-                              color: Colors.white70,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        LinearProgressIndicator(
-                          value: viewModel.progress,
-                          minHeight: 5,
-                        ),
-                        const SizedBox(height: 16),
-
-                        ...viewModel.subtasks.asMap().entries.map((entry) {
-                          final index = entry.key;
-                          final subtask = entry.value;
-                          return CheckboxListTile(
-                            value: subtask.isDone,
-                            onChanged: (_) =>
-                                viewModel.toggleSubtask(index),
-                            dense: true,
-                            contentPadding: EdgeInsets.zero,
-                            title: AppText(
-                              subtask.title,
-                              color: subtask.isDone
-                                  ? Colors.white54
-                                  : Colors.white,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          );
-                        }),
-                        const SizedBox(height: 8),
-                        OutlinedButton.icon(
-                          onPressed: () =>
-                              _addSubtaskDialog(context, viewModel),
-                          icon: const Icon(Icons.add),
-                          label: const Text('Add Subtask'),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            side: const BorderSide(
-                                color: Colors.white24),
-                            shape: RoundedRectangleBorder(
-                              borderRadius:
-                              BorderRadius.circular(16),
-                            ),
+                            items: const [
+                              DropdownMenuItem(
+                                value: 'Work',
+                                child: Text('Work'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'Personal',
+                                child: Text('Personal'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'Custom',
+                                child: Text('Custom'),
+                              ),
+                            ],
+                            onChanged: (value) {
+                              if (value != null) {
+                                viewModel.setCategory(value);
+                              }
+                            },
+                            style: const TextStyle(color: Colors.white),
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
+                      ),
 
-                  // Create / Update Button
-                  PrimaryButton(
-                    label: viewModel.isSaving
-                        ? (isEditing ? 'Updating...' : 'Creating...')
-                        : (isEditing ? 'Update Task' : 'Create Task'),
-                    onPressed: viewModel.isSaving
-                        ? null
-                        : () async {
-                      final user =
-                          FirebaseAuth.instance.currentUser;
-                      if (user == null) {
-                        ScaffoldMessenger.of(context)
-                            .showSnackBar(
-                          const SnackBar(
+                      if (viewModel.isCustomSelected) ...[
+                        const SizedBox(height: 12),
+                        PrimaryTextField(
+                          label: '',
+                          hint: 'Enter custom category',
+                          controller: viewModel.customCategoryController,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // ---------------- RECURRING SWITCH ----------------
+                _SectionCard(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          AppText(
+                            'Recurring Task',
+                            fontWeight: FontWeight.w600,
+                          ),
+                          SizedBox(height: 4),
+                          AppText(
+                            'Set task to repeat',
+                            color: Colors.white70,
+                          ),
+                        ],
+                      ),
+                      Switch(
+                        value: viewModel.isRecurring,
+                        onChanged: viewModel.toggleRecurring,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // ---------------- SUBTASKS ----------------
+                _SectionCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const AppText('Subtasks', fontWeight: FontWeight.w600),
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const AppText('Progress'),
+                          AppText(
+                            '${(viewModel.progress * 100).round()}% Completed',
+                            color: Colors.white70,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      LinearProgressIndicator(
+                        value: viewModel.progress,
+                        minHeight: 5,
+                      ),
+                      const SizedBox(height: 16),
+
+                      ...viewModel.subtasks.asMap().entries.map((entry) {
+                        final index = entry.key;
+                        final subtask = entry.value;
+                        return CheckboxListTile(
+                          value: subtask.isDone,
+                          onChanged: (_) => viewModel.toggleSubtask(index),
+                          dense: true,
+                          contentPadding: EdgeInsets.zero,
+                          title: AppText(
+                            subtask.title,
+                            color: subtask.isDone
+                                ? Colors.white54
+                                : Colors.white,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        );
+                      }),
+                      const SizedBox(height: 8),
+                      OutlinedButton.icon(
+                        onPressed: () => _addSubtaskDialog(context, viewModel),
+                        icon: const Icon(Icons.add),
+                        label: const Text('Add Subtask'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          side: const BorderSide(color: Colors.white24),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // ---------------- CREATE / UPDATE BUTTON ----------------
+                PrimaryButton(
+                  label: viewModel.isSaving
+                      ? (isEditing ? 'Updating...' : 'Creating...')
+                      : (isEditing ? 'Update Task' : 'Create Task'),
+                  onPressed: viewModel.isSaving
+                      ? null
+                      : () async {
+                    final user = FirebaseAuth.instance.currentUser;
+                    if (user == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'You must be logged in to add tasks',
+                          ),
+                        ),
+                      );
+                      return;
+                    }
+
+                    await viewModel.saveTask(
+                      userId: user.uid,
+                      onSuccess: () {
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
                             content: Text(
-                              'You must be logged in to add tasks',
+                              isEditing
+                                  ? 'Task updated'
+                                  : 'Task created',
                             ),
                           ),
                         );
-                        return;
-                      }
-
-                      await viewModel.saveTask(
-                        userId: user.uid,
-                        onSuccess: () {
-                          Navigator.pop(context);
-                          ScaffoldMessenger.of(context)
-                              .showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                isEditing
-                                    ? 'Task updated'
-                                    : 'Task created',
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ],
-              ),
+                      },
+                    );
+                  },
+                ),
+              ],
             ),
           ),
         ),
@@ -478,8 +483,7 @@ class _PickerTile extends StatelessWidget {
       borderRadius: BorderRadius.circular(14),
       onTap: onTap,
       child: Container(
-        padding:
-        const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
           color: const Color(0xFF151A24),
           borderRadius: BorderRadius.circular(14),
@@ -489,8 +493,7 @@ class _PickerTile extends StatelessWidget {
             Icon(icon, color: Colors.white70),
             const SizedBox(width: 12),
             Expanded(child: AppText(label, color: Colors.white)),
-            const Icon(Icons.keyboard_arrow_down,
-                color: Colors.white70),
+            const Icon(Icons.keyboard_arrow_down, color: Colors.white70),
           ],
         ),
       ),

@@ -21,19 +21,14 @@ class CalendarScreen extends StatelessWidget {
     if (user == null) {
       return const Scaffold(
         body: Center(
-          child: AppText(
-            'Please log in to see your calendar.',
-            fontSize: 16,
-          ),
+          child: AppText('Please log in to see your calendar.', fontSize: 16),
         ),
       );
     }
 
     return ChangeNotifierProvider(
-      create: (_) => CalendarViewModel(
-        repo: TaskRepository(),
-        userId: user.uid,
-      ),
+      create: (_) =>
+          CalendarViewModel(repo: TaskRepository(), userId: user.uid),
       child: const _CalendarView(),
     );
   }
@@ -60,120 +55,94 @@ class _CalendarView extends StatelessWidget {
 
     return Scaffold(
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // ---------- Header ----------
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  AppText(
-                    'Calendar',
-                    fontSize: 28,
-                    fontWeight: FontWeight.w700,
+        child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ---------- Header ----------
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: const [
+                      AppText(
+                        'Calendar',
+                        fontSize: 28,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      Icon(Icons.calendar_today_outlined, color: Colors.white),
+                    ],
                   ),
-                  Icon(Icons.calendar_today_outlined, color: Colors.white),
+                  const SizedBox(height: 24),
+
+                  // ---------- Month / Week Toggle ----------
+                  _CalendarFormatToggle(),
+
+                  const SizedBox(height: 24),
+
+                  // ---------- TableCalendar ----------
+                  _NovaTableCalendar(),
+
                 ],
               ),
-              const SizedBox(height: 24),
+            ),
 
-              // ---------- Month / Week Toggle ----------
-              _CalendarFormatToggle(),
-
-              const SizedBox(height: 24),
-
-              // ---------- TableCalendar ----------
-              _NovaTableCalendar(),
-
-              const SizedBox(height: 24),
-
-              // ---------- Tasks Card ----------
-              Expanded(
-                child: Container(
-                  width: double.infinity,
+            DraggableScrollableSheet(
+              initialChildSize: 0.42,
+              minChildSize: 0.30,
+              maxChildSize: 0.9,
+              builder: (context, scrollController) {
+                return Container(
                   decoration: BoxDecoration(
                     color: const Color(0xFF11151F),
-                    borderRadius: BorderRadius.circular(28),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(28),
+                    ),
+                    boxShadow: [
+                      BoxShadow(color: Colors.black26, blurRadius: 10),
+                    ], // Optional shadow
                   ),
                   padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
                   child: vm.isLoading
                       ? const Center(child: CircularProgressIndicator())
                       : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      AppText(
-                        titleText,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                      ),
-                      const SizedBox(height: 4),
-                      AppText(
-                        subtitleText,
-                        color: Colors.white54,
-                      ),
-                      const SizedBox(height: 16),
-                      const Divider(
-                        color: Colors.white12,
-                        height: 1,
-                      ),
-                      const SizedBox(height: 8),
-                      Expanded(
-                        child: tasks.isEmpty
-                            ? const Center(
-                          child: AppText(
-                            'No tasks for this selection.',
-                            color: Colors.white54,
-                          ),
-                        )
-                            : ListView.separated(
-                          itemCount: tasks.length,
-                          separatorBuilder: (_, __) =>
-                          const Divider(
-                            color: Colors.white10,
-                            height: 1,
-                          ),
-                          itemBuilder: (context, index) {
-                            final task = tasks[index];
-                            return _CalendarTaskTile(task: task);
-                          },
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // ... Aapka baki content same rahega ...
+                            AppText(
+                              titleText,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                            ),
+                            // ...
+                            Expanded(
+                              child: tasks.isEmpty
+                                  ? const Center(
+                                      child: AppText(
+                                        'No tasks...',
+                                        color: Colors.white54,
+                                      ),
+                                    )
+                                  : ListView.separated(
+                                      controller:
+                                          scrollController,
+                                      itemCount: tasks.length,
+                                      separatorBuilder: (_, __) =>
+                                          const Divider(color: Colors.white10),
+                                      itemBuilder: (context, index) =>
+                                          _CalendarTaskTile(task: tasks[index]),
+                                    ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
+                );
+              },
+            ),
+          ],
         ),
       ),
-
-      // ---------- FAB ----------
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showModalBottomSheet<void>(
-            context: context,
-            isScrollControlled: true,
-            enableDrag: true,
-            backgroundColor: Colors.transparent,
-            builder: (sheetContext) {
-              return DraggableScrollableSheet(
-                initialChildSize: 0.9,
-                maxChildSize: 1,
-                minChildSize: 0.3,
-                expand: false,
-                builder: (context, scrollController) {
-                  return const AddTaskScreen();
-                },
-              );
-            },
-          );
-        },
-        backgroundColor: theme.colorScheme.primary,
-        shape: const CircleBorder(),
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
+      // ... FAB ...
     );
   }
 }
@@ -197,32 +166,25 @@ class _CalendarFormatToggle extends StatelessWidget {
         children: [
           Expanded(
             child: GestureDetector(
-              onTap: () =>
-                  context.read<CalendarViewModel>().onFormatChanged(
-                    CalendarFormat.month,
-                  ),
+              onTap: () => context.read<CalendarViewModel>().onFormatChanged(
+                CalendarFormat.month,
+              ),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 decoration: BoxDecoration(
-                  color: isMonth
-                      ? const Color(0xFF0F172A)
-                      : Colors.transparent,
+                  color: isMonth ? const Color(0xFF0F172A) : Colors.transparent,
                   borderRadius: BorderRadius.circular(24),
                 ),
                 alignment: Alignment.center,
-                child: const AppText(
-                  'Month',
-                  fontWeight: FontWeight.w600,
-                ),
+                child: const AppText('Month', fontWeight: FontWeight.w600),
               ),
             ),
           ),
           Expanded(
             child: GestureDetector(
-              onTap: () =>
-                  context.read<CalendarViewModel>().onFormatChanged(
-                    CalendarFormat.week,
-                  ),
+              onTap: () => context.read<CalendarViewModel>().onFormatChanged(
+                CalendarFormat.week,
+              ),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 decoration: BoxDecoration(
@@ -262,9 +224,8 @@ class _NovaTableCalendar extends StatelessWidget {
       rangeSelectionMode: vm.rangeSelectionMode,
       rangeStartDay: vm.rangeStart,
       rangeEndDay: vm.rangeEnd,
-      startingDayOfWeek: StartingDayOfWeek.sunday,
-      selectedDayPredicate: (day) =>
-          vm.isSameDayInternal(vm.selectedDay, day),
+      startingDayOfWeek: StartingDayOfWeek.monday,
+      selectedDayPredicate: (day) => vm.isSameDayInternal(vm.selectedDay, day),
 
       eventLoader: vm.getTasksForDay,
 
@@ -280,10 +241,8 @@ class _NovaTableCalendar extends StatelessWidget {
       headerStyle: const HeaderStyle(
         titleCentered: true,
         formatButtonVisible: false,
-        leftChevronIcon:
-        Icon(Icons.chevron_left, color: Colors.white70),
-        rightChevronIcon:
-        Icon(Icons.chevron_right, color: Colors.white70),
+        leftChevronIcon: Icon(Icons.chevron_left, color: Colors.white70),
+        rightChevronIcon: Icon(Icons.chevron_right, color: Colors.white70),
         titleTextStyle: TextStyle(
           color: Colors.white,
           fontSize: 18,
@@ -300,8 +259,7 @@ class _NovaTableCalendar extends StatelessWidget {
         outsideDaysVisible: false,
         defaultTextStyle: const TextStyle(color: Colors.white70),
         weekendTextStyle: const TextStyle(color: Colors.white70),
-        disabledTextStyle:
-        const TextStyle(color: Colors.white24),
+        disabledTextStyle: const TextStyle(color: Colors.white24),
 
         selectedDecoration: BoxDecoration(
           color: theme.colorScheme.primary,
@@ -311,8 +269,7 @@ class _NovaTableCalendar extends StatelessWidget {
           color: theme.colorScheme.primary.withOpacity(0.25),
           shape: BoxShape.circle,
         ),
-        rangeHighlightColor:
-        theme.colorScheme.primary.withOpacity(0.20),
+        rangeHighlightColor: theme.colorScheme.primary.withOpacity(0.20),
         rangeStartDecoration: BoxDecoration(
           color: theme.colorScheme.primary,
           shape: BoxShape.circle,
@@ -368,9 +325,7 @@ class _CalendarTaskTile extends StatelessWidget {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute<void>(
-            builder: (_) => TaskDetailScreen(task: task),
-          ),
+          MaterialPageRoute<void>(builder: (_) => TaskDetailScreen(task: task)),
         );
       },
       child: Padding(
@@ -389,18 +344,12 @@ class _CalendarTaskTile extends StatelessWidget {
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: isDone
-                        ? Colors.transparent
-                        : Colors.white38,
+                    color: isDone ? Colors.transparent : Colors.white38,
                     width: 2,
                   ),
                 ),
                 child: isDone
-                    ? const Icon(
-                  Icons.check,
-                  size: 16,
-                  color: Colors.white,
-                )
+                    ? const Icon(Icons.check, size: 16, color: Colors.white)
                     : null,
               ),
             ),
@@ -415,18 +364,12 @@ class _CalendarTaskTile extends StatelessWidget {
                     task.title,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color:
-                    isDone ? Colors.white54 : Colors.white,
-                    decoration: isDone
-                        ? TextDecoration.lineThrough
-                        : null,
+                    color: isDone ? Colors.white54 : Colors.white,
+                    decoration: isDone ? TextDecoration.lineThrough : null,
                   ),
                   if (timeText.isNotEmpty) ...[
                     const SizedBox(height: 4),
-                    AppText(
-                      timeText,
-                      color: Colors.white54,
-                    ),
+                    AppText(timeText, color: Colors.white54),
                   ],
                 ],
               ),
@@ -454,9 +397,8 @@ String _formatFull(DateTime d) {
     'September',
     'October',
     'November',
-    'December'
+    'December',
   ];
   final monthName = months[d.month - 1];
   return '$monthName ${d.day}';
 }
-

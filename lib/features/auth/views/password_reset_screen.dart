@@ -169,6 +169,8 @@ class _ResetCard extends StatelessWidget {
             const SizedBox(height: 24),
             PrimaryButton(
               label: viewModel.isSubmitting ? 'Resetting...' : 'Reset Password',
+              icon: viewModel.isSubmitting ? Icons.hourglass_bottom_rounded : null,
+              isSpinning: viewModel.isSubmitting,
               onPressed: viewModel.isSubmitting ? null : onSubmit,
             ),
             if (!viewModel.isSubmitting &&
