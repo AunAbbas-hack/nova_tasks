@@ -15,8 +15,6 @@ class TaskCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final homeVm = context.read<HomeViewModel>();
-    DateTime created = DateTime.parse(task.createdAt.toString());
-
     String formattedTime = DateFormat('hh:mm a').format(task.createdAt);
     // Priority & category colors
     final priorityColor = _priorityColor(task.priority);

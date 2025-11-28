@@ -22,7 +22,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) =>
-      HomeViewModel(repo: TaskRepository(), userId: userId)..start(),
+          HomeViewModel(repo: TaskRepository(), userId: userId)..start(),
       child: const _HomeView(),
     );
   }
@@ -39,7 +39,7 @@ class _HomeView extends StatelessWidget {
     // Week dates (Mon-Fri centered around today)
     final dates = _generate5Days();
     final selectedIndex = dates.indexWhere(
-          (d) => _isSameDay(d, homeVm.selectedDate),
+      (d) => _isSameDay(d, homeVm.selectedDate),
     );
 
     // Categories for filter row
@@ -56,7 +56,6 @@ class _HomeView extends StatelessWidget {
               const SizedBox(height: 24),
 
               // ---------------- DATE CHIPS ----------------
-
               SizedBox(
                 height: 44,
                 child: ListView.separated(
@@ -83,8 +82,9 @@ class _HomeView extends StatelessWidget {
                         child: AppText(
                           label,
                           color: isSelected ? Colors.white : Colors.white70,
-                          fontWeight:
-                          isSelected ? FontWeight.w600 : FontWeight.w500,
+                          fontWeight: isSelected
+                              ? FontWeight.w600
+                              : FontWeight.w500,
                         ),
                       ),
                     );
@@ -95,29 +95,36 @@ class _HomeView extends StatelessWidget {
               const SizedBox(height: 16),
 
               // ---------------- CATEGORY FILTER ROW ----------------
-
               if (categories.isNotEmpty) ...[
                 SizedBox(
                   height: 34,
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: categories.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 8),
+                    separatorBuilder: (_, __) => const SizedBox(width: 10),
                     itemBuilder: (context, index) {
                       final cat = categories[index];
                       final selected = cat == homeVm.selectedCategory;
+                      final color = cat == 'All'
+                          ? Colors.white70
+                          : _categoryColor(cat);
 
                       return ChoiceChip(
-                        label: Text(cat),
+                        label: Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: Text(cat),),
                         selected: selected,
                         onSelected: (_) => homeVm.setSelectedCategory(cat),
-                        selectedColor: theme.colorScheme.primary,
+                        selectedColor: color,
                         backgroundColor: const Color(0xFF151A24),
                         labelStyle: TextStyle(
                           color: selected ? Colors.white : Colors.white70,
-                          fontWeight:
-                          selected ? FontWeight.w600 : FontWeight.w500,
+                          fontWeight: selected
+                              ? FontWeight.w600
+                              : FontWeight.w500,
                         ),
+                        materialTapTargetSize:
+                            MaterialTapTargetSize.shrinkWrap,
                       );
                     },
                   ),
@@ -126,7 +133,6 @@ class _HomeView extends StatelessWidget {
               ],
 
               // ---------------- TODAY'S TASKS ----------------
-
               if (homeVm.todayTasks.isNotEmpty)
                 AppText(
                   "Today's Tasks${homeVm.selectedCategory != 'All' ? ' · ${homeVm.selectedCategory}' : ''}",
@@ -136,16 +142,25 @@ class _HomeView extends StatelessWidget {
               if (homeVm.todayTasks.isNotEmpty) const SizedBox(height: 12),
 
               ...homeVm.todayTasks.map(
-                    (task) => Padding(
+                (task) => Padding(
                   padding: const EdgeInsets.only(bottom: 12),
-                  child: TaskCard(task: task),
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TaskDetailScreen(task: task),
+                        ),
+                      );
+                    },
+                    child: TaskCard(task: task),
+                  ),
                 ),
               ),
 
               if (homeVm.todayTasks.isNotEmpty) const SizedBox(height: 24),
 
               // ---------------- OVERDUE ----------------
-
               if (homeVm.overdueTasks.isNotEmpty) ...[
                 const AppText(
                   "Overdue",
@@ -155,16 +170,38 @@ class _HomeView extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 ...homeVm.overdueTasks.map(
-                      (task) => Padding(
+                  (task) => Padding(
                     padding: const EdgeInsets.only(bottom: 12),
-                    child: _TaskCard(task: task),
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TaskDetailScreen(task: task),
+                          ),
+                        );
+                      },
+                      child: GestureDetector(
+                        onTap: () {
+                          print("tap ");
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  TaskDetailScreen(task: task),
+                            ),
+                          );
+                        },
+                        child: TaskCard(task: task),
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 24),
               ],
 
               // ---------------- UPCOMING ----------------
-// 🔹 Upcoming Header
+              // 🔹 Upcoming Header
               if (homeVm.upcomingTasks.isNotEmpty)
                 const AppText(
                   "Upcoming",
@@ -172,12 +209,11 @@ class _HomeView extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                 ),
 
-              if (homeVm.upcomingTasks.isNotEmpty)
-                const SizedBox(height: 12),
+              if (homeVm.upcomingTasks.isNotEmpty) const SizedBox(height: 12),
 
-// 🔹 Upcoming Task Groups
+              // 🔹 Upcoming Task Groups
               ...homeVm.upcomingTasks.entries.map(
-                    (entry) => Column(
+                (entry) => Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Date Heading
@@ -191,9 +227,21 @@ class _HomeView extends StatelessWidget {
 
                     // Tasks List
                     ...entry.value.map(
-                          (task) => Padding(
+                      (task) => Padding(
                         padding: const EdgeInsets.only(bottom: 12),
-                        child: TaskCard(task: task),   // 🔥 Now using TaskCard!
+                        child: GestureDetector(
+                          onTap: () {
+                            print("tap2");
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    TaskDetailScreen(task: task),
+                              ),
+                            );
+                          },
+                          child: TaskCard(task: task),
+                        ), // 🔥 Now using TaskCard!
                       ),
                     ),
 
@@ -203,14 +251,12 @@ class _HomeView extends StatelessWidget {
               ),
 
               const SizedBox(height: 80),
-
             ],
           ),
         ),
       ),
 
       // ---------------- FAB (UNCHANGED) ----------------
-
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           showModalBottomSheet<void>(
@@ -264,11 +310,7 @@ class _Header extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 AppText('Good Morning,', color: Colors.white70),
-                AppText(
-                  display,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                ),
+                AppText(display, fontSize: 20, fontWeight: FontWeight.w700),
               ],
             ),
           ],
@@ -280,122 +322,6 @@ class _Header extends StatelessWidget {
 }
 
 // ---------------- TASK CARD ----------------
-
-class _TaskCard extends StatelessWidget {
-  final TaskModel task;
-
-  const _TaskCard({required this.task});
-
-  @override
-  Widget build(BuildContext context) {
-    final priorityColor = _priorityColor(task.priority);
-    final categoryChipColor = _categoryColor(task.category);
-
-    return GestureDetector(
-      onTap: (){
-        Navigator.push(context, MaterialPageRoute(builder: (context)=>TaskDetailScreen(task: task)));
-      },
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: const Color(0xFF11151F),
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: Row(
-          children: [
-            // Priority bar
-            Container(
-              width: 4,
-              height: 48,
-              decoration: BoxDecoration(
-                color: priorityColor,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(width: 16),
-
-            // Title + time + category
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  AppText(
-                    task.title,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color:
-                    task.completedAt == null ? Colors.white : Colors.white54,
-                    decoration: task.completedAt != null
-                        ? TextDecoration.lineThrough
-                        : null,
-                  ),
-                  const SizedBox(height: 6),
-                  AppText(
-                    task.time.isEmpty ? task.category : task.time,
-                    color: Colors.white54,
-                  ),
-                  const SizedBox(height: 6),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: categoryChipColor.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: categoryChipColor.withOpacity(0.5),
-                            width: 0.6,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.label_rounded,
-                              size: 14,
-                              color: categoryChipColor,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              task.category,
-                              style: TextStyle(
-                                color: categoryChipColor,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            // Checkbox
-
-                Checkbox(
-                  value: task.completedAt != null,
-                  onChanged: (_) {
-                    context.read<HomeViewModel>().toggleComplete(task);
-                  },
-                  activeColor: priorityColor,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                ),
-              ],
-            ),
-
-
-
-      ),
-    );
-  }
-}
 
 // ---------------- Helpers ----------------
 

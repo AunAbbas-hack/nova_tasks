@@ -20,7 +20,7 @@ class TaskDetailScreen extends StatelessWidget {
 
     return ChangeNotifierProvider(
       create: (_) => TaskDetailViewModel(
-        repo: TaskRepository(), // ya TaskRepository(), dono chal jayega
+        repo: TaskRepository(),
         initialTask: task,
       ),
       child: const _TaskDetailView(),
@@ -147,12 +147,7 @@ class _TaskDetailView extends StatelessWidget {
                   // Edit
                   IconButton(
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => AddTaskScreen(initialTask: task),
-                        ),
-                      );
+                      _openEditBottomSheet(context, task);
                     },
                     icon: const Icon(Icons.edit, color: Colors.white70),
                   ),
@@ -396,6 +391,26 @@ class _TaskDetailView extends StatelessWidget {
       ),
     );
   }
+  static void _openEditBottomSheet(BuildContext context, TaskModel task) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      enableDrag: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.8,
+          minChildSize: 0.1,
+          maxChildSize: 0.9,
+          expand: false,
+          builder: (context, scrollController) {
+            // AddTaskScreen already handles edit vs create using initialTask
+            return AddTaskScreen(initialTask: task);
+          },
+        );
+      },
+    );
+  }
 }
 
 // Small reusable row for "Due Date / Priority / Category"
@@ -457,4 +472,5 @@ class _InfoRow extends StatelessWidget {
       ],
     );
   }
+
 }

@@ -18,7 +18,7 @@ class BottomNavBar extends StatelessWidget {
       unselectedItemColor: Colors.white70,
       currentIndex: currentIndex,
       onTap: onTap,
-      type: BottomNavigationBarType.shifting,
+      type: BottomNavigationBarType.fixed,
       items: [
         BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
         BottomNavigationBarItem(

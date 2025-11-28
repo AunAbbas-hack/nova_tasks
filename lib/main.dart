@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:nova_tasks/features/auth/viewmodels/signup_viewmodel.dart';
 import 'package:nova_tasks/firebase_options.dart';
 import 'package:provider/provider.dart';
@@ -28,7 +29,7 @@ class NovaTasksApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'NovaTasks',
       theme: AppTheme.dark(),
