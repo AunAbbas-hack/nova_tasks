@@ -543,6 +543,9 @@ class _Header extends StatelessWidget {
     final name = user?.displayName?.trim().isNotEmpty == true
         ? user!.displayName!
         : "Guest";
+    final String? profilePhoto = user?.photoURL?.trim().isNotEmpty == true
+        ? user?.photoURL
+        : null;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -554,14 +557,17 @@ class _Header extends StatelessWidget {
                 context,
                 MaterialPageRoute(builder: (_) => const MeScreen()),
               ),
-              child: const CircleAvatar(
+              child:  CircleAvatar(
                 radius: 26,
                 backgroundColor: Color(0xFFEEC9B7),
-                child: Icon(
-                  Icons.person,
-                  size: 30,
-                  color: Colors.black12,
-                ),
+                backgroundImage: profilePhoto != null
+                    ? NetworkImage(profilePhoto)
+                    : null,
+                // Agar photo null hai, to Icon dikhayein
+                child: profilePhoto == null
+                    ? const Icon(Icons.person, size: 30, color: Colors.black45)
+                    : null,
+                // ),
               ),
             ),
             const SizedBox(width: 12),
