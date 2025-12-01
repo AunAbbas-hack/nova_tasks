@@ -1,29 +1,27 @@
-// lib/features/home/presentation/views/home_screen.dart
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:nova_tasks/features/tasks/views/task_detail_screen.dart';
+import 'package:nova_tasks/core/theme/app_colors.dart';
+import 'package:nova_tasks/features/me/presentation/views/me_screen.dart';
+import 'package:nova_tasks/features/me/presentation/views/settings_screen.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../data/models/task_model.dart';
 import '../../../../data/repositories/task_repository.dart';
-import '../../../auth/viewmodels/signup_viewmodel.dart';
 import '../../../tasks/widgets/task_card.dart';
 import '../viewmodels/home_viewmodel.dart';
 import '../../../tasks/views/add_task_screen.dart';
-import '../../../tasks/viewmodels/add_task_viewmodel.dart';
 import '../../../../core/widgets/app_text.dart';
+import '../../../tasks/views/task_detail_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final String userId;
-
   const HomeScreen({super.key, required this.userId});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) =>
-          HomeViewModel(repo: TaskRepository(), userId: userId)..start(),
+      HomeViewModel(repo: TaskRepository(), userId: userId)..start(),
       child: const _HomeView(),
     );
   }
@@ -35,219 +33,145 @@ class _HomeView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final homeVm = context.watch<HomeViewModel>();
+    final vm = context.watch<HomeViewModel>();
 
-    // Week dates (Mon-Fri centered around today)
-    final dates = _generate5Days();
-    final selectedIndex = dates.indexWhere(
-      (d) => _isSameDay(d, homeVm.selectedDate),
-    );
-
-    // Categories for filter row
-    final categories = ['All', ...homeVm.availableCategories];
+    // Week row dates
+    final dates = _generate7Days();
+    // ab selectedIndex ki jagah direct check kar lenge
+    final categories = ["All", ...vm.availableCategories];
 
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        child: vm.isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
+          padding:
+          const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _Header(theme: theme),
               const SizedBox(height: 24),
 
-              // ---------------- DATE CHIPS ----------------
-              SizedBox(
-                height: 44,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: dates.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 12),
-                  itemBuilder: (context, index) {
-                    final isSelected = index == selectedIndex;
-                    final date = dates[index];
-                    final label = "${_weekday(date)} ${date.day}";
-
-                    return GestureDetector(
-                      onTap: () => homeVm.setSelectedDate(date),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        padding: const EdgeInsets.symmetric(horizontal: 18),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? theme.colorScheme.primary
-                              : theme.colorScheme.surface,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        alignment: Alignment.center,
-                        child: AppText(
-                          label,
-                          color: isSelected ? Colors.white : Colors.white70,
-                          fontWeight: isSelected
-                              ? FontWeight.w600
-                              : FontWeight.w500,
-                        ),
+              // ------------- DATE + SHOW ALL ROW -------------
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: () => _openShowAllSheet(context, vm),
+                    child: AnimatedContainer(
+                      height: 44,
+                      duration: const Duration(milliseconds: 180),
+                      padding:
+                      const EdgeInsets.symmetric(horizontal: 18),
+                      decoration: BoxDecoration(
+                        color: vm.subset == HomeFilterSubset.all
+                            ? const Color(0xFF151A24)
+                            : theme.colorScheme.primary,
+                        borderRadius: BorderRadius.circular(16),
                       ),
-                    );
-                  },
-                ),
+                      alignment: Alignment.center,
+                      child: AppText(
+                        "Show All",
+                        color: vm.subset == HomeFilterSubset.all
+                            ? Colors.white70
+                            : Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: SizedBox(
+                      height: 44,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: dates.length,
+                        separatorBuilder: (_, __) =>
+                        const SizedBox(width: 10),
+                        itemBuilder: (_, i) {
+                          final date = dates[i];
+                          final isSel = vm.selectedDate != null &&
+                              _isSameDay(date, vm.selectedDate!);
+
+                          return GestureDetector(
+                            onTap: () {
+                              if (isSel) {
+                                // same date tap -> clear date
+                                vm.clearSelectedDate();
+                              } else {
+                                vm.setSelectedDate(date);
+                              }
+                            },
+                            child: AnimatedContainer(
+                              duration:
+                              const Duration(milliseconds: 180),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 18),
+                              decoration: BoxDecoration(
+                                color: isSel
+                                    ? theme.colorScheme.primary
+                                    : const Color(0xFF151A24),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              alignment: Alignment.center,
+                              child: AppText(
+                                "${_weekday(date)} ${date.day}",
+                                color: isSel
+                                    ? Colors.white
+                                    : Colors.white70,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
               ),
 
               const SizedBox(height: 16),
 
-              // ---------------- CATEGORY FILTER ROW ----------------
+              // ------------- CATEGORY ROW -------------
               if (categories.isNotEmpty) ...[
                 SizedBox(
                   height: 38,
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: categories.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 10),
-                    itemBuilder: (context, index) {
-                      final cat = categories[index];
-                      final selected = cat == homeVm.selectedCategory;
-                      final color = cat == 'All'
-                          ? Colors.white70
-                          : _categoryColor(cat);
+                    separatorBuilder: (_, __) =>
+                    const SizedBox(width: 10),
+                    itemBuilder: (_, i) {
+                      final cat = categories[i];
+                      final sel = cat == vm.selectedCategory;
 
                       return ChoiceChip(
                         label: Text(cat),
-                        selected: selected,
-                        onSelected: (_) => homeVm.setSelectedCategory(cat),
-                        selectedColor: color,
+                        selected: sel,
+                        selectedColor: sel
+                            ? _categoryColor(cat)
+                            : const Color(0xFF151A24),
                         backgroundColor: const Color(0xFF151A24),
                         labelStyle: TextStyle(
-                          color: selected ? Colors.white : Colors.white70,
-                          fontWeight: selected
-                              ? FontWeight.w600
+                          color:
+                          sel ? Colors.black : Colors.white70,
+                          fontWeight: sel
+                              ? FontWeight.w700
                               : FontWeight.w500,
                         ),
-                        materialTapTargetSize:
-                            MaterialTapTargetSize.shrinkWrap,
+                        onSelected: (_) =>
+                            vm.setSelectedCategory(cat),
                       );
                     },
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
               ],
 
-              // ---------------- TODAY'S TASKS ----------------
-              if (homeVm.todayTasks.isNotEmpty)
-                AppText(
-                  "Today's Tasks${homeVm.selectedCategory != 'All' ? ' · ${homeVm.selectedCategory}' : ''}",
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                ),
-              if (homeVm.todayTasks.isNotEmpty) const SizedBox(height: 12),
-
-              ...homeVm.todayTasks.map(
-                (task) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => TaskDetailScreen(task: task),
-                        ),
-                      );
-                    },
-                    child: TaskCard(task: task),
-                  ),
-                ),
-              ),
-
-              if (homeVm.todayTasks.isNotEmpty) const SizedBox(height: 24),
-
-              // ---------------- OVERDUE ----------------
-              if (homeVm.overdueTasks.isNotEmpty) ...[
-                const AppText(
-                  "Overdue",
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.redAccent,
-                ),
-                const SizedBox(height: 12),
-                ...homeVm.overdueTasks.map(
-                  (task) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => TaskDetailScreen(task: task),
-                          ),
-                        );
-                      },
-                      child: GestureDetector(
-                        onTap: () {
-                          print("tap ");
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  TaskDetailScreen(task: task),
-                            ),
-                          );
-                        },
-                        child: TaskCard(task: task),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-              ],
-
-              // ---------------- UPCOMING ----------------
-              // 🔹 Upcoming Header
-              if (homeVm.upcomingTasks.isNotEmpty)
-                const AppText(
-                  "Upcoming",
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                ),
-
-              if (homeVm.upcomingTasks.isNotEmpty) const SizedBox(height: 12),
-
-              // 🔹 Upcoming Task Groups
-              ...homeVm.upcomingTasks.entries.map(
-                (entry) => Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Date Heading
-                    AppText(
-                      "${_weekday(entry.key)}, ${entry.key.day}",
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white70,
-                    ),
-                    const SizedBox(height: 8),
-
-                    // Tasks List
-                    ...entry.value.map(
-                      (task) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: GestureDetector(
-                          onTap: () {
-                            print("tap2");
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    TaskDetailScreen(task: task),
-                              ),
-                            );
-                          },
-                          child: TaskCard(task: task),
-                        ), // 🔥 Now using TaskCard!
-                      ),
-                    ),
-
-                    const SizedBox(height: 12),
-                  ],
-                ),
-              ),
+              // ------------- MAIN CONTENT -------------
+              vm.selectedDate != null
+                  ? _DateModeSection(vm: vm)
+                  : _ShowAllSection(vm: vm),
 
               const SizedBox(height: 80),
             ],
@@ -255,98 +179,440 @@ class _HomeView extends StatelessWidget {
         ),
       ),
 
-      // ---------------- FAB (UNCHANGED) ----------------
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context)=>AddTaskScreen()));
-          Navigator.push(context, MaterialPageRoute(builder: (context)=>AddTaskScreen()));
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const AddTaskScreen()),
+          );
         },
         backgroundColor: theme.colorScheme.primary,
-        shape: const CircleBorder(),
         child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
 }
 
-// ---------------- HEADER ----------------
+// -------------------------------------------------
+//  DATE MODE: sirf selected date ke tasks
+// -------------------------------------------------
+
+class _DateModeSection extends StatelessWidget {
+  final HomeViewModel vm;
+  const _DateModeSection({required this.vm});
+
+  @override
+  Widget build(BuildContext context) {
+    final tasks = vm.dayTasks;
+    final d = vm.selectedDate!;
+    final title = "Tasks for ${_weekday(d)}, ${d.day}";
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        AppText(
+          title,
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+        ),
+        const SizedBox(height: 12),
+
+        if (tasks.isEmpty)
+          const AppText(
+            "No tasks for this day.",
+            color: Colors.white54,
+          ),
+
+        ...tasks.map(
+              (task) => Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: GestureDetector(
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => TaskDetailScreen(task: task),
+                ),
+              ),
+              child: TaskCard(task: task),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// -------------------------------------------------
+//  SHOW ALL SECTION (global view)
+// -------------------------------------------------
+
+class _ShowAllSection extends StatelessWidget {
+  final HomeViewModel vm;
+  const _ShowAllSection({required this.vm});
+
+  @override
+  Widget build(BuildContext context) {
+    // agar subset == all → grouped view (Today/Overdue/Upcoming)
+    if (vm.subset == HomeFilterSubset.all) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // TODAY
+          if (vm.todayTasks.isNotEmpty) ...[
+            const AppText(
+              "Today's Tasks",
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+            ),
+            const SizedBox(height: 12),
+            ...vm.todayTasks.map(
+                  (t) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: TaskCard(task: t),
+              ),
+            ),
+            const SizedBox(height: 24),
+          ],
+
+          // OVERDUE
+          if (vm.overdueTasks.isNotEmpty) ...[
+            const AppText(
+              "Overdue",
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: Colors.redAccent,
+            ),
+            const SizedBox(height: 12),
+            ...vm.overdueTasks.map(
+                  (t) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: TaskCard(task: t),
+              ),
+            ),
+            const SizedBox(height: 24),
+          ],
+
+          // UPCOMING (grouped by date)
+          if (vm.upcomingTasks.isNotEmpty) ...[
+            const AppText(
+              "Upcoming",
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+            ),
+            const SizedBox(height: 12),
+            ...vm.upcomingTasks.entries.map(
+                  (entry) => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AppText(
+                    "${_weekday(entry.key)}, ${entry.key.day}",
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white70,
+                  ),
+                  const SizedBox(height: 8),
+                  ...entry.value.map(
+                        (t) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: TaskCard(task: t),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+              ),
+            ),
+          ],
+        ],
+      );
+    }
+
+    // warna subset specific flat list
+    final list = vm.currentFlatTasks;
+    String title;
+    Color? color;
+
+    switch (vm.subset) {
+      case HomeFilterSubset.overdue:
+        title = "Overdue Tasks";
+        color = Colors.redAccent;
+        break;
+      case HomeFilterSubset.today:
+        title = "Today's Tasks";
+        color = Colors.white;
+        break;
+      case HomeFilterSubset.upcoming:
+        title = "Upcoming Tasks";
+        color = Colors.white;
+        break;
+      case HomeFilterSubset.all:
+        title = "All Tasks";
+        break;
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        AppText(
+          title,
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+          color: color,
+        ),
+        const SizedBox(height: 12),
+
+        if (list.isEmpty)
+          const AppText(
+            "No tasks found for this filter.",
+            color: Colors.white54,
+          ),
+
+        ...list.map(
+              (t) => Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: TaskCard(task: t),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// -------------------------------------------------
+//  SHOW ALL BOTTOM SHEET
+// -------------------------------------------------
+
+
+void _openShowAllSheet(BuildContext context, HomeViewModel vm) {
+  showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: const Color(0xFF11151F),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    ),
+    builder: (_) {
+      HomeFilterSubset selected = vm.subset; // temporary selection
+
+      Widget buildOption(String title, HomeFilterSubset value,void Function(void Function()) setStateSheet) {
+        bool isSelected = selected == value;
+
+        return GestureDetector(
+          onTap: () {
+            // (context as Element).markNeedsBuild();
+            // selected = value;
+            setStateSheet((){
+              selected = value;
+            });
+          },
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+            decoration: BoxDecoration(
+              color: isSelected ? AppColors.primary : const Color(0xFF1A1E28),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      color: isSelected ? Colors.black : Colors.white,
+                      fontSize: 16,
+                      fontWeight:
+                      isSelected ? FontWeight.w700 : FontWeight.w400,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+
+      return StatefulBuilder(
+        builder: (context, setStateSheet) {
+          return SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 12),
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.white24,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                const AppText(
+                  "Show",
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
+
+                const SizedBox(height: 8),
+                const Divider(color: Colors.white10, height: 1),
+
+                buildOption("All (Today + Overdue + Upcoming)", HomeFilterSubset.all,setStateSheet),
+                buildOption("Overdue Tasks", HomeFilterSubset.overdue,setStateSheet),
+                buildOption("Today Tasks", HomeFilterSubset.today,setStateSheet),
+                buildOption("Upcoming Tasks", HomeFilterSubset.upcoming,setStateSheet),
+
+                const SizedBox(height: 16),
+
+                // BUTTONS SECTION
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: [
+                      // CANCEL
+                      Expanded(
+                        child: OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Colors.white30),
+                            foregroundColor: Colors.white,
+                          ),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text("Cancel"),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+
+                      // APPLY
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.black,
+                          ),
+                          onPressed: () {
+                            // switch logic
+                            switch (selected) {
+                              case HomeFilterSubset.overdue:
+                                vm.setSubset(HomeFilterSubset.overdue);
+                                break;
+                              case HomeFilterSubset.today:
+                                vm.setSubset(HomeFilterSubset.today);
+                                break;
+                              case HomeFilterSubset.upcoming:
+                                vm.setSubset(HomeFilterSubset.upcoming);
+                                break;
+                              case HomeFilterSubset.all:
+                              default:
+                                vm.setSubset(HomeFilterSubset.all);
+                                break;
+                            }
+
+                            Navigator.pop(context);
+                          },
+                          child: const Text("Apply"),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+              ],
+            ),
+          );
+        },
+      );
+    },
+  );
+}
+
+// -------------------------------------------------
+//  HEADER
+// -------------------------------------------------
 
 class _Header extends StatelessWidget {
   final ThemeData theme;
-
   const _Header({required this.theme});
 
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
-    final userName = (user?.displayName != null &&
-        user!.displayName!.trim().isNotEmpty)
-        ? user.displayName!.trim()
-        : 'Guest';
+    final name = user?.displayName?.trim().isNotEmpty == true
+        ? user!.displayName!
+        : "Guest";
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Row(
           children: [
-            const CircleAvatar(radius: 26, backgroundColor: Color(0xFFEEC9B7)),
+            GestureDetector(
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const MeScreen()),
+              ),
+              child: const CircleAvatar(
+                radius: 26,
+                backgroundColor: Color(0xFFEEC9B7),
+                child: Icon(
+                  Icons.person,
+                  size: 30,
+                  color: Colors.black12,
+                ),
+              ),
+            ),
             const SizedBox(width: 12),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                AppText('HI!,', color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
-                AppText(userName, fontSize: 20, fontWeight: FontWeight.w700),
+                const AppText("HI!,", fontWeight: FontWeight.w700),
+                AppText(
+                  name,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                ),
               ],
             ),
           ],
         ),
-        const Icon(Icons.settings, color: Colors.white),
+        IconButton(
+          icon: const Icon(Icons.settings_outlined, color: Colors.white),
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const SettingsScreen()),
+          ),
+        ),
       ],
     );
   }
 }
 
-// ---------------- TASK CARD ----------------
-
-// ---------------- Helpers ----------------
+// -------------------------------------------------
+//  HELPERS
+// -------------------------------------------------
 
 String _weekday(DateTime d) {
-  const names = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const names = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   return names[d.weekday - 1];
 }
 
 bool _isSameDay(DateTime a, DateTime b) =>
     a.year == b.year && a.month == b.month && a.day == b.day;
 
-List<DateTime> _generate5Days() {
+List<DateTime> _generate7Days() {
   final today = DateTime.now();
-  final only = DateTime(today.year, today.month, today.day);
-  // today in center: -2, -1, 0, +1, +2
-  return List.generate(5, (i) => only.add(Duration(days: i - 2)));
+  final start = DateTime(today.year, today.month, today.day)
+      .subtract(const Duration(days: 1));
+  return List.generate(7, (i) => start.add(Duration(days: i)));
 }
 
-// 🔥 Priority string → Color
-Color _priorityColor(String priority) {
-  switch (priority.toLowerCase()) {
-    case 'low':
-      return const Color(0xFF60A5FA); // blue
-    case 'medium':
-      return const Color(0xFFF59E0B); // amber
-    case 'high':
-      return const Color(0xFFFB7185); // pink
-    case 'urgent':
-      return const Color(0xFFEF4444); // red
-    default:
-      return const Color(0xFF60A5FA);
-  }
-}
-
-// 🔥 Category string → Color
+// Category → Color
 Color _categoryColor(String category) {
-  final c = category.toLowerCase().trim();
-  if (c == 'work') return const Color(0xFF38BDF8); // sky
-  if (c == 'personal') return const Color(0xFFA3E635); // lime
-
-  // Any custom category
-  return const Color(0xFF6366F1); // indigo for custom
+  final c = category.toLowerCase();
+  if (c == "work") return const Color(0xFF38BDF8);
+  if (c == "personal") return const Color(0xFF34D399);
+  return Colors.white70;
 }

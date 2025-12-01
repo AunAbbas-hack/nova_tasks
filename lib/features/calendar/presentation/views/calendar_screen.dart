@@ -6,9 +6,9 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:nova_tasks/core/widgets/app_text.dart';
 import 'package:nova_tasks/data/models/task_model.dart';
 import 'package:nova_tasks/data/repositories/task_repository.dart';
-import 'package:nova_tasks/features/tasks/views/add_task_screen.dart';
 import 'package:nova_tasks/features/tasks/views/task_detail_screen.dart';
 
+import '../../../tasks/views/add_task_screen.dart';
 import '../viewmodels/calendar_viewmodel.dart';
 
 class CalendarScreen extends StatelessWidget {
@@ -39,7 +39,6 @@ class _CalendarView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final vm = context.watch<CalendarViewModel>();
 
     final tasks = vm.visibleTasks;
@@ -54,7 +53,13 @@ class _CalendarView extends StatelessWidget {
         : '${vm.visibleTasksCount} task(s) for this day';
 
     return Scaffold(
-      body: SafeArea(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context)=>AddTaskScreen()));
+        },
+        shape: const CircleBorder(),
+        child: const Icon(Icons.add, color: Colors.white),
+      ),      body: SafeArea(
         child: Stack(
           children: [
             Padding(
@@ -89,7 +94,7 @@ class _CalendarView extends StatelessWidget {
             ),
 
             DraggableScrollableSheet(
-              initialChildSize: 0.42,
+              initialChildSize: 0.38,
               minChildSize: 0.30,
               maxChildSize: 0.9,
               builder: (context, scrollController) {

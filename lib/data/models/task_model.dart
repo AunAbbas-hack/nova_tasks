@@ -6,17 +6,17 @@ class TaskModel {
   final String userId;
   final String title;
   final String description;
-  final DateTime date;
   final String time;
   final String priority;
   final String category;
-  final DateTime? completedAt;
   final String? recurrenceRule;
   final String? parentTaskId;
   final bool hasAttachment;
   final List<SubtaskModel> subtasks;
+  final DateTime date;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final DateTime? completedAt;
 
   const TaskModel({
     required this.id,
@@ -38,7 +38,9 @@ class TaskModel {
 
   // ---------------- FIRESTORE FROM ----------------
   factory TaskModel.fromFirestore(
-      DocumentSnapshot<Map<String, dynamic>> doc, SnapshotOptions? _) {
+    DocumentSnapshot<Map<String, dynamic>> doc,
+    SnapshotOptions? _,
+  ) {
     final data = doc.data() ?? {};
 
     return TaskModel(
@@ -57,10 +59,8 @@ class TaskModel {
       subtasks: (data['subtasks'] as List<dynamic>? ?? [])
           .map((e) => SubtaskModel.fromJson(e, e['id']))
           .toList(),
-      createdAt:
-      (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      updatedAt:
-      (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
   }
 
@@ -78,7 +78,7 @@ class TaskModel {
       'parentTaskId': parentTaskId,
       'hasAttachment': hasAttachment,
       'subtasks': [
-        for (final s in subtasks) {'id': s.id, ...s.toJson()}
+        for (final s in subtasks) {'id': s.id, ...s.toJson()},
       ],
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
@@ -125,3 +125,4 @@ class TaskModel {
     );
   }
 }
+

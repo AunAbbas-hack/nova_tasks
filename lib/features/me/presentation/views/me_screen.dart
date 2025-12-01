@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:nova_tasks/features/me/presentation/views/settings_screen.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/widgets/app_text.dart';
@@ -8,14 +11,14 @@ import '../../../auth/views/login_screen.dart';
 import '../viewmodels/me_viewmodel.dart';
 
 class MeScreen extends StatelessWidget {
-  const MeScreen({super.key});
+  final bool? showBack;
+  const MeScreen({super.key,this.showBack});
 
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      // theoretically yahan kabhi nahi ana chahiye because NavigationWrapper
-      // already check karta hai, but just in case:
+
       return const Scaffold(
         body: Center(child: Text('Not logged in')),
       );
@@ -26,13 +29,16 @@ class MeScreen extends StatelessWidget {
         repo: TaskRepository(),
         userId: user.uid,
       ),
-      child: const _MeView(),
+      child:  _MeView(showBack??true),
     );
   }
 }
 
 class _MeView extends StatelessWidget {
-  const _MeView();
+  bool showBack;
+
+
+   _MeView(this.showBack);
 
   Future<void> _showEditNameDialog(BuildContext context) async {
     final vm = context.read<MeViewModel>();
@@ -139,7 +145,13 @@ class _MeView extends StatelessWidget {
         backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         centerTitle: true,
-        leading: const SizedBox(), // tab nav hai, back ki zarurat nahi
+        automaticallyImplyLeading: showBack,
+        leading: showBack
+          ? IconButton(
+          onPressed: () => Navigator.pop(context),
+    icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+    )
+        : null,  // tab nav hai, back ki zarurat nahi
         title: const AppText(
           'Profile',
           fontSize: 18,
@@ -258,9 +270,7 @@ class _MeView extends StatelessWidget {
                     label: 'Settings',
                     onTap: () {
                       // TODO: settings screen
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text('Settings coming soon')),
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=>SettingsScreen())
                       );
                     },
                   ),
@@ -294,32 +304,7 @@ class _MeView extends StatelessWidget {
       ),
 
       // -------- Bottom Save button (for UX feel) --------
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-        child: SizedBox(
-          height: 54,
-          child: ElevatedButton(
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Profile is up to date')),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: primary,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(24),
-              ),
-            ),
-            child: const Text(
-              'Save Changes',
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 16,
-              ),
-            ),
-          ),
-        ),
-      ),
+
     );
   }
 }
@@ -333,35 +318,53 @@ class _Avatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        const CircleAvatar(
-          radius: 48,
-          backgroundColor: Color(0xFF151A24),
-          child: Icon(
-            Icons.person,
-            size: 52,
-            color: Colors.white54,
+    final vm = context.watch<MeViewModel>();
+
+    ImageProvider? imageProvider;
+
+    if (vm.profileImageFile != null) {
+      // freshly picked, local file
+      imageProvider = FileImage(vm.profileImageFile!);
+    } else if (vm.profileImageUrl != null &&
+        vm.profileImageUrl!.isNotEmpty) {
+      // saved remote url from Firestore/Storage
+      imageProvider = NetworkImage(vm.profileImageUrl!);
+    }
+    return GestureDetector(
+      onTap: (){
+        vm.pickProfileImage();
+      },
+      child: Stack(
+        children: [
+          CircleAvatar(
+            radius: 48,
+            backgroundColor: const Color(0xFF151A24),
+            backgroundImage: imageProvider,
+            child: imageProvider==null?const Icon(
+              Icons.person,
+              size: 52,
+              color: Colors.white54,
+            ):null,
           ),
-        ),
-        Positioned(
-          bottom: 4,
-          right: 4,
-          child: Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              color: primary,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.edit,
-              size: 16,
-              color: Colors.white,
+          Positioned(
+            bottom: 4,
+            right: 4,
+            child: Container(
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                color: primary,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.edit,
+                size: 16,
+                color: Colors.white,
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

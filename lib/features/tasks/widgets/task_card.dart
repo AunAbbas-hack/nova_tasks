@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:nova_tasks/features/tasks/views/task_detail_screen.dart';
 import 'package:provider/provider.dart';
 
 import 'package:nova_tasks/core/widgets/app_text.dart';
@@ -20,159 +21,170 @@ class TaskCard extends StatelessWidget {
     // Priority & category colors
     final priorityColor = _priorityColor(task.priority);
     final categoryChipColor = _categoryChipColor(task.category);
+    String _formatDue(TaskModel task) {
+      final dateStr = DateFormat('MMM d, yyyy').format(task.date);
+      if (task.time.isEmpty) return dateStr;
+      return '$dateStr - ${task.time}';
+    }
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: const Color(0xFF11151F),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Priority bar
-          Container(
-            width: 4,
-            height: 88,
-            decoration: BoxDecoration(
-              color: priorityColor,
-              borderRadius: BorderRadius.circular(2),
+    return GestureDetector(
+      onTap: (){
+        Navigator.push(context, MaterialPageRoute(builder: (context)=>TaskDetailScreen(task: task)));
+      },
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: const Color(0xFF11151F),
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Priority bar
+            Container(
+              width: 4,
+              height: 88,
+              decoration: BoxDecoration(
+                color: priorityColor,
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
-          ),
-          const SizedBox(width: 16),
+            const SizedBox(width: 16),
 
-          // Title + time + category chip
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AppText(
-                  task.title,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: task.completedAt == null
-                      ? Colors.white
-                      : Colors.white54,
-                  decoration: task.completedAt != null
-                      ? TextDecoration.lineThrough
-                      : null,
-                ),
-                const SizedBox(height: 6),
-                AppText(
-                  task.time.isEmpty ? task.category : task.time,
-                  color: Colors.white54,
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: categoryChipColor.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: categoryChipColor.withOpacity(0.5),
-                          width: 0.6,
+            // Title + time + category chip
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AppText(
+                    task.title,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: task.completedAt == null
+                        ? Colors.white
+                        : Colors.white54,
+                    decoration: task.completedAt != null
+                        ? TextDecoration.lineThrough
+                        : null,
+                  ),
+                  const SizedBox(height: 6),
+                  //Task finished on data
+                  AppText(
+                    _formatDue(task),
+                    color: Colors.white54,
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: categoryChipColor.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: categoryChipColor.withOpacity(0.5),
+                            width: 0.6,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.label_rounded,
+                              size: 14,
+                              color: categoryChipColor,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              task.category,
+                              style: TextStyle(
+                                color: categoryChipColor,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.label_rounded,
-                            size: 14,
-                            color: categoryChipColor,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            task.category,
-                            style: TextStyle(
-                              color: categoryChipColor,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            // Checkbox + Update + Delete
+            Column(
+              children: [
+                // ✅ Complete toggle
+                Row(
+                  children: [
+                    Checkbox(
+                      value: task.completedAt != null,
+                      onChanged: (_) => homeVm.toggleComplete(task),
+                      activeColor: priorityColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
                       ),
+                    ),
+                    const SizedBox(width: 2),
+                    AppText(
+                      formattedTime.toString(),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ],
+                ),
+
+                // ✏️ Update button
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(
+                        Icons.edit,
+                        color: Colors.white70,
+                        size: 20,
+                      ),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      onPressed: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context)=>AddTaskScreen(initialTask: task,)));
+                      },
+                    ),
+                    const SizedBox(width: 2),
+
+                    // 🗑 Delete button
+                    IconButton(
+                      icon: const Icon(
+                        Icons.delete,
+                        color: Colors.redAccent,
+                        size: 20,
+                      ),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      onPressed: () async {
+                        final confirm = await _confirmDelete(context);
+                        if (!confirm) return;
+
+                        await homeVm.repo.deleteTask(task.userId, task.id);
+
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Task deleted')),
+                          );
+                        }
+                      },
                     ),
                   ],
                 ),
               ],
             ),
-          ),
-
-          // Checkbox + Update + Delete
-          Column(
-            children: [
-              // ✅ Complete toggle
-              Row(
-                children: [
-                  Checkbox(
-                    value: task.completedAt != null,
-                    onChanged: (_) => homeVm.toggleComplete(task),
-                    activeColor: priorityColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                  ),
-                  const SizedBox(width: 2),
-                  AppText(
-                    formattedTime.toString(),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ],
-              ),
-
-              // ✏️ Update button
-              Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(
-                      Icons.edit,
-                      color: Colors.white70,
-                      size: 20,
-                    ),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context)=>AddTaskScreen(initialTask: task,)));
-                    },
-                  ),
-                  const SizedBox(width: 2),
-
-                  // 🗑 Delete button
-                  IconButton(
-                    icon: const Icon(
-                      Icons.delete,
-                      color: Colors.redAccent,
-                      size: 20,
-                    ),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    onPressed: () async {
-                      final confirm = await _confirmDelete(context);
-                      if (!confirm) return;
-
-                      await homeVm.repo.deleteTask(task.userId, task.id);
-
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Task deleted')),
-                        );
-                      }
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

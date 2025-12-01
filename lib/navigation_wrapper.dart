@@ -4,10 +4,14 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import 'package:nova_tasks/core/widgets/bottom_nav_bar.dart';
+import 'package:nova_tasks/data/repositories/task_repository.dart';
 import 'package:nova_tasks/features/calendar/presentation/views/calendar_screen.dart';
 import 'package:nova_tasks/features/home/presentation/views/home_screen.dart';
 import 'package:nova_tasks/features/me/presentation/views/me_screen.dart';
 import 'package:nova_tasks/features/auth/views/login_screen.dart';
+import 'package:provider/provider.dart';
+
+import 'features/home/presentation/viewmodels/home_viewmodel.dart';
 
 class NavigationWrapper extends StatefulWidget {
   const NavigationWrapper({super.key});
@@ -64,10 +68,15 @@ class _NavigationWrapperState extends State<NavigationWrapper> {
     final List<Widget> screens = [
       HomeScreen(userId: userID),
       const CalendarScreen(),
-      const MeScreen(),
+      const MeScreen(showBack: false,),
     ];
 
-    return PopScope(
+    return MultiProvider(providers: [
+      ChangeNotifierProvider(create: (_) => HomeViewModel(repo: TaskRepository(), userId: userID
+    )..start(),)
+    ],
+
+    child:  PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
@@ -77,6 +86,7 @@ class _NavigationWrapperState extends State<NavigationWrapper> {
           SystemNavigator.pop();
         }
       },
+
       child: Scaffold(
         body: screens[currentIndex],
         bottomNavigationBar: BottomNavBar(
@@ -88,6 +98,7 @@ class _NavigationWrapperState extends State<NavigationWrapper> {
           },
         ),
       ),
+    )
     );
   }
 }
