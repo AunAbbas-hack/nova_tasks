@@ -1,5 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:nova_tasks/core/theme/app_colors.dart';
 import 'package:provider/provider.dart';
 
 import 'package:nova_tasks/core/widgets/app_text.dart';
@@ -45,14 +47,10 @@ class _SignupView extends StatelessWidget {
   void _handleSignup(BuildContext context) {
     context.read<SignupViewModel>().submit(
       onSuccess: () {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Signed up successfully')));
+        Get.snackbar("Success", "Sign up successful",backgroundColor: AppColors.success,colorText: Colors.black);
         Navigator.of(context).pop();
       },
-      onError: () => ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Signup failed, try again.')),
-      ),
+      onError: () => Get.snackbar("Error", "Sign up failed ",backgroundColor: AppColors.error,colorText: Colors.black)
     );
   }
 
@@ -221,7 +219,7 @@ class _SignupFormCard extends StatelessWidget {
                     // TODO: Integrate Google sign-up.
                   },
             icon: Image.asset(
-              'assets/images/google-logo-icon.png',
+              'assets/images/icons-google-logo.png',
               width: 24,
               height: 24,
             ),

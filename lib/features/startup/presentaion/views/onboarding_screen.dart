@@ -132,7 +132,7 @@ class _OnboardingDots extends StatelessWidget {
   }
 }
 class _ContinueButton extends StatelessWidget {
-  const _ContinueButton({super.key});
+  const _ContinueButton();
 
   @override
   Widget build(BuildContext context) {

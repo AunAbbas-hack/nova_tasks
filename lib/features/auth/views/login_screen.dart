@@ -2,7 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:nova_tasks/navigation_wrapper.dart';
 import 'package:provider/provider.dart';
-
+import 'package:get/get.dart';
 import 'package:nova_tasks/core/widgets/app_text.dart';
 import 'package:nova_tasks/core/widgets/primary_button.dart';
 import 'package:nova_tasks/core/widgets/primary_text_field.dart';
@@ -10,7 +10,8 @@ import 'package:nova_tasks/features/auth/views/forgot_password_screen.dart';
 import 'package:nova_tasks/features/auth/viewmodels/login_viewmodel.dart';
 import 'package:nova_tasks/features/auth/views/signup_screen.dart';
 
-import '../../home/presentation/views/home_screen.dart';
+import '../../../core/theme/app_colors.dart';
+
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -46,17 +47,18 @@ class _LoginScreenState extends State<LoginScreen> {
 class _LoginView extends StatelessWidget {
   const _LoginView();
 
-  void _handleLogin(BuildContext context) {
+  void _handleLogin(BuildContext context,) {
     context.read<LoginViewModel>().submit(
       onSuccess: () {
+        Get.snackbar("Success", "Login successful",backgroundColor: AppColors.success,colorText: Colors.black);
         Navigator.of(context).pushReplacement(
           MaterialPageRoute<void>(builder: (_) => const NavigationWrapper()),
         );
       },
-      onError: () => ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Login failed, try again.!!')),
-      ),
-    );
+      onError: () {
+        Get.snackbar("Error", "Login failed ", backgroundColor: AppColors.error,
+            colorText: Colors.black);
+      } );
   }
 
   @override
@@ -175,6 +177,7 @@ class _LoginFormCard extends StatelessWidget {
             textInputAction: TextInputAction.next,
             validator: viewModel.validateEmail,
             prefixIcon: Icons.mail_outline_rounded,
+            errorText: viewModel.emailError,
           ),
           const SizedBox(height: 20),
           PrimaryTextField(
@@ -184,6 +187,7 @@ class _LoginFormCard extends StatelessWidget {
             textInputAction: TextInputAction.done,
             validator: viewModel.validatePassword,
             prefixIcon: Icons.lock_outline_rounded,
+            errorText: viewModel.passwordError,
             isPassword: true,
           ),
           const SizedBox(height: 8),
@@ -236,7 +240,7 @@ class _LoginFormCard extends StatelessWidget {
                     // TODO: Integrate Google sign-in.
                   },
             icon: Image.asset(
-              'assets/images/google-logo-icon.png',
+              'assets/images/icons-google-logo.png',
               width: 24,
               height: 24,
             ),

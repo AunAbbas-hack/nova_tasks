@@ -1,7 +1,7 @@
-import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:nova_tasks/features/me/presentation/views/notification_screen.dart';
 import 'package:nova_tasks/features/me/presentation/views/settings_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -281,10 +281,7 @@ class _MeView extends StatelessWidget {
                     label: 'Notifications',
                     onTap: () {
                       // TODO: notifications screen
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text('Notifications coming soon')),
-                      );
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=>NotificationsScreen()));
                     },
                   ),
                   const Divider(color: Colors.white10, height: 24),

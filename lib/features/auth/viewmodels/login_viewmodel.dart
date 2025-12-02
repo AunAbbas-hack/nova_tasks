@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:nova_tasks/data/repositories/auth_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,6 +13,8 @@ class LoginViewModel extends ChangeNotifier {
   final formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  String? emailError;
+  String? passwordError;
 
   bool _isSubmitting = false;
   bool get isSubmitting => _isSubmitting;
@@ -48,6 +51,8 @@ class LoginViewModel extends ChangeNotifier {
     if (!(formKey.currentState?.validate() ?? false)) return;
 
     _setSubmitting(true);
+    emailError=null;
+    passwordError=null;
 
     try {
       await _authRepository.signIn(
@@ -60,8 +65,24 @@ class LoginViewModel extends ChangeNotifier {
       await prefs.setBool("loggedIn", true);
 
       onSuccess();
-    } catch (_) {
+    }on FirebaseAuthException catch (e) {
       onError?.call();
+      switch (e.code) {
+        case "user-not-found":
+          emailError = "No account found with this email";
+          break;
+
+        case "wrong-password":
+          passwordError = "Incorrect password";
+          break;
+
+        case "invalid-email":
+          emailError = "Invalid email format";
+          break;
+
+        default:
+          passwordError = e.message ?? "Login failed";
+      }
     } finally {
       _setSubmitting(false);
     }

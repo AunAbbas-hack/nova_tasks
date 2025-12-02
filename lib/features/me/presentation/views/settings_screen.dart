@@ -25,7 +25,6 @@ class _SettingsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<SettingsViewModel>();
-    final theme = Theme.of(context);
 
     if (vm.isLoading) {
       return const Scaffold(

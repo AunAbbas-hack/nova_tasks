@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import 'package:nova_tasks/core/widgets/app_text.dart';
 import 'package:nova_tasks/data/models/task_model.dart';
 import 'package:nova_tasks/data/repositories/task_repository.dart';
-import 'package:nova_tasks/features/home/presentation/viewmodels/home_viewmodel.dart';
 import 'package:nova_tasks/features/tasks/viewmodels/task_detail_viewmodel.dart';
 import 'package:nova_tasks/features/tasks/views/add_task_screen.dart';
 
@@ -91,12 +90,12 @@ class _TaskDetailView extends StatelessWidget {
                 child: Row(
                   children: [
                     Checkbox(
-                      value: vm.isCompleted,
+                      value: task.completedAt != null,
                       onChanged: (_) => vm.toggleTaskCompleted(),
+                      activeColor: priorityColor,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(6),
                       ),
-                      activeColor: priorityColor,
                     ),
                     const SizedBox(width: 8),
                     Expanded(

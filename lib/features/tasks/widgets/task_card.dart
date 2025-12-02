@@ -26,7 +26,7 @@ class TaskCard extends StatelessWidget {
       if (task.time.isEmpty) return dateStr;
       return '$dateStr - ${task.time}';
     }
-
+    final isRecurring=task.recurrenceRule !=null &&task.recurrenceRule!.trim().isNotEmpty;
     return GestureDetector(
       onTap: (){
         Navigator.push(context, MaterialPageRoute(builder: (context)=>TaskDetailScreen(task: task)));
@@ -143,6 +143,8 @@ class TaskCard extends StatelessWidget {
                 // ✏️ Update button
                 Row(
                   children: [
+                    if(isRecurring)
+                      IconButton(onPressed: (){}, icon: Icon(Icons.repeat,color: Colors.white,size: 20,)),
                     IconButton(
                       icon: const Icon(
                         Icons.edit,

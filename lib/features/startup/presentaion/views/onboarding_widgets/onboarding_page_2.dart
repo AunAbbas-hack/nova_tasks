@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:nova_tasks/core/theme/app_colors.dart';
-import 'package:nova_tasks/core/widgets/primary_button.dart';
 
 class OnboardingPageTwo extends StatelessWidget {
   const OnboardingPageTwo({

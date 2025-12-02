@@ -13,10 +13,11 @@ class PrimaryTextField extends StatefulWidget {
     this.suffixIcon,
     this.isPassword = false,
     this.onChanged,
+    this.errorText,
 
     super.key,
   });
-
+final String? errorText;
   final String label;
   final String hint;
   final TextEditingController controller;
@@ -70,6 +71,7 @@ autovalidateMode: AutovalidateMode.onUserInteraction,
 
 
           decoration: InputDecoration(
+            errorText: widget.errorText,
             hintText: widget.hint,
             hintStyle: TextStyle(
               color: Colors.white.withOpacity(0.4),
