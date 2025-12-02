@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import '../../../../data/models/task_model.dart';
 import '../../../../data/repositories/task_repository.dart';
 
-/// Kaun sa global filter lagaa hua hai
+/// Global "Show all" filter (bottom sheet)
 enum HomeFilterSubset {
   all,       // Today + Overdue + Upcoming (grouped)
-  overdue,   // Sirf overdue
-  today,     // Sirf today
-  upcoming,  // Sirf upcoming
+  overdue,   // Only overdue
+  today,     // Only today
+  upcoming,  // Only upcoming
 }
 
 class HomeViewModel extends ChangeNotifier {
@@ -23,20 +23,20 @@ class HomeViewModel extends ChangeNotifier {
 
   bool isLoading = true;
 
-  // 🔹 Selected date (null => koi specific date nahi)
+  // -------- Selected Date (null => no specific date filter) --------
   DateTime? _selectedDate;
   DateTime? get selectedDate => _selectedDate;
 
-  // 🔹 Category filter
+  // -------- Category filter --------
   String _selectedCategory = 'All';
   String get selectedCategory => _selectedCategory;
 
-  // 🔹 Global mode (Show All bottom sheet ke options)
+  // -------- Show All subset --------
   HomeFilterSubset _subset = HomeFilterSubset.all;
   HomeFilterSubset get subset => _subset;
 
   HomeViewModel({required this.repo, required this.userId}) {
-    // default: aaj ka din selected
+    // Default: today selected
     _selectedDate = _only(DateTime.now());
   }
 
@@ -46,7 +46,7 @@ class HomeViewModel extends ChangeNotifier {
 
   void start() {
     _sub = repo.streamUserTasks(userId).listen((list) {
-      _tasks = list; // ✅ ab hum expandRecurring nahi kar rahe
+      _tasks = list; // recurrence is handled logically, not expanded
       isLoading = false;
       notifyListeners();
     });
@@ -73,26 +73,36 @@ class HomeViewModel extends ChangeNotifier {
   bool _isRecurring(TaskModel t) =>
       (t.recurrenceRule?.trim().isNotEmpty ?? false);
 
-  /// Recurrence rule ko dekh kar decide karta hai ke *is day* pe yeh task aata hai ya nahi
+  /// Public helper for UI
+  bool isRecurring(TaskModel t) => _isRecurring(t);
+
+  /// Recurrence rule ko dekh kar decide karta hai ke
+  /// *is day* pe yeh task show hona chahiye ya nahi.
+  ///
+  /// Supported rules:
+  ///  DAILY
+  ///  WEEKLY:1,3,5        (1 = Mon ... 7 = Sun)
+  ///  MONTHLY:15          (15th of every month)
+  ///  YEARLY:03-10        (MM-dd, e.g., March 10)
   bool _occursOn(TaskModel task, DateTime day) {
     final dayOnly = _only(day);
     final start = _only(task.date);
     final rule = task.recurrenceRule?.trim();
 
-    // agar recurrence hi nahi → simple one-time task
+    // No recurrence → single instance
     if (rule == null || rule.isEmpty) {
       return _isSameDay(start, dayOnly);
     }
 
-    // future recurrence ke liye: start se pehle walon pe mat dikhao
+    // Do not show before start date
     if (dayOnly.isBefore(start)) return false;
 
-    // DAILY
+    // ------ DAILY ------
     if (rule == 'DAILY') {
       return true;
     }
 
-    // WEEKLY:1,3,5  (1=Mon ... 7=Sun)
+    // ------ WEEKLY:1,3,5 ------
     if (rule.startsWith('WEEKLY:')) {
       final part = rule.substring('WEEKLY:'.length);
       final days = part
@@ -103,7 +113,7 @@ class HomeViewModel extends ChangeNotifier {
       return days.contains(dayOnly.weekday);
     }
 
-    // MONTHLY:15
+    // ------ MONTHLY:15 ------
     if (rule.startsWith('MONTHLY:')) {
       final part = rule.substring('MONTHLY:'.length);
       final dom = int.tryParse(part.trim());
@@ -111,7 +121,18 @@ class HomeViewModel extends ChangeNotifier {
       return dayOnly.day == dom;
     }
 
-    // unknown rule → fallback: sirf start date
+    // ------ YEARLY:03-10 ------
+    if (rule.startsWith('YEARLY:')) {
+      final part = rule.substring('YEARLY:'.length);
+      final segs = part.split('-');
+      if (segs.length != 2) return false;
+      final month = int.tryParse(segs[0]);
+      final dayNum = int.tryParse(segs[1]);
+      if (month == null || dayNum == null) return false;
+      return dayOnly.month == month && dayOnly.day == dayNum;
+    }
+
+    // Unknown rule → fallback to only start date
     return _isSameDay(start, dayOnly);
   }
 
@@ -122,7 +143,7 @@ class HomeViewModel extends ChangeNotifier {
     int hour = 23;
     int minute = 59;
 
-    // 12h format?  e.g. "2:30 PM"
+    // 12h format e.g. "2:30 PM"
     final amPmRegex =
     RegExp(r'^(\d{1,2}):(\d{2})\s*(AM|PM)$', caseSensitive: false);
     final amPmMatch = amPmRegex.firstMatch(timeStr);
@@ -162,7 +183,6 @@ class HomeViewModel extends ChangeNotifier {
   /// Date chip tap hua
   void setSelectedDate(DateTime d) {
     _selectedDate = _only(d);
-    // date select hone par subset as-is rehne do
     notifyListeners();
   }
 
@@ -176,13 +196,12 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Show All bottom sheet se subset select
   void setSubset(HomeFilterSubset newSubset) {
     _subset = newSubset;
-
-    // Show All ke filters lagate waqt date/category reset
+    // Global filters pe aate waqt date/category reset
     _selectedDate = null;
     _selectedCategory = 'All';
-
     notifyListeners();
   }
 
@@ -214,7 +233,7 @@ class HomeViewModel extends ChangeNotifier {
         return false;
       }
 
-      // Date filter (agar date selected hai, recurrence aware)
+      // Date filter (if selected, recurrence-aware)
       if (_selectedDate != null && !_occursOn(t, _selectedDate!)) {
         return false;
       }
@@ -235,19 +254,19 @@ class HomeViewModel extends ChangeNotifier {
   /// Non-recurring tasks ke liye date + time based overdue
   bool _isTaskOverdue(TaskModel t) {
     if (t.completedAt != null) return false;
-    if (_isRecurring(t)) return false; // ✅ recurring ko overdue nahi dikha rahe
+    if (_isRecurring(t)) return false; // recurring ko overdue list me nahi dikhate
 
     final now = DateTime.now();
     final today = _todayOnly;
     final taskDay = _only(t.date);
 
-    // Date pehle ka → overdue
+    // Past day → overdue
     if (taskDay.isBefore(today)) return true;
 
-    // Future date → overdue nahi
+    // Future day → not overdue
     if (taskDay.isAfter(today)) return false;
 
-    // same day, time check
+    // Same day → check time
     if (t.time.trim().isEmpty) return false;
 
     final due = _parseTaskDateTime(t.date, t.time);
@@ -271,7 +290,7 @@ class HomeViewModel extends ChangeNotifier {
     return false;
   }
 
-  /// Recurring ke liye: kya aaj ke baad next 90 din me koi occurrence aati hai?
+  /// Recurring ke liye: aaj ke baad next N din me koi occurrence?
   bool _isUpcomingRecurring(TaskModel t) {
     if (!_isRecurring(t)) return false;
 
@@ -294,18 +313,16 @@ class HomeViewModel extends ChangeNotifier {
   //  VIEW-SPECIFIC GETTERS
   // -------------------------------------------------
 
-  /// 1) Jab koi date selected ho -> sirf us date ke tasks (recurrence aware)
+  /// 1) Specific date ke tasks (recurrence aware)
   List<TaskModel> get dayTasks {
     if (_selectedDate == null) return [];
-    final base = _baseFiltered();
-    // _baseFiltered already respects selectedDate + category
-    return base;
+    return _baseFiltered(); // date + category already applied
   }
 
-  /// 2) Today tasks (global/show-all view)
+  /// 2) Today tasks (global / show-all view)
   List<TaskModel> get todayTasks {
-    final base = _baseFiltered().where((t) => _occursOn(t, _todayOnly)).toList();
-    return base;
+    final base = _baseFiltered();
+    return base.where((t) => _occursOn(t, _todayOnly)).toList();
   }
 
   /// 3) Overdue (sirf non-recurring)
@@ -322,7 +339,7 @@ class HomeViewModel extends ChangeNotifier {
 
     for (final t in base) {
       if (_isRecurring(t)) {
-        // next 30 days me jitne occurrences hain (aaj ko skip)
+        // Next 30 days ke occurrences (aaj skip)
         for (int i = 1; i <= 30; i++) {
           final d = _only(today.add(Duration(days: i)));
           if (_occursOn(t, d)) {
@@ -339,7 +356,6 @@ class HomeViewModel extends ChangeNotifier {
       }
     }
 
-    // sort keys
     final sortedKeys = map.keys.toList()..sort();
     final ordered = <DateTime, List<TaskModel>>{};
     for (final k in sortedKeys) {
@@ -348,7 +364,7 @@ class HomeViewModel extends ChangeNotifier {
     return ordered;
   }
 
-  /// 5) Flat list for Overdue/Today/Upcoming modes (Show All tab)
+  /// 5) Flat list for Overdue/Today/Upcoming (Show All subset)
   List<TaskModel> get currentFlatTasks {
     final base = _baseFiltered();
 
@@ -365,12 +381,79 @@ class HomeViewModel extends ChangeNotifier {
   }
 
   // -------------------------------------------------
+  //  RECURRENCE LABEL FOR UI
+  // -------------------------------------------------
+
+  String? recurrenceLabel(TaskModel task) {
+    final rule = task.recurrenceRule?.trim();
+    if (rule == null || rule.isEmpty) return null;
+
+    if (rule == 'DAILY') {
+      return 'Repeats daily';
+    }
+
+    if (rule.startsWith('WEEKLY:')) {
+      const names = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      final part = rule.substring('WEEKLY:'.length);
+      final days = part
+          .split(',')
+          .map((e) => int.tryParse(e.trim()))
+          .whereType<int>()
+          .toList()
+        ..sort();
+      final labels = days
+          .where((d) => d >= 1 && d <= 7)
+          .map((d) => names[d - 1])
+          .toList();
+      if (labels.isEmpty) return 'Repeats weekly';
+      return 'Every ${labels.join(', ')}';
+    }
+
+    if (rule.startsWith('MONTHLY:')) {
+      final part = rule.substring('MONTHLY:'.length);
+      final dom = int.tryParse(part.trim());
+      if (dom == null) return 'Repeats monthly';
+      return 'Monthly on the $dom';
+    }
+
+    if (rule.startsWith('YEARLY:')) {
+      final part = rule.substring('YEARLY:'.length);
+      final segs = part.split('-');
+      if (segs.length != 2) return 'Repeats yearly';
+      final month = int.tryParse(segs[0]);
+      final dayNum = int.tryParse(segs[1]);
+      if (month == null || dayNum == null) return 'Repeats yearly';
+
+      const monthNames = [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
+      ];
+
+      final monthName =
+      (month >= 1 && month <= 12) ? monthNames[month - 1] : 'Month';
+      return 'Every year on $monthName $dayNum';
+    }
+
+    return 'Repeats';
+  }
+
+  // -------------------------------------------------
   //  TOGGLE COMPLETE
   // -------------------------------------------------
 
   Future<void> toggleComplete(TaskModel task) async {
     await repo.updateTask(task.userId, task.id, {
-      "completedAt": task.completedAt == null ? DateTime.now() : null,
+      'completedAt': task.completedAt == null ? DateTime.now() : null,
     });
   }
 }

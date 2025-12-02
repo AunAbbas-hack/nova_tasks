@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nova_tasks/features/tasks/views/recurrence_bottomsheet.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -8,6 +9,7 @@ import 'package:nova_tasks/core/widgets/primary_text_field.dart';
 import 'package:nova_tasks/features/tasks/viewmodels/add_task_viewmodel.dart';
 
 import '../../../data/models/task_model.dart';
+import '../viewmodels/recurrence_bottomsheet_viewmodel.dart';
 
 class AddTaskScreen extends StatelessWidget {
   const AddTaskScreen({super.key, this.initialTask});
@@ -335,8 +337,27 @@ class _AddTaskPage extends StatelessWidget {
                       ),
                       Switch(
                         value: viewModel.isRecurring,
-                        onChanged: viewModel.toggleRecurring,
-                      ),
+                        onChanged: (value) async {
+                          if (value == true) {
+                            // OPEN BOTTOM SHEET
+                            final RecurrenceSettings? result =
+                            await
+                                showRecurrenceBottomSheet(context);
+
+                            if (result != null) {
+                              // User pressed SAVE
+                              viewModel.setRecurrence(result);
+                            } else {
+                              // User cancelled — keep toggle OFF
+                              viewModel.clearRecurrence();
+                            }
+                          } else {
+                            // User turned OFF the toggle
+                            viewModel.clearRecurrence();
+                          }
+                        },
+                      )
+
                     ],
                   ),
                 ),

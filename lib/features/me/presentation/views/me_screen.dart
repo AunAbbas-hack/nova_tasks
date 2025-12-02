@@ -1,6 +1,7 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:nova_tasks/core/theme/app_colors.dart';
 import 'package:nova_tasks/features/me/presentation/views/notification_screen.dart';
 import 'package:nova_tasks/features/me/presentation/views/settings_screen.dart';
 import 'package:provider/provider.dart';
@@ -137,7 +138,7 @@ class _MeView extends StatelessWidget {
 
     final theme = Theme.of(context);
     final surfaceDark = const Color(0xFF11151F);
-    final pillBg = const Color(0xFF151A24);
+    final pillBg = const Color(0xFF1D2330);
     final primary = theme.colorScheme.primary;
 
     return Scaffold(
@@ -447,16 +448,22 @@ class _StatCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppText(
-            value,
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
+          Center(
+            child: AppText(
+              value,
+              fontSize: 30,
+              fontWeight: FontWeight.w900,
+              color: AppColors.primary,
+            ),
           ),
           const SizedBox(height: 4),
-          AppText(
-            label,
-            color: Colors.white70,
-            fontSize: 12,
+          Center(
+            child: AppText(
+              textAlign: TextAlign.center,
+              label,
+              color: Colors.white70,
+              fontSize: 15,
+            ),
           ),
         ],
       ),

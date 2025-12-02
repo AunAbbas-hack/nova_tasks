@@ -38,9 +38,9 @@ class TaskModel {
 
   // ---------------- FIRESTORE FROM ----------------
   factory TaskModel.fromFirestore(
-    DocumentSnapshot<Map<String, dynamic>> doc,
-    SnapshotOptions? _,
-  ) {
+      DocumentSnapshot<Map<String, dynamic>> doc,
+      SnapshotOptions? _,
+      ) {
     final data = doc.data() ?? {};
 
     return TaskModel(
@@ -84,7 +84,6 @@ class TaskModel {
       'updatedAt': Timestamp.fromDate(updatedAt),
     };
 
-    // remove null fields
     if (completedAt != null) {
       map['completedAt'] = Timestamp.fromDate(completedAt!);
     }
@@ -92,7 +91,7 @@ class TaskModel {
     return map;
   }
 
-  // ---------------- COPYWITH (FULL + SAFE) ----------------
+  // ---------------- COPYWITH ----------------
   TaskModel copyWith({
     String? title,
     String? description,
@@ -105,6 +104,8 @@ class TaskModel {
     String? parentTaskId,
     bool? hasAttachment,
     List<SubtaskModel>? subtasks,
+    DateTime? createdAt,
+    DateTime? updatedAt,
   }) {
     return TaskModel(
       id: id,
@@ -120,9 +121,8 @@ class TaskModel {
       parentTaskId: parentTaskId ?? this.parentTaskId,
       hasAttachment: hasAttachment ?? this.hasAttachment,
       subtasks: subtasks ?? this.subtasks,
-      createdAt: createdAt,
-      updatedAt: DateTime.now(),
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? DateTime.now(),
     );
   }
 }
-

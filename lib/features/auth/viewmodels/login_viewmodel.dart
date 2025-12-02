@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:nova_tasks/data/repositories/auth_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -51,8 +52,8 @@ class LoginViewModel extends ChangeNotifier {
     if (!(formKey.currentState?.validate() ?? false)) return;
 
     _setSubmitting(true);
-    emailError=null;
-    passwordError=null;
+    emailError = null;
+    passwordError = null;
 
     try {
       await _authRepository.signIn(
@@ -60,26 +61,29 @@ class LoginViewModel extends ChangeNotifier {
         password: passwordController.text.trim(),
       );
 
-      // -------- SAVE LOGIN STATUS --------
+
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool("loggedIn", true);
 
       onSuccess();
-    }on FirebaseAuthException catch (e) {
+    } on FirebaseAuthException catch (e) {
       onError?.call();
       switch (e.code) {
         case "user-not-found":
           emailError = "No account found with this email";
           break;
-
+        case "email-already-in-use":
+          emailError = "Email already in use";
+          break;
+        case "weak-password":
+          passwordError = "Password must be at least 6 characters";
+          break;
         case "wrong-password":
           passwordError = "Incorrect password";
           break;
-
         case "invalid-email":
           emailError = "Invalid email format";
           break;
-
         default:
           passwordError = e.message ?? "Login failed";
       }
@@ -87,6 +91,7 @@ class LoginViewModel extends ChangeNotifier {
       _setSubmitting(false);
     }
   }
+
 
   // ---------------- STATE MGMT ----------------
 

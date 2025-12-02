@@ -21,55 +21,69 @@ class FirebaseAuthSource {
     required String email,
     required String password,
   }) async {
-    final cred = await _auth.createUserWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
-    final user = cred.user!;
+  try  {
+      final cred = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      final user = cred.user!;
 
-    final now = DateTime.now();
-    final userModel = UserModel(
-      id: user.uid,
-      name: name,
-      email: email,
-      photoUrl: user.photoURL,
-      createdAt: now,
-      updatedAt: now,
-    );
+      final now = DateTime.now();
+      final userModel = UserModel(
+        id: user.uid,
+        name: name,
+        email: email,
+        photoUrl: user.photoURL,
+        createdAt: now,
+        updatedAt: now,
+      );
 
-    await _userCollection().doc(user.uid).set(userModel.toFirestore());
-    return userModel;
+      await _userCollection().doc(user.uid).set(userModel.toFirestore());
+      return userModel;
+    }on FirebaseAuthException catch(e){
+      rethrow;
+  }
+    catch (e){
+      throw Exception("Unexpected error: $e");
+    }
   }
 
   Future<UserModel> signInWithEmail({
     required String email,
     required String password,
   }) async {
-    final cred = await _auth.signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
-    final user = cred.user!;
-
-    final doc = await _userCollection().doc(user.uid).get();
-    if (doc.exists) {
-      return UserModel.fromFirestore(
-        doc as DocumentSnapshot<Map<String, dynamic>>,
-        null,
+   try {
+      final cred = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
       );
-    }
+      final user = cred.user!;
 
-    final now = DateTime.now();
-    final userModel = UserModel(
-      id: user.uid,
-      name: user.displayName ?? '',
-      email: user.email ?? email,
-      photoUrl: user.photoURL,
-      createdAt: now,
-      updatedAt: now,
-    );
-    await _userCollection().doc(user.uid).set(userModel.toFirestore());
-    return userModel;
+      final doc = await _userCollection().doc(user.uid).get();
+      if (doc.exists) {
+        return UserModel.fromFirestore(
+          doc as DocumentSnapshot<Map<String, dynamic>>,
+          null,
+        );
+      }
+
+      final now = DateTime.now();
+      final userModel = UserModel(
+        id: user.uid,
+        name: user.displayName ?? '',
+        email: user.email ?? email,
+        photoUrl: user.photoURL,
+        createdAt: now,
+        updatedAt: now,
+      );
+      await _userCollection().doc(user.uid).set(userModel.toFirestore());
+      return userModel;
+    }on FirebaseAuthException catch (e){
+      rethrow;
+   }
+    catch (e){
+      throw Exception("Unexpected error: $e");
+    }
   }
 
   Future<void> sendPasswordResetEmail(String email) {

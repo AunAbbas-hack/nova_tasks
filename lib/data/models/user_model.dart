@@ -56,8 +56,3 @@ class UserModel {
     );
   }
 }
-
-
-
-
-

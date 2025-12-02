@@ -16,6 +16,9 @@ class SignupViewModel extends ChangeNotifier {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
+  String? emailError;
+  String? passwordError;
+
 
   bool _isSubmitting = false;
   bool get isSubmitting => _isSubmitting;
@@ -89,11 +92,31 @@ class SignupViewModel extends ChangeNotifier {
         await user.updateDisplayName(name);
         await user.reload(); // taake turant reflect ho
       }
-
+     // Send Verification Email
       // 3) callback
       onSuccess();
-    } catch (e) {
+    }on FirebaseAuthException catch (e) {
       onError?.call();
+      switch (e.code) {
+        case "user-not-found":
+          emailError = "No account found with this email";
+          break;
+        case "email-already-in-use":
+          emailError = "Email already in use";
+          break;
+        case "weak-password":
+          passwordError = "Password must be at least 6 characters";
+          break;
+        case "wrong-password":
+          passwordError = "Incorrect password";
+          break;
+
+        case "invalid-email":
+          emailError = "Invalid email format";
+          break;
+
+
+      }
     } finally {
       _setSubmitting(false);
     }

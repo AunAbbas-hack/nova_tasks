@@ -50,14 +50,16 @@ class _LoginView extends StatelessWidget {
   void _handleLogin(BuildContext context,) {
     context.read<LoginViewModel>().submit(
       onSuccess: () {
-        Get.snackbar("Success", "Login successful",backgroundColor: AppColors.success,colorText: Colors.black);
         Navigator.of(context).pushReplacement(
           MaterialPageRoute<void>(builder: (_) => const NavigationWrapper()),
         );
       },
       onError: () {
-        Get.snackbar("Error", "Login failed ", backgroundColor: AppColors.error,
-            colorText: Colors.black);
+        Get.snackbar("", "",
+          titleText: Text("Error",style: TextStyle(color: AppColors.error),),
+          messageText: Text("Login Failed",style: TextStyle(color: AppColors.textPrimary),),
+          backgroundColor: AppColors.background
+        );
       } );
   }
 

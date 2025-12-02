@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:nova_tasks/data/datasources/remote/firebase_auth_source.dart';
 import 'package:nova_tasks/data/models/user_model.dart';
 
@@ -41,7 +42,6 @@ class AuthRepository {
   Future<UserModel> signIn({required String email, required String password}) {
     return _remote.signInWithEmail(email: email, password: password);
   }
-
   Future<void> sendPasswordResetEmail(String email) =>
       _remote.sendPasswordResetEmail(email);
 

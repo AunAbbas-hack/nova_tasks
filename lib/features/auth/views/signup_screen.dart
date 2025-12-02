@@ -47,10 +47,15 @@ class _SignupView extends StatelessWidget {
   void _handleSignup(BuildContext context) {
     context.read<SignupViewModel>().submit(
       onSuccess: () {
-        Get.snackbar("Success", "Sign up successful",backgroundColor: AppColors.success,colorText: Colors.black);
-        Navigator.of(context).pop();
+        Get.snackbar("Verify Email", "Verification email sent. Please check inbox.",
+        titleText: Text("Verify Email",style: TextStyle(color: AppColors.textPrimary),),
+          messageText: Text("Verification email sent. Please check inbox.",style: TextStyle(color: AppColors.textPrimary),),
+        );
+        Navigator.pop(context);
       },
-      onError: () => Get.snackbar("Error", "Sign up failed ",backgroundColor: AppColors.error,colorText: Colors.black)
+      onError: () => Get.snackbar("Error", "Sign up failed ",
+          messageText: Text("Sign Up Failed",style: TextStyle(color: AppColors.textPrimary),)
+          ,colorText: Colors.black,titleText: Text("Error",style: TextStyle(color: AppColors.error),),backgroundColor: AppColors.background)
     );
   }
 
@@ -160,9 +165,11 @@ class _SignupFormCard extends StatelessWidget {
             textInputAction: TextInputAction.next,
             validator: viewModel.validateName,
             prefixIcon: Icons.person_outline_rounded,
+
           ),
           const SizedBox(height: 20),
           PrimaryTextField(
+            errorText: viewModel.emailError,
             label: 'Email',
             hint: 'Enter your email',
             controller: viewModel.emailController,
