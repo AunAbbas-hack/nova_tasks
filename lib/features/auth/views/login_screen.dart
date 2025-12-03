@@ -239,7 +239,7 @@ class _LoginFormCard extends StatelessWidget {
             onPressed: viewModel.isSubmitting
                 ? null
                 : () {
-                    // TODO: Integrate Google sign-in.
+
                   },
             icon: Image.asset(
               'assets/images/icons-google-logo.png',

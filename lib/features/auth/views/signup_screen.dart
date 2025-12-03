@@ -2,6 +2,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nova_tasks/core/theme/app_colors.dart';
+import 'package:nova_tasks/features/home/presentation/views/home_screen.dart';
+import 'package:nova_tasks/navigation_wrapper.dart';
 import 'package:provider/provider.dart';
 
 import 'package:nova_tasks/core/widgets/app_text.dart';
@@ -223,7 +225,9 @@ class _SignupFormCard extends StatelessWidget {
             onPressed: viewModel.isSubmitting
                 ? null
                 : () {
-                    // TODO: Integrate Google sign-up.
+                   viewModel.signUpWithGoogle(onSuccess: (){
+                     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>NavigationWrapper()));
+                   });
                   },
             icon: Image.asset(
               'assets/images/icons-google-logo.png',

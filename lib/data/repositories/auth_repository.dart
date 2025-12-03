@@ -42,8 +42,12 @@ class AuthRepository {
   Future<UserModel> signIn({required String email, required String password}) {
     return _remote.signInWithEmail(email: email, password: password);
   }
-  Future<void> sendPasswordResetEmail(String email) =>
-      _remote.sendPasswordResetEmail(email);
+  Future<void> sendPasswordResetEmail(
+      String email
+      ){
+    return _remote.sendPasswordResetEmail(email);
+  }
+
 
   Future<void> signOut() => _remote.signOut();
 }

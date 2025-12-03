@@ -11,8 +11,9 @@ import 'features/startup/presentaion/views/splash_screen.dart';
 void main() async{
 WidgetsFlutterBinding.ensureInitialized();
 await Firebase.initializeApp(
-  options: DefaultFirebaseOptions.currentPlatform
-);
+  options: DefaultFirebaseOptions.currentPlatform);
+
+
   runApp(
     MultiProvider(providers: [
       ChangeNotifierProvider(create: (_)=>SignupViewModel()),
