@@ -22,6 +22,7 @@ class AuthRepository {
           photoUrl: user.photoURL,
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
+
         );
       }
     }
@@ -42,7 +43,7 @@ class AuthRepository {
   Future<UserModel> signIn({required String email, required String password}) {
     return _remote.signInWithEmail(email: email, password: password);
   }
-  Future<void> sendPasswordResetEmail(
+  Future<void> sendResetPasswordEmail(
       String email
       ){
     return _remote.sendPasswordResetEmail(email);

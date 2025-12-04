@@ -158,16 +158,32 @@ class AddTaskViewModel extends ChangeNotifier {
 
     try {
       final now = DateTime.now();
-      final taskId =
-          _editingTask?.id ?? DateTime.now().millisecondsSinceEpoch.toString();
+      final existing = _editingTask;
 
+      // Unique ID for new task
+      final taskId =
+          existing?.id ?? DateTime.now().millisecondsSinceEpoch.toString();
+
+      // Time string UI ke liye (24h format)
       final timeString = _dueTime != null ? _formatTime24(_dueTime!) : '';
 
+      // Category resolve (custom / normal)
       final categoryToSave =
       _isCustomSelected && customCategoryController.text.trim().isNotEmpty
           ? customCategoryController.text.trim()
           : _category;
 
+      // 🔥 dueAt = exact deadline (date + time)
+      final baseDate = _dueDate ?? now;
+      final dueAt = DateTime(
+        baseDate.year,
+        baseDate.month,
+        baseDate.day,
+        _dueTime?.hour ?? 0,
+        _dueTime?.minute ?? 0,
+      );
+
+      // Subtasks build
       final subtasksModels = _subtasks.asMap().entries.map((entry) {
         final index = entry.key;
         final sub = entry.value;
@@ -184,32 +200,49 @@ class AddTaskViewModel extends ChangeNotifier {
         userId: userId,
         title: titleController.text.trim(),
         description: descriptionController.text.trim(),
+
         date: _dueDate ?? now,
         time: timeString,
         priority: _priorityToString(_priority),
         category: categoryToSave,
-        completedAt: _editingTask?.completedAt,
-        // 🔥 encode recurrence into a string
+
+        completedAt: existing?.completedAt,
+
+        // 🔁 recurrence as string
         recurrenceRule:
         _recurrence != null ? _encodeRecurrence(_recurrence!) : null,
-        parentTaskId: _editingTask?.parentTaskId,
-        hasAttachment: _editingTask?.hasAttachment ?? false,
+        parentTaskId: existing?.parentTaskId,
+        hasAttachment: existing?.hasAttachment ?? false,
         subtasks: subtasksModels,
-        createdAt: _editingTask?.createdAt ?? now,
+
+        createdAt: existing?.createdAt ?? now,
         updatedAt: now,
+
+        // 🔥 NEW: exact deadline
+        dueAt: dueAt,
+
+        // 🔥 NEW: reminder flags – edit case mein purane hi rehne chahiye
+        reminder24Sent: existing?.reminder24Sent ?? false,
+        reminder60Sent: existing?.reminder60Sent ?? false,
+        reminder30Sent: existing?.reminder30Sent ?? false,
+        reminder10Sent: existing?.reminder10Sent ?? false,
+        reminder5Sent: existing?.reminder5Sent ?? false,
+        overdueSent: existing?.overdueSent ?? false,
       );
 
       final repo = TaskRepository();
 
-      if (_editingTask == null) {
+      if (existing == null) {
+        // New task
         await repo.addTask(task);
       } else {
+        // Edit task → poora document overwrite (safe because hum sab fields de rahe)
         await repo.updateTask(userId, task.id, task.toFirestore());
       }
 
       onSuccess();
 
-      if (_editingTask == null) {
+      if (existing == null) {
         _resetForm();
       }
     } catch (e) {

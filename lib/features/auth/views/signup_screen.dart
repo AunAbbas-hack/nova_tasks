@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -10,6 +11,8 @@ import 'package:nova_tasks/core/widgets/app_text.dart';
 import 'package:nova_tasks/core/widgets/primary_button.dart';
 import 'package:nova_tasks/core/widgets/primary_text_field.dart';
 import 'package:nova_tasks/features/auth/viewmodels/signup_viewmodel.dart';
+
+import '../../../core/services/notificationservices/notification_services.dart';
 
 
 class SignupScreen extends StatefulWidget {
@@ -48,7 +51,12 @@ class _SignupView extends StatelessWidget {
 
   void _handleSignup(BuildContext context) {
     context.read<SignupViewModel>().submit(
-      onSuccess: () {
+      onSuccess: ()async{
+        final user=  FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          await PushNotificationService().init();
+          await PushNotificationService().saveUserToken(userId: user.uid);
+        }
         Get.snackbar("Verify Email", "Verification email sent. Please check inbox.",
         titleText: Text("Verify Email",style: TextStyle(color: AppColors.textPrimary),),
           messageText: Text("Verification email sent. Please check inbox.",style: TextStyle(color: AppColors.textPrimary),),

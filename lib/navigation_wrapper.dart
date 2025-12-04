@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:nova_tasks/core/utils/notification_utils.dart';
 
 import 'package:nova_tasks/core/widgets/bottom_nav_bar.dart';
 import 'package:nova_tasks/data/repositories/task_repository.dart';
@@ -21,9 +22,16 @@ class NavigationWrapper extends StatefulWidget {
 }
 
 class _NavigationWrapperState extends State<NavigationWrapper> {
+  @override
   int currentIndex = 0;
 
   Future<bool> _showExitDialog() async {
+    if (currentIndex!=0){
+      setState(() {
+        currentIndex = 0;
+      });
+      return false;
+    }
     final result = await Get.dialog<bool>(
       AlertDialog(
         title: const Text("Exit App"),

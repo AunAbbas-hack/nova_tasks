@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:nova_tasks/data/repositories/auth_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -92,6 +94,69 @@ class LoginViewModel extends ChangeNotifier {
     }
   }
 
+  Future<void> signUpWithGoogle({
+    required VoidCallback onSuccess,
+    VoidCallback? onError,
+  }) async {
+    final googleSign=GoogleSignIn.instance;
+    unawaited(
+        googleSign.initialize(clientId: "75231049160")
+    );
+    try {
+      _setSubmitting(true);
+
+      // Define scopes
+      const scopes = [
+        'https://www.googleapis.com/auth/userinfo.email',
+        'https://www.googleapis.com/auth/userinfo.profile',
+        'openid',
+      ];
+
+      // Authenticate with scopes
+
+      final GoogleSignInAccount? googleUser =
+      await GoogleSignIn.instance.authenticate(
+        scopeHint: scopes,
+      );
+
+      if (googleUser == null) {
+        _setSubmitting(false);
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        idToken: googleAuth.idToken,
+      );
+
+      final UserCredential userCred =
+      await FirebaseAuth.instance.signInWithCredential(credential);
+
+      final User? user = userCred.user;
+
+      if (user != null) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .set({
+          'name': user.displayName ?? '',
+          'email': user.email ?? '',
+          'photoURL': user.photoURL ?? '',
+          'createdAt': FieldValue.serverTimestamp(),
+          'updatedAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+      }
+
+      onSuccess();
+
+    } catch (e) {
+      debugPrint('Google Sign-Up Error: $e');
+      onError?.call();
+    } finally {
+      _setSubmitting(false);
+    }
+  }
 
   // ---------------- STATE MGMT ----------------
 

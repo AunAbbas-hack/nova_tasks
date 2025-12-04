@@ -46,6 +46,18 @@ class HomeViewModel extends ChangeNotifier {
 
   void start() {
     _sub = repo.streamUserTasks(userId).listen((list) {
+      list.sort((a, b) {
+        final d1=DateTime(a.date.year,a.date.month,a.date.day);
+        final d2=DateTime(b.date.year,b.date.month,b.date.day);
+        final dateCompare=d1.compareTo(d2);
+        if(dateCompare!=0){
+          return dateCompare;
+        }
+        final t1=_parseTaskDateTime(a.date, a.time);
+        final t2=_parseTaskDateTime(b.date, b.time);
+        return t1.compareTo(t2);
+      });
+
       _tasks = list; // recurrence is handled logically, not expanded
       isLoading = false;
       notifyListeners();

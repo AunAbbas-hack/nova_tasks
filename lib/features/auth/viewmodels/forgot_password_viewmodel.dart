@@ -30,7 +30,7 @@ class ForgotPasswordViewModel extends ChangeNotifier {
     return null;
   }
 
-  Future<void> sendVerificationCode({
+  Future<void> sendVerificationEmail({
     required ValueChanged<String> onSuccess,
     VoidCallback? onError,
   }) async {
@@ -39,7 +39,7 @@ class ForgotPasswordViewModel extends ChangeNotifier {
     final email = emailController.text.trim();
     _setSubmitting(true);
     try {
-      await _authRepository.sendPasswordResetEmail(email);
+      await _authRepository.sendResetPasswordEmail(email);
       _lastSubmittedEmail = email;
       onSuccess(email);
     } catch (_) {

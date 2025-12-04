@@ -6,17 +6,26 @@ class TaskModel {
   final String userId;
   final String title;
   final String description;
+
+  final DateTime date;
   final String time;
+
   final String priority;
   final String category;
   final String? recurrenceRule;
   final String? parentTaskId;
   final bool hasAttachment;
   final List<SubtaskModel> subtasks;
-  final DateTime date;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? completedAt;
+  final DateTime? dueAt;
+  final bool reminder24Sent;
+  final bool reminder60Sent;
+  final bool reminder30Sent;
+  final bool reminder10Sent;
+  final bool reminder5Sent;
+  final bool overdueSent;
 
   const TaskModel({
     required this.id,
@@ -27,13 +36,20 @@ class TaskModel {
     required this.time,
     required this.priority,
     required this.category,
-    this.completedAt,
     this.recurrenceRule,
     this.parentTaskId,
     this.hasAttachment = false,
     this.subtasks = const [],
+    this.completedAt,
     required this.createdAt,
     required this.updatedAt,
+    this.dueAt,
+    this.reminder24Sent = false,
+    this.reminder60Sent = false,
+    this.reminder30Sent = false,
+    this.reminder10Sent = false,
+    this.reminder5Sent = false,
+    this.overdueSent = false,
   });
 
   // ---------------- FIRESTORE FROM ----------------
@@ -43,30 +59,54 @@ class TaskModel {
       ) {
     final data = doc.data() ?? {};
 
+    final dateTs = data['date'] as Timestamp?;
+    final baseDate = dateTs?.toDate() ?? DateTime.now();
+
+    // 🔥 Try reading dueAt, otherwise fallback to date-only
+    DateTime? dueAt;
+    final dueAtRaw = data['dueAt'];
+    if (dueAtRaw is Timestamp) {
+      dueAt = dueAtRaw.toDate();
+    } else {
+      // fallback: at least date set, time 00:00
+      dueAt = DateTime(baseDate.year, baseDate.month, baseDate.day);
+    }
+
     return TaskModel(
       id: doc.id,
-      userId: data['userId'] ?? '',
-      title: data['title'] ?? '',
-      description: data['description'] ?? '',
-      date: (data['date'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      time: data['time'] ?? '',
-      priority: data['priority'] ?? 'medium',
-      category: data['category'] ?? 'general',
+      userId: data['userId'] as String? ?? '',
+      title: data['title'] as String? ?? '',
+      description: data['description'] as String? ?? '',
+      date: baseDate,
+      time: data['time'] as String? ?? '',
+      priority: data['priority'] as String? ?? 'medium',
+      category: data['category'] as String? ?? 'general',
       completedAt: (data['completedAt'] as Timestamp?)?.toDate(),
-      recurrenceRule: data['recurrenceRule'],
-      parentTaskId: data['parentTaskId'],
-      hasAttachment: data['hasAttachment'] ?? false,
+      recurrenceRule: data['recurrenceRule'] as String?,
+      parentTaskId: data['parentTaskId'] as String?,
+      hasAttachment: data['hasAttachment'] as bool? ?? false,
       subtasks: (data['subtasks'] as List<dynamic>? ?? [])
           .map((e) => SubtaskModel.fromJson(e, e['id']))
           .toList(),
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      createdAt:
+      (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      updatedAt:
+      (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+
+      // NEW
+      dueAt: dueAt,
+      reminder24Sent: data['reminder24Sent'] as bool? ?? false,
+      reminder60Sent: data['reminder60Sent'] as bool? ?? false,
+      reminder30Sent: data['reminder30Sent'] as bool? ?? false,
+      reminder10Sent: data['reminder10Sent'] as bool? ?? false,
+      reminder5Sent: data['reminder5Sent'] as bool? ?? false,
+      overdueSent: data['overdueSent'] as bool? ?? false,
     );
   }
 
   // ---------------- FIRESTORE TO ----------------
   Map<String, dynamic> toFirestore() {
-    final map = {
+    final map = <String, dynamic>{
       'userId': userId,
       'title': title,
       'description': description,
@@ -82,6 +122,17 @@ class TaskModel {
       ],
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
+
+      // 🔥 NEW FIELDS
+      'dueAt': Timestamp.fromDate(
+        dueAt ?? date, // fallback: at least date le lo
+      ),
+      'reminder24Sent': reminder24Sent,
+      'reminder60Sent': reminder60Sent,
+      'reminder30Sent': reminder30Sent,
+      'reminder10Sent': reminder10Sent,
+      'reminder5Sent': reminder5Sent,
+      'overdueSent': overdueSent,
     };
 
     if (completedAt != null) {
@@ -91,7 +142,6 @@ class TaskModel {
     return map;
   }
 
-  // ---------------- COPYWITH ----------------
   TaskModel copyWith({
     String? title,
     String? description,
@@ -106,6 +156,15 @@ class TaskModel {
     List<SubtaskModel>? subtasks,
     DateTime? createdAt,
     DateTime? updatedAt,
+
+    // NEW
+    DateTime? dueAt,
+    bool? reminder24Sent,
+    bool? reminder60Sent,
+    bool? reminder30Sent,
+    bool? reminder10Sent,
+    bool? reminder5Sent,
+    bool? overdueSent,
   }) {
     return TaskModel(
       id: id,
@@ -123,6 +182,15 @@ class TaskModel {
       subtasks: subtasks ?? this.subtasks,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? DateTime.now(),
+
+      // NEW
+      dueAt: dueAt ?? this.dueAt,
+      reminder24Sent: reminder24Sent ?? this.reminder24Sent,
+      reminder60Sent: reminder60Sent ?? this.reminder60Sent,
+      reminder30Sent: reminder30Sent ?? this.reminder30Sent,
+      reminder10Sent: reminder10Sent ?? this.reminder10Sent,
+      reminder5Sent: reminder5Sent ?? this.reminder5Sent,
+      overdueSent: overdueSent ?? this.overdueSent,
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:nova_tasks/navigation_wrapper.dart';
@@ -10,6 +11,7 @@ import 'package:nova_tasks/features/auth/views/forgot_password_screen.dart';
 import 'package:nova_tasks/features/auth/viewmodels/login_viewmodel.dart';
 import 'package:nova_tasks/features/auth/views/signup_screen.dart';
 
+import '../../../core/services/notificationservices/notification_services.dart';
 import '../../../core/theme/app_colors.dart';
 
 
@@ -49,7 +51,12 @@ class _LoginView extends StatelessWidget {
 
   void _handleLogin(BuildContext context,) {
     context.read<LoginViewModel>().submit(
-      onSuccess: () {
+      onSuccess: ()async {
+      final user=  FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        await PushNotificationService().init();
+        await PushNotificationService().saveUserToken(userId: user.uid);
+      }
         Navigator.of(context).pushReplacement(
           MaterialPageRoute<void>(builder: (_) => const NavigationWrapper()),
         );
@@ -239,7 +246,14 @@ class _LoginFormCard extends StatelessWidget {
             onPressed: viewModel.isSubmitting
                 ? null
                 : () {
-
+              viewModel.signUpWithGoogle(onSuccess: ()async{
+                final user=  FirebaseAuth.instance.currentUser;
+                if (user != null) {
+                  await PushNotificationService().init();
+                  await PushNotificationService().saveUserToken(userId: user.uid);
+                }
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>NavigationWrapper()));
+              });
                   },
             icon: Image.asset(
               'assets/images/icons-google-logo.png',

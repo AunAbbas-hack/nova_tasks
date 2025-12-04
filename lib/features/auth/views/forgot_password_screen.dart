@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
 import 'package:nova_tasks/core/widgets/app_text.dart';
@@ -35,19 +36,26 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<ForgotPasswordViewModel>.value(
       value: _viewModel,
-      child: const _ForgotPasswordView(),
+      child:  _ForgotPasswordView(
+        _viewModel,
+      ),
     );
   }
 }
 
 class _ForgotPasswordView extends StatelessWidget {
-  const _ForgotPasswordView();
+  final ForgotPasswordViewModel viewModel;
+
+  const _ForgotPasswordView(this.viewModel);
 
   void _handleSubmit(BuildContext context) {
-    context.read<ForgotPasswordViewModel>().sendVerificationCode(
+    context.read<ForgotPasswordViewModel>().sendVerificationEmail(
       onSuccess: (email) {
-        Navigator.of(context).push(
-          MaterialPageRoute<void>(builder: (_) => OtpScreen(email: email)),
+        viewModel.sendVerificationEmail(onSuccess: (email){
+          Get.snackbar("", "",backgroundColor: Colors.grey,
+          messageText: Text("Email sent. Check Your Inbox",style: TextStyle(color: Colors.black,fontSize: 12,fontWeight: FontWeight.w600),),
+          titleText: Text("Success",style: TextStyle(color: Colors.black,fontSize: 16,fontWeight: FontWeight.bold),),);
+        }
         );
       },
       onError: () => ScaffoldMessenger.of(context).showSnackBar(
@@ -173,7 +181,7 @@ class _ForgotPasswordCard extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             PrimaryButton(
-              label: viewModel.isSubmitting ? 'Sending OTP...' : 'Send OTP',
+              label: viewModel.isSubmitting ? 'Sending Email...' : 'Verify By Email',
               icon: viewModel.isSubmitting ? Icons.hourglass_bottom_rounded : null,
               isSpinning: viewModel.isSubmitting,
               onPressed: viewModel.isSubmitting ? null : onSubmit,
