@@ -30,6 +30,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   provider: ^6.1.2
   shared_preferences: ^2.2.3
@@ -49,7 +51,6 @@ dependencies:
   firebase_messaging: ^16.0.4
   app_settings: ^7.0.0
   flutter_local_notifications: ^19.5.0
-  flutter_localization: ^0.3.3
 
 
 dev_dependencies:
@@ -68,17 +69,12 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
-  # The following line ensures that the Material Icons font is
-  # included with your application, so that you can use the icons in
-  # the material Icons class.
+  generate: true
   uses-material-design: true
 
   assets:
     - assets/images/
-    - assets/l10n/
 
-  generate: true
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

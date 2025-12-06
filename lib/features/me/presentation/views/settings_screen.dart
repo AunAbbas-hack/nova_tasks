@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:nova_tasks/features/me/presentation/views/me_screen.dart';
 import 'package:provider/provider.dart';
 
 import 'package:nova_tasks/core/widgets/app_text.dart';
 import 'package:nova_tasks/features/auth/views/login_screen.dart';
 
+import '../../../../core/utils/language/change_language.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../viewmodels/settings_viewmodel.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -12,10 +15,7 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => SettingsViewModel(),
-      child: const _SettingsView(),
-    );
+    return const _SettingsView();
   }
 }
 
@@ -34,6 +34,7 @@ class _SettingsView extends StatelessWidget {
 
     final name = vm.currentUserName ?? 'User';
     final email = vm.currentUserEmail ?? 'no-email';
+    final text=AppLocalizations.of(context)!;
 
     return Scaffold(
       body: SafeArea(
@@ -50,10 +51,10 @@ class _SettingsView extends StatelessWidget {
                     icon: const Icon(Icons.arrow_back_ios_new_rounded,
                         color: Colors.white),
                   ),
-                  const Expanded(
+                  Expanded(
                     child: Center(
                       child: AppText(
-                        'Settings',
+                        text.settings,
                         fontSize: 22,
                         fontWeight: FontWeight.w700,
                       ),
@@ -115,7 +116,7 @@ class _SettingsView extends StatelessWidget {
               const SizedBox(height: 24),
 
               // --------- APPEARANCE ----------
-              const _SectionHeader(title: 'APPEARANCE'),
+               _SectionHeader(title: text.appearance),
               const SizedBox(height: 12),
 
               // Dark Mode
@@ -124,8 +125,8 @@ class _SettingsView extends StatelessWidget {
                   _IconTile(
                     icon: Icons.dark_mode_rounded,
                     iconBgColor: const Color(0xFF111827),
-                    title: 'Dark Mode',
-                    subtitle: 'System Default',
+                    title: text.darkMode,
+                    subtitle: text.systemDefault,
                     trailing: Switch(
                       value: vm.darkMode,
                       onChanged: (val) {
@@ -138,7 +139,7 @@ class _SettingsView extends StatelessWidget {
                   _IconTile(
                     icon: Icons.home_rounded,
                     iconBgColor: const Color(0xFF111827),
-                    title: 'Default Home View',
+                    title: text.defaultHomeView,
                     subtitle: vm.defaultHomeView,
                     onTap: () => _showHomeViewDialog(context, vm),
                     trailing: const Icon(Icons.chevron_right,
@@ -150,7 +151,7 @@ class _SettingsView extends StatelessWidget {
               const SizedBox(height: 24),
 
               // --------- GENERAL ----------
-              const _SectionHeader(title: 'GENERAL'),
+               _SectionHeader(title: text.general),
               const SizedBox(height: 12),
 
               _SettingsCard(
@@ -158,7 +159,7 @@ class _SettingsView extends StatelessWidget {
                   _IconTile(
                     icon: Icons.notifications_active_outlined,
                     iconBgColor: const Color(0xFF111827),
-                    title: 'Default Reminder Time',
+                    title: AppLocalizations.of(context)!.defaultReminderTime,
                     subtitle: _formatTimeOfDay(vm.defaultReminderTime),
                     onTap: () => _pickReminderTime(context, vm),
                     trailing: const Icon(Icons.chevron_right,
@@ -168,8 +169,10 @@ class _SettingsView extends StatelessWidget {
                   _IconTile(
                     icon: Icons.language_rounded,
                     iconBgColor: const Color(0xFF111827),
-                    title: 'Language',
-                    subtitle: vm.language,
+                    title: text.language,
+                    subtitle: vm.languageCode == "en"
+                        ? text.english
+                        : text.urdu,
                     onTap: () => _showLanguageDialog(context, vm),
                     trailing: const Icon(Icons.chevron_right,
                         color: Colors.white54),
@@ -180,7 +183,7 @@ class _SettingsView extends StatelessWidget {
               const SizedBox(height: 24),
 
               // --------- ACCOUNT ----------
-              const _SectionHeader(title: 'ACCOUNT'),
+              _SectionHeader(title: text.account),
               const SizedBox(height: 12),
 
               _SettingsCard(
@@ -189,7 +192,7 @@ class _SettingsView extends StatelessWidget {
                     icon: Icons.logout_rounded,
                     iconBgColor: const Color(0xFF3F1D1D),
                     iconColor: const Color(0xFFEF4444),
-                    title: 'Logout',
+                    title: text.logout,
                     titleColor: const Color(0xFFEF4444),
                     onTap: () => _confirmLogout(context, vm),
                   ),
@@ -205,15 +208,20 @@ class _SettingsView extends StatelessWidget {
   // ------- dialogs / pickers -------
 
   static Future<void> _showHomeViewDialog(
+
       BuildContext context, SettingsViewModel vm) async {
-    final options = ['Today', 'Week'];
+    final options = {
+    AppLocalizations.of(context)!.today,
+      AppLocalizations.of(context)!.week
+  };
     String temp = vm.defaultHomeView;
+    final text=AppLocalizations.of(context)!;
 
     await showDialog<void>(
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: const Color(0xFF11151F),
-        title: const Text('Default Home View',
+        title: Text(text.defaultHomeView,
             style: TextStyle(color: Colors.white)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -250,36 +258,74 @@ class _SettingsView extends StatelessWidget {
   }
 
   static Future<void> _showLanguageDialog(
-      BuildContext context, SettingsViewModel vm) async {
-    final options = ['English', 'Urdu'];
-    String temp = vm.language;
+      BuildContext context,
+      SettingsViewModel vm,
+      ) async {
+    final loc = AppLocalizations.of(context)!;
 
-    await showDialog<void>(
+    final options = {
+      "en": loc.english,
+      "ur": loc.urdu,
+    };
+
+    String temp = vm.languageCode;
+
+    await showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF11151F),
-        title:
-        const Text('Language', style: TextStyle(color: Colors.white)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: options
-              .map(
-                (o) => RadioListTile<String>(
-              value: o,
-              groupValue: temp,
-              onChanged: (v) {
-                if (v == null) return;
-                temp = v;
-                vm.setLanguage(v);
-                Navigator.pop(context);
-              },
-              title: Text(o, style: const TextStyle(color: Colors.white)),
-              activeColor: Theme.of(context).colorScheme.primary,
-            ),
-          )
-              .toList(),
-        ),
-      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              backgroundColor: const Color(0xFF11151F),
+              title: Text(
+                loc.language,
+                style: const TextStyle(color: Colors.white),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: options.entries.map((entry) {
+                  return RadioListTile<String>(
+                    value: entry.key,
+                    groupValue: temp,
+                    onChanged: (v) async {
+                      if (v == null) return;
+
+                      setState(() => temp = v);
+
+                      // ✅ Change language
+                      await vm.setLanguage(v);
+                      Get.forceAppUpdate();
+                      // ✅ Close dialog
+                      if (context.mounted) {
+                        Navigator.pop(context);
+                      }
+
+                      // ✅ Show confirmation
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              v == 'ur'
+                                  ? 'زبان تبدیل ہو گئی'
+                                  : 'Language changed',
+                            ),
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      }
+                    },
+                    title: Text(
+                      entry.value,
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    activeColor: Theme.of(context).colorScheme.primary,
+                  );
+                }).toList(),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 

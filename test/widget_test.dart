@@ -5,13 +5,15 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
+import 'dart:ui';
+
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:nova_tasks/main.dart';
 
 void main() {
   testWidgets('Splash transitions to onboarding', (WidgetTester tester) async {
-    await tester.pumpWidget(const NovaTasksApp());
+    await tester.pumpWidget(NovaTasksApp(initialLocale: Locale("en"),));
 
     expect(find.text('TaskFlow'), findsOneWidget);
 

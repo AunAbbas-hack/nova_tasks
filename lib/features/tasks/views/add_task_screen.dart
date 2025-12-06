@@ -9,6 +9,7 @@ import 'package:nova_tasks/core/widgets/primary_text_field.dart';
 import 'package:nova_tasks/features/tasks/viewmodels/add_task_viewmodel.dart';
 
 import '../../../data/models/task_model.dart';
+import '../../../l10n/app_localizations.dart';
 import '../viewmodels/recurrence_bottomsheet_viewmodel.dart';
 
 class AddTaskScreen extends StatelessWidget {
@@ -104,6 +105,7 @@ class _AddTaskPage extends StatelessWidget {
     final viewModel = context.watch<AddTaskViewModel>();
     final theme = Theme.of(context);
     final isEditing = viewModel.isEditing;
+    final loc=AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -115,7 +117,7 @@ class _AddTaskPage extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: AppText(
-          isEditing ? 'Edit Task' : 'New Task',
+          isEditing ? loc.editTaskTitle : loc.newTaskTitle,
           fontSize: 18,
           fontWeight: FontWeight.w700,
         ),
@@ -134,19 +136,19 @@ class _AddTaskPage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const AppText(
-                        'Task Title',
+                       AppText(
+                        loc.taskTitleLabel,
                         fontWeight: FontWeight.w600,
                       ),
                       const SizedBox(height: 8),
                       PrimaryTextField(
                         label: '',
-                        hint: 'e.g., Design the new dashboard',
+                        hint: loc.taskTitleHint,
                         controller: viewModel.titleController,
                       ),
                       const SizedBox(height: 16),
-                      const AppText(
-                        'Description',
+                       AppText(
+                        loc.taskDescriptionLabel,
                         fontWeight: FontWeight.w600,
                       ),
                       const SizedBox(height: 8),
@@ -157,7 +159,7 @@ class _AddTaskPage extends StatelessWidget {
                         maxLines: 4,
                         keyboardType: TextInputType.multiline,
                         decoration: InputDecoration(
-                          hintText: 'Add a description for your task',
+                          hintText: loc.taskDescriptionHint,
                           hintStyle: TextStyle(
                             color: Colors.white.withOpacity(0.4),
                             fontSize: 14,
@@ -195,7 +197,7 @@ class _AddTaskPage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const AppText('Due Date', fontWeight: FontWeight.w600),
+                       AppText(loc.dueDateLabel, fontWeight: FontWeight.w600),
                       const SizedBox(height: 8),
                       _PickerTile(
                         icon: Icons.calendar_today_outlined,
@@ -203,7 +205,7 @@ class _AddTaskPage extends StatelessWidget {
                         onTap: () => _pickDate(context, viewModel),
                       ),
                       const SizedBox(height: 16),
-                      const AppText('Time', fontWeight: FontWeight.w600),
+                         AppText(loc.timeLabel, fontWeight: FontWeight.w600),
                       const SizedBox(height: 8),
                       _PickerTile(
                         icon: Icons.access_time_rounded,
@@ -220,19 +222,19 @@ class _AddTaskPage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const AppText('Priority', fontWeight: FontWeight.w600),
+                       AppText(loc.priorityLabel, fontWeight: FontWeight.w600),
                       const SizedBox(height: 12),
                       Wrap(
                         spacing: 8,
                         children: [
                           _PriorityChip(
-                            label: 'Low',
+                            label: loc.priorityLow,
                             color: Colors.blueGrey,
                             selected: viewModel.priority == TaskPriority.low,
                             onTap: () => viewModel.setPriority(TaskPriority.low),
                           ),
                           _PriorityChip(
-                            label: 'Medium',
+                            label: loc.priorityMedium,
                             color: Colors.blue,
                             selected:
                             viewModel.priority == TaskPriority.medium,
@@ -240,13 +242,13 @@ class _AddTaskPage extends StatelessWidget {
                                 viewModel.setPriority(TaskPriority.medium),
                           ),
                           _PriorityChip(
-                            label: 'High',
+                            label: loc.priorityHigh,
                             color: Colors.orange,
                             selected: viewModel.priority == TaskPriority.high,
                             onTap: () => viewModel.setPriority(TaskPriority.high),
                           ),
                           _PriorityChip(
-                            label: 'Urgent',
+                            label: loc.priorityUrgent,
                             color: Colors.red,
                             selected:
                             viewModel.priority == TaskPriority.urgent,
@@ -257,7 +259,7 @@ class _AddTaskPage extends StatelessWidget {
                       ),
                       const SizedBox(height: 16),
 
-                      const AppText('Category', fontWeight: FontWeight.w600),
+                       AppText(loc.categoryLabel, fontWeight: FontWeight.w600),
                       const SizedBox(height: 8),
 
                       // Dropdown
@@ -279,18 +281,18 @@ class _AddTaskPage extends StatelessWidget {
                               Icons.keyboard_arrow_down,
                               color: Colors.white70,
                             ),
-                            items: const [
+                            items:  [
                               DropdownMenuItem(
                                 value: 'Work',
-                                child: Text('Work'),
+                                child: Text(loc.categoryWork),
                               ),
                               DropdownMenuItem(
                                 value: 'Personal',
-                                child: Text('Personal'),
+                                child: Text(loc.categoryPersonal),
                               ),
                               DropdownMenuItem(
                                 value: 'Custom',
-                                child: Text('Custom'),
+                                child: Text(loc.categoryCustom),
                               ),
                             ],
                             onChanged: (value) {
@@ -307,7 +309,7 @@ class _AddTaskPage extends StatelessWidget {
                         const SizedBox(height: 12),
                         PrimaryTextField(
                           label: '',
-                          hint: 'Enter custom category',
+                          hint: loc.enterCustomCategory,
                           controller: viewModel.customCategoryController,
                         ),
                       ],
@@ -323,14 +325,14 @@ class _AddTaskPage extends StatelessWidget {
                     children: [
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
+                        children:  [
                           AppText(
-                            'Recurring Task',
+                            loc.recurringTaskLabel,
                             fontWeight: FontWeight.w600,
                           ),
                           SizedBox(height: 4),
                           AppText(
-                            'Set task to repeat',
+                            loc.recurringTaskHint,
                             color: Colors.white70,
                           ),
                         ],
@@ -368,14 +370,14 @@ class _AddTaskPage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const AppText('Subtasks', fontWeight: FontWeight.w600),
+                       AppText(loc.subtasksLabel, fontWeight: FontWeight.w600),
                       const SizedBox(height: 12),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const AppText('Progress'),
+                           AppText(loc.subtasksProgressLabel, fontWeight: FontWeight.w600),
                           AppText(
-                            '${(viewModel.progress * 100).round()}% Completed',
+                            '${(viewModel.progress * 100).round()}% ${loc.tasksCompletedLabel}',
                             color: Colors.white70,
                           ),
                         ],
@@ -408,7 +410,7 @@ class _AddTaskPage extends StatelessWidget {
                       OutlinedButton.icon(
                         onPressed: () => _addSubtaskDialog(context, viewModel),
                         icon: const Icon(Icons.add),
-                        label: const Text('Add Subtask'),
+                        label:  Text(loc.addSubtaskAction),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.white,
                           side: const BorderSide(color: Colors.white24),
@@ -425,17 +427,17 @@ class _AddTaskPage extends StatelessWidget {
                 // ---------------- CREATE / UPDATE BUTTON ----------------
                 PrimaryButton(
                   label: viewModel.isSaving
-                      ? (isEditing ? 'Updating...' : 'Creating...')
-                      : (isEditing ? 'Update Task' : 'Create Task'),
+                      ? (isEditing ? loc.updating : loc.creating)
+                      : (isEditing ? loc.updateTaskAction : loc.createTaskAction),
                   onPressed: viewModel.isSaving
                       ? null
                       : () async {
                     final user = FirebaseAuth.instance.currentUser;
                     if (user == null) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
+                         SnackBar(
                           content: Text(
-                            'You must be logged in to add tasks',
+                           loc.loginRequiredToAddTask,
                           ),
                         ),
                       );
@@ -450,8 +452,8 @@ class _AddTaskPage extends StatelessWidget {
                           SnackBar(
                             content: Text(
                               isEditing
-                                  ? 'Task updated'
-                                  : 'Task created',
+                                  ? loc.taskUpdated
+                                  : loc.taskCreated,
                             ),
                           ),
                         );

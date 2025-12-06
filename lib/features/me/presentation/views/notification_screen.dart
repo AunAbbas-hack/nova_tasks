@@ -2,6 +2,7 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:nova_tasks/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/widgets/app_text.dart';
@@ -44,14 +45,15 @@ class _NotificationsView extends StatelessWidget {
   Widget build(BuildContext context) {
     final vm = context.watch<NotificationsViewModel>();
     final theme = Theme.of(context);
-
+final loc=AppLocalizations.of(context)!;
     return Scaffold(
+
       appBar: AppBar(
         backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         centerTitle: false,
-        title: const AppText(
-          'Notifications',
+        title:  AppText(
+          loc.notifications,
           fontSize: 24,
           fontWeight: FontWeight.w700,
         ),
@@ -59,7 +61,7 @@ class _NotificationsView extends StatelessWidget {
           TextButton(
             onPressed: vm.hasNotifications ? vm.clearAll : null,
             child: Text(
-              'Clear All',
+              loc.clearAll,
               style: TextStyle(
                 color: vm.hasNotifications
                     ? AppColors.primaryBright
@@ -82,8 +84,8 @@ class _NotificationsView extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (vm.todayNotifications.isNotEmpty) ...[
-              const AppText(
-                'Today',
+               AppText(
+                loc.today,
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
               ),
@@ -123,9 +125,10 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    final loc=AppLocalizations.of(context)!;
+    return  Center(
       child: AppText(
-        "You're all caught up!\nNo notifications right now.",
+        "${loc.noNotificationsTitle}/n${loc.noNotificationsSubtitle}",
         textAlign: TextAlign.center,
         color: Colors.white54,
       ),
@@ -163,6 +166,31 @@ class _NotificationCard extends StatelessWidget {
         return Icons.group_outlined;
     }
   }
+  String _title(AppNotification n,AppLocalizations loc) {
+    switch (n.kind) {
+      case NotificationKind.dueSoon:
+        return loc.notificationDueSoonTitle;
+        case NotificationKind.overdue:
+        return loc.notificationOverdueTitle;
+      case NotificationKind.productivityInsight:
+        return loc.notificationProductivityInsightTitle;
+      case NotificationKind.activityInfo:
+        return loc.notificationActivityTitle;
+    }
+  }
+  String _message(AppNotification n,AppLocalizations loc) {
+    final task=n.task;
+    switch (n.kind) {
+      case NotificationKind.dueSoon:
+        return loc.notificationDueSoonMessage(task?.title??"", task?.time??"");
+      case NotificationKind.overdue:
+        return loc.notificationOverdueMessage(task?.title??"", task?.time??"");
+        case NotificationKind.productivityInsight:
+        return loc.notificationProductivityInsightMessage(task?.title??"");
+      case NotificationKind.activityInfo:
+        return loc.notificationActivityMessage;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -175,6 +203,7 @@ class _NotificationCard extends StatelessWidget {
     final bool canMarkDone =
         item.kind == NotificationKind.dueSoon ||
             item.kind == NotificationKind.overdue;
+    final loc=AppLocalizations.of(context)!;
 
     return Container(
       width: double.infinity,
@@ -207,7 +236,7 @@ class _NotificationCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      item.title,
+                      _title(item,loc),
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                         color: Colors.white,
@@ -215,7 +244,7 @@ class _NotificationCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      item.message,
+                      _message(item,loc),
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: Colors.white70,
                       ),
@@ -234,14 +263,14 @@ class _NotificationCard extends StatelessWidget {
               children: [
                 if (canSnooze)
                   _PillButton(
-                    label: 'Snooze',
+                    label: loc.notificationSnoozeButton,
                     filled: true,
                     onTap: () => vm.snooze(item),
                   ),
                 if (canSnooze && canMarkDone) const SizedBox(width: 12),
                 if (canMarkDone)
                   _PillButton(
-                    label: 'Mark as Done',
+                    label: loc.markAsDone,
                     filled: false,
                     onTap: () => vm.markTaskDone(item),
                   ),

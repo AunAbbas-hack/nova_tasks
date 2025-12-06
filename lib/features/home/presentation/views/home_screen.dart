@@ -8,6 +8,7 @@ import 'package:nova_tasks/features/me/presentation/views/settings_screen.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../data/repositories/task_repository.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../tasks/widgets/task_card.dart';
 import '../viewmodels/home_viewmodel.dart';
 import '../../../tasks/views/add_task_screen.dart';
@@ -33,6 +34,7 @@ class _HomeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc=AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final vm = context.watch<HomeViewModel>();
 
@@ -72,7 +74,7 @@ class _HomeView extends StatelessWidget {
                       ),
                       alignment: Alignment.center,
                       child: AppText(
-                        "Show All",
+                        loc.showAll,
                         color: vm.subset == HomeFilterSubset.all
                             ? Colors.white70
                             : Colors.white,
@@ -116,7 +118,7 @@ class _HomeView extends StatelessWidget {
                               ),
                               alignment: Alignment.center,
                               child: AppText(
-                                "${_weekday(date)} ${date.day}",
+                                loc.tasksForDay(localizedWeekday(context, date), date.day),
                                 color: isSel
                                     ? Colors.white
                                     : Colors.white70,
@@ -204,9 +206,11 @@ class _DateModeSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc=AppLocalizations.of(context)!;
     final tasks = vm.dayTasks;
     final d = vm.selectedDate!;
-    final title = "Tasks for ${_weekday(d)}, ${d.day}";
+    final title =
+        loc.tasksForDay(localizedWeekday(context, d), d.day);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -219,8 +223,8 @@ class _DateModeSection extends StatelessWidget {
         const SizedBox(height: 12),
 
         if (tasks.isEmpty)
-          const AppText(
-            "No tasks for this day.",
+          AppText(
+            loc.noTasksForDay,
             color: Colors.white54,
           ),
 
@@ -253,6 +257,7 @@ class _ShowAllSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc=AppLocalizations.of(context)!;
     // agar subset == all → grouped view (Today/Overdue/Upcoming)
     if (vm.subset == HomeFilterSubset.all) {
       return Column(
@@ -260,8 +265,8 @@ class _ShowAllSection extends StatelessWidget {
         children: [
           // TODAY
           if (vm.todayTasks.isNotEmpty) ...[
-            const AppText(
-              "Today's Tasks",
+             AppText(
+              loc.filterTodayTasks,
               fontSize: 20,
               fontWeight: FontWeight.w700,
             ),
@@ -277,8 +282,8 @@ class _ShowAllSection extends StatelessWidget {
 
           // OVERDUE
           if (vm.overdueTasks.isNotEmpty) ...[
-            const AppText(
-              "Overdue",
+             AppText(
+              loc.filterOverdueTasks,
               fontSize: 20,
               fontWeight: FontWeight.w700,
               color: Colors.redAccent,
@@ -295,8 +300,8 @@ class _ShowAllSection extends StatelessWidget {
 
           // UPCOMING (grouped by date)
           if (vm.upcomingTasks.isNotEmpty) ...[
-            const AppText(
-              "Upcoming",
+             AppText(
+              loc.filterUpcomingTasks,
               fontSize: 20,
               fontWeight: FontWeight.w700,
             ),
@@ -306,7 +311,7 @@ class _ShowAllSection extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   AppText(
-                    "${_weekday(entry.key)}, ${entry.key.day}",
+                    "${localizedWeekday(context,entry.key)}, ${entry.key.day}",
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: Colors.white70,
@@ -334,19 +339,19 @@ class _ShowAllSection extends StatelessWidget {
 
     switch (vm.subset) {
       case HomeFilterSubset.overdue:
-        title = "Overdue Tasks";
+        title = loc.filterOverdueTasks;
         color = Colors.redAccent;
         break;
       case HomeFilterSubset.today:
-        title = "Today's Tasks";
+        title = loc.filterTodayTasks;
         color = Colors.white;
         break;
       case HomeFilterSubset.upcoming:
-        title = "Upcoming Tasks";
+        title = loc.filterUpcomingTasks;
         color = Colors.white;
         break;
       case HomeFilterSubset.all:
-        title = "All Tasks";
+        title = loc.allTasks;
         break;
     }
 
@@ -362,8 +367,8 @@ class _ShowAllSection extends StatelessWidget {
         const SizedBox(height: 12),
 
         if (list.isEmpty)
-          const AppText(
-            "No tasks found for this filter.",
+           AppText(
+           loc.noTasksForFilter,
             color: Colors.white54,
           ),
 
@@ -434,6 +439,7 @@ void _openShowAllSheet(BuildContext context, HomeViewModel vm) {
 
       return StatefulBuilder(
         builder: (context, setStateSheet) {
+          final loc=AppLocalizations.of(context)!;
           return SafeArea(
             top: false,
             child: Column(
@@ -450,19 +456,13 @@ void _openShowAllSheet(BuildContext context, HomeViewModel vm) {
                 ),
                 const SizedBox(height: 16),
 
-                const AppText(
-                  "Show",
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                ),
 
-                const SizedBox(height: 8),
-                const Divider(color: Colors.white10, height: 1),
 
-                buildOption("All (Today + Overdue + Upcoming)", HomeFilterSubset.all,setStateSheet),
-                buildOption("Overdue Tasks", HomeFilterSubset.overdue,setStateSheet),
-                buildOption("Today Tasks", HomeFilterSubset.today,setStateSheet),
-                buildOption("Upcoming Tasks", HomeFilterSubset.upcoming,setStateSheet),
+
+                buildOption(loc.filterAllTasks, HomeFilterSubset.all,setStateSheet),
+                buildOption(loc.filterOverdueTasks, HomeFilterSubset.overdue,setStateSheet),
+                buildOption(loc.filterTodayTasks, HomeFilterSubset.today,setStateSheet),
+                buildOption(loc.filterUpcomingTasks, HomeFilterSubset.upcoming,setStateSheet),
 
                 const SizedBox(height: 16),
 
@@ -481,7 +481,7 @@ void _openShowAllSheet(BuildContext context, HomeViewModel vm) {
                           onPressed: () {
                             Navigator.pop(context);
                           },
-                          child: const Text("Cancel"),
+                          child:  Text(loc.filterCancelButton),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -513,7 +513,7 @@ void _openShowAllSheet(BuildContext context, HomeViewModel vm) {
 
                             Navigator.pop(context);
                           },
-                          child: const Text("Apply"),
+                          child:  Text(loc.filterApplyButton),
                         ),
                       ),
                     ],
@@ -547,7 +547,7 @@ class _Header extends StatelessWidget {
     final String? profilePhoto = user?.photoURL?.trim().isNotEmpty == true
         ? user?.photoURL
         : null;
-
+final loc=AppLocalizations.of(context)!;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -575,7 +575,7 @@ class _Header extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const AppText("HI!,", fontWeight: FontWeight.w700),
+                 AppText(loc.hi, fontWeight: FontWeight.w700),
                 AppText(
                   name,
                   fontSize: 20,
@@ -612,9 +612,31 @@ class _Header extends StatelessWidget {
 //  HELPERS
 // -------------------------------------------------
 
-String _weekday(DateTime d) {
-  const names = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  return names[d.weekday - 1];
+// String _weekday(DateTime d) {
+//   const names = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+//   return names[d.weekday - 1];
+// }
+String localizedWeekday(BuildContext context, DateTime date) {
+  final loc = AppLocalizations.of(context)!;
+
+  switch (date.weekday) {
+    case DateTime.monday:
+      return loc.dayMon;
+    case DateTime.tuesday:
+      return loc.dayTue;
+    case DateTime.wednesday:
+      return loc.dayWed;
+    case DateTime.thursday:
+      return loc.dayThu;
+    case DateTime.friday:
+      return loc.dayFri;
+    case DateTime.saturday:
+      return loc.daySat;
+    case DateTime.sunday:
+      return loc.daySun;
+    default:
+      return "";
+  }
 }
 
 bool _isSameDay(DateTime a, DateTime b) =>

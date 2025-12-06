@@ -8,6 +8,7 @@ import 'package:nova_tasks/data/models/task_model.dart';
 import 'package:nova_tasks/data/repositories/task_repository.dart';
 import 'package:nova_tasks/features/tasks/views/task_detail_screen.dart';
 
+import '../../../../l10n/app_localizations.dart';
 import '../../../tasks/views/add_task_screen.dart';
 import '../viewmodels/calendar_viewmodel.dart';
 
@@ -40,17 +41,17 @@ class _CalendarView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<CalendarViewModel>();
-
+    final loc=AppLocalizations.of(context)!;
     final tasks = vm.visibleTasks;
     final isRange = vm.isRangeActive;
 
     final titleText = isRange
-        ? 'Tasks from ${_formatFull(vm.rangeStart!)} – ${_formatFull(vm.rangeEnd!)}'
-        : 'Tasks for ${_formatFull(vm.selectedDay ?? vm.focusedDay)}';
+        ? '${loc.tasksFrom} ${formatFull(vm.rangeStart!,context)} – ${formatFull(vm.rangeEnd!,context)}'
+        : '${loc.tasksFor} ${formatFull(vm.selectedDay ?? vm.focusedDay,context)}';
 
     final subtitleText = isRange
-        ? '${vm.visibleTasksCount} task(s) in this range'
-        : '${vm.visibleTasksCount} task(s) for this day';
+        ? '${vm.visibleTasksCount} ${loc.tasksInThisRange}'
+        : '${vm.visibleTasksCount} ${loc.tasksForThisDay}';
 
     return Scaffold(
       floatingActionButton: FloatingActionButton(
@@ -70,9 +71,9 @@ class _CalendarView extends StatelessWidget {
                   // ---------- Header ----------
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
+                    children:  [
                       AppText(
-                        'Calendar',
+                        loc.bottomNavCalendar,
                         fontSize: 28,
                         fontWeight: FontWeight.w700,
                       ),
@@ -123,9 +124,9 @@ class _CalendarView extends StatelessWidget {
                             // ...
                             Expanded(
                               child: tasks.isEmpty
-                                  ? const Center(
+                                  ?  Center(
                                       child: AppText(
-                                        'No tasks...',
+                                        loc.noTasks,
                                         color: Colors.white54,
                                       ),
                                     )
@@ -159,7 +160,7 @@ class _CalendarFormatToggle extends StatelessWidget {
   Widget build(BuildContext context) {
     final vm = context.watch<CalendarViewModel>();
     final isMonth = vm.calendarFormat == CalendarFormat.month;
-
+    final loc=AppLocalizations.of(context)!;
     return Container(
       height: 56,
       padding: const EdgeInsets.all(4),
@@ -181,7 +182,7 @@ class _CalendarFormatToggle extends StatelessWidget {
                   borderRadius: BorderRadius.circular(24),
                 ),
                 alignment: Alignment.center,
-                child: const AppText('Month', fontWeight: FontWeight.w600),
+                child:  AppText(loc.month, fontWeight: FontWeight.w600),
               ),
             ),
           ),
@@ -199,8 +200,8 @@ class _CalendarFormatToggle extends StatelessWidget {
                   borderRadius: BorderRadius.circular(24),
                 ),
                 alignment: Alignment.center,
-                child: const AppText(
-                  'Week',
+                child:  AppText(
+                  loc.week,
                   fontWeight: FontWeight.w600,
                   color: Colors.white70,
                 ),
@@ -388,22 +389,26 @@ class _CalendarTaskTile extends StatelessWidget {
 
 // ================== HELPERS ==================
 
-String _formatFull(DateTime d) {
-  // e.g. "October 26"
-  const months = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
+
+
+/// Returns formatted date like "October 26" using localized month names
+String formatFull(DateTime date, BuildContext context) {
+  final months = [
+    AppLocalizations.of(context)!.january,
+    AppLocalizations.of(context)!.february,
+    AppLocalizations.of(context)!.march,
+    AppLocalizations.of(context)!.april,
+    AppLocalizations.of(context)!.may,
+    AppLocalizations.of(context)!.june,
+    AppLocalizations.of(context)!.july,
+    AppLocalizations.of(context)!.august,
+    AppLocalizations.of(context)!.september,
+    AppLocalizations.of(context)!.october,
+    AppLocalizations.of(context)!.november,
+    AppLocalizations.of(context)!.december,
   ];
-  final monthName = months[d.month - 1];
-  return '$monthName ${d.day}';
+
+  final monthName = months[date.month - 1];
+  return "$monthName ${date.day}";
 }
+

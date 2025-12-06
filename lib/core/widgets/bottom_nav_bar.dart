@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nova_tasks/l10n/app_localizations.dart';
 
 class BottomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -13,6 +14,7 @@ class BottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final loc=AppLocalizations.of(context)!;
     return BottomNavigationBar(
       selectedItemColor: theme.colorScheme.primary,
       unselectedItemColor: Colors.white70,
@@ -20,12 +22,12 @@ class BottomNavBar extends StatelessWidget {
       onTap: onTap,
       type: BottomNavigationBarType.fixed,
       items: [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+        BottomNavigationBarItem(icon: Icon(Icons.home), label: loc.bottomNavHome),
         BottomNavigationBarItem(
           icon: Icon(Icons.calendar_today),
-          label: 'Calendar',
+          label: loc.bottomNavCalendar,
         ),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'ME'),
+        BottomNavigationBarItem(icon: Icon(Icons.person), label: loc.bottomNavMe),
       ],
     );
   }

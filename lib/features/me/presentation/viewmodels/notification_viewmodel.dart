@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:nova_tasks/l10n/app_localizations.dart';
 
 import '../../../../data/models/task_model.dart';
 import '../../../../data/repositories/task_repository.dart';
@@ -20,16 +21,13 @@ class AppNotification {
   const AppNotification({
     required this.id,
     required this.kind,
-    required this.title,
-    required this.message,
+
     required this.date,
     this.task,
   });
 
   final String id;              // usually task.id ya synthetic id
   final NotificationKind kind;
-  final String title;
-  final String message;
   final DateTime date;          // kis din ki notification hai
   final TaskModel? task;        // agar task based hai to yeh fill hoga
 }
@@ -152,9 +150,7 @@ class NotificationsViewModel extends ChangeNotifier {
             AppNotification(
               id: 'dueSoon_${t.id}',
               kind: NotificationKind.dueSoon,
-              title: 'Task Due Soon',
-              message:
-              '${t.title} is due at ${t.time}.',
+
               date: today,
               task: t,
             ),
@@ -176,10 +172,7 @@ class NotificationsViewModel extends ChangeNotifier {
           AppNotification(
             id: 'overdue_${t.id}',
             kind: NotificationKind.overdue,
-            title: 'Overdue Task',
-            message: t.description.isNotEmpty
-                ? t.description
-                : 'Task "${t.title}" is overdue.',
+
             date: today,
             task: t,
           ),
@@ -199,9 +192,7 @@ class NotificationsViewModel extends ChangeNotifier {
         AppNotification(
           id: 'insight_$yesterday',
           kind: NotificationKind.productivityInsight,
-          title: 'Productivity Insight',
-          message:
-          'You completed $completedYesterday task(s) yesterday. Keep it up!',
+
           date: yesterday,
         ),
       );
@@ -218,9 +209,7 @@ class NotificationsViewModel extends ChangeNotifier {
         AppNotification(
           id: 'activity_$yesterday',
           kind: NotificationKind.activityInfo,
-          title: 'New Tasks Yesterday',
-          message:
-          'You added $createdYesterday new task(s) yesterday.',
+
           date: yesterday,
         ),
       );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:nova_tasks/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
 import 'package:nova_tasks/core/widgets/app_text.dart';
@@ -70,7 +71,7 @@ class _TaskDetailView extends StatelessWidget {
 
     final priorityColor = _priorityColor(task.priority);
     final categoryColor = _categoryColor(task.category);
-
+    final loc=AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
@@ -134,10 +135,10 @@ class _TaskDetailView extends StatelessWidget {
                         color: Colors.white),
                   ),
                   const SizedBox(width: 4),
-                  const Expanded(
+                   Expanded(
                     child: Center(
                       child: AppText(
-                        'Task Details',
+                        loc.taskDetails,
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                       ),
@@ -157,25 +158,25 @@ class _TaskDetailView extends StatelessWidget {
                         context: context,
                         builder: (_) => AlertDialog(
                           backgroundColor: const Color(0xFF1A1F2B),
-                          title: const Text(
-                            'Delete Task?',
+                          title:  Text(
+                           loc.deleteTaskTitle ,
                             style: TextStyle(color: Colors.white),
                           ),
-                          content: const Text(
-                            'Are you sure you want to delete this task?',
+                          content:  Text(
+                            loc.deleteTaskMessage,
                             style: TextStyle(color: Colors.white70),
                           ),
                           actions: [
                             TextButton(
                               onPressed: () =>
                                   Navigator.pop(context, false),
-                              child: const Text('Cancel'),
+                              child:  Text(loc.cancelAction),
                             ),
                             TextButton(
                               onPressed: () =>
                                   Navigator.pop(context, true),
-                              child: const Text(
-                                'Delete',
+                              child:  Text(
+                                loc.deleteAction,
                                 style: TextStyle(
                                   color: Colors.redAccent,
                                 ),
@@ -191,10 +192,7 @@ class _TaskDetailView extends StatelessWidget {
                       await vm.deleteTask();
                       if (context.mounted) {
                         Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('Task deleted successfully')),
-                        );
+
                       }
                     },
                     icon: const Icon(Icons.delete, color: Colors.redAccent),
@@ -224,14 +222,14 @@ class _TaskDetailView extends StatelessWidget {
                           _InfoRow(
                             icon: Icons.calendar_today_rounded,
                             iconBg: const Color(0xFF1D4ED8),
-                            label: 'Due Date',
+                            label: loc.dueDateLabel,
                             value: _formatDue(task),
                           ),
                           const SizedBox(height: 16),
                           _InfoRow(
                             icon: Icons.flag_rounded,
                             iconBg: const Color(0xFFB91C1C),
-                            label: 'Priority',
+                            label: loc.priorityLabel,
                             value: task.priority[0].toUpperCase() +
                                 task.priority.substring(1),
                             valueColor: priorityColor,
@@ -240,7 +238,7 @@ class _TaskDetailView extends StatelessWidget {
                           _InfoRow(
                             icon: Icons.local_offer_rounded,
                             iconBg: const Color(0xFF15803D),
-                            label: 'Category',
+                            label: loc.categoryLabel,
                             valueWidget: Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 10,
@@ -266,8 +264,8 @@ class _TaskDetailView extends StatelessWidget {
                     const SizedBox(height: 24),
 
                     // Description
-                    const AppText(
-                      'Description',
+                     AppText(
+                      loc.taskDescriptionLabel,
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                     ),
@@ -281,7 +279,7 @@ class _TaskDetailView extends StatelessWidget {
                       ),
                       child: AppText(
                         task.description.isEmpty
-                            ? 'No description added.'
+                            ? loc.noDescriptionAdded
                             : task.description,
                         color: Colors.white70,
                       ),
@@ -293,13 +291,13 @@ class _TaskDetailView extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const AppText(
-                          'Subtasks',
+                         AppText(
+                          loc.subtasksLabel,
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
                         ),
                         AppText(
-                          '${vm.completedSubtasks} of ${vm.totalSubtasks} Completed',
+                          '${vm.completedSubtasks} of ${vm.totalSubtasks} ${loc.tasksCompletedLabel}',
                           color: Colors.white70,
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
@@ -322,8 +320,8 @@ class _TaskDetailView extends StatelessWidget {
                           ),
                           const SizedBox(height: 16),
                           if (task.subtasks.isEmpty)
-                            const AppText(
-                              'No subtasks added.',
+                             AppText(
+                             loc.noSubtasksAdded,
                               color: Colors.white70,
                             )
                           else

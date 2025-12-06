@@ -1,0 +1,270 @@
+{
+  "@@locale": "en",
+
+  "settings": "Settings",
+
+  "profileName": "Andria",
+  "profileEmail": "andria@email.com",
+
+  "appearance": "APPEARANCE",
+  "darkMode": "Dark Mode",
+  "systemDefault": "System Default",
+
+  "defaultHomeView": "Default Home View",
+  "today": "Today",
+
+  "general": "GENERAL",
+  "defaultReminderTime": "Default Reminder Time",
+  "time0900am": "09:00 AM",
+
+  "language": "Language",
+  "english": "English",
+
+  "account": "ACCOUNT",
+  "logout": "Logout",
+  "urdu":"Urdu",
+  "week":"Week",
+
+
+ "tasksCompletedLabel": "Tasks Completed",
+  "onTimeRateLabel": "On-Time Rate",
+  "currentStreakLabel": "Current Streak",
+
+
+
+  "profile": "Profile",
+  "fullName": "Full Name",
+  "email": "Email",
+
+  "productivityInsights": "Productivity Insights",
+
+  "tasksCompleted": "{count} Tasks Completed",
+  "@tasksCompleted": {
+    "description": "Shows number of completed tasks",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "onTimeRate": "{percent}% On-Time Rate",
+  "@onTimeRate": {
+    "description": "Shows percentage of on-time rate",
+    "placeholders": {
+      "percent": {
+        "type": "double"
+      }
+    }
+  },
+
+  "currentStreak": "{days} Day Streak",
+  "@currentStreak": {
+    "description": "Shows current streak in days",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+
+  "notifications": "Notifications",
+  "saveChanges": "Save Changes",
+  "clearAll":"Clear All",
+
+  "noNotificationsTitle": "You're all caught up!",
+  "noNotificationsSubtitle": "No notifications right now",
+
+  "notificationsTitle": "Notifications",
+  "notificationsClearAll": "Clear All",
+  "notificationsToday": "Today",
+  "notificationsYesterday": "Yesterday",
+
+  "notificationDueSoonTitle": "Task Due Soon",
+  "notificationOverdueTitle": "Overdue Task",
+  "notificationProductivityInsightTitle": "Productivity Insight",
+  "notificationCollaborationTitle": "New Tasks",
+
+  "notificationDueSoonMessage": "{taskTitle}: Due in {relativeTime}",
+  "@notificationDueSoonMessage": {
+    "description": "Shown when a task is due soon",
+    "placeholders": {
+      "taskTitle": {
+        "example": "Project Alpha"
+      },
+      "relativeTime": {
+        "example": "15 minutes"
+      }
+    }
+  },
+
+  "notificationOverdueMessage": "{taskTitle}: {relativeTime} ago",
+  "@notificationOverdueMessage": {
+    "description": "Shown when a task is overdue",
+    "placeholders": {
+      "taskTitle": {
+        "example": "Complete project report"
+      },
+      "relativeTime": {
+        "example": "1 hour"
+      }
+    }
+  },
+
+  "notificationProductivityInsightMessage": "You completed {completedCount} task(s) yesterday!",
+  "@notificationProductivityInsightMessage": {
+    "description": "Yesterday productivity summary",
+    "placeholders": {
+      "completedCount": {
+        "example": "5"
+      }
+    }
+  },
+
+  "notificationCollaborationMessage": "{assignerName} assigned you a new task",
+  "@notificationCollaborationMessage": {
+    "description": "New task assigned by someone",
+    "placeholders": {
+      "assignerName": {
+        "example": "John Doe"
+      }
+    }
+  },
+
+  "notificationSnoozeButton": "Snooze",
+  "notificationMarkDoneButton": "Mark as Done",
+  "notificationActivityTitle": "New tasks",
+  "notificationActivityMessage": "You created new tasks yesterday.",
+
+  "markAsDone": "Mark as Done",
+  "snooze": "Snooze",
+
+  "hi": "Hi",
+  "showAll": "Show All",
+
+
+
+  "filterAll": "All",
+  "filterPersonal": "Personal",
+  "filterWork": "Work",
+
+  "tasksForDay": "Tasks for {day}, {date}",
+  "@tasksForDay": {
+    "placeholders": {
+      "day": {},
+      "date": {}
+    }
+  },
+
+  "noTasksForDay": "No tasks for this day",
+
+  "bottomNavHome": "Home",
+  "bottomNavCalendar": "Calendar",
+  "bottomNavMe": "Me",
+
+
+  "dayMon": "Mon",
+  "dayTue": "Tue",
+  "dayWed": "Wed",
+  "dayThu": "Thu",
+  "dayFri": "Fri",
+  "daySat": "Sat",
+  "daySun": "Sun",
+
+  "filterTitleShow": "Show",
+
+  "filterAllTasks": "All (Today + Overdue + Upcoming)",
+  "filterOverdueTasks": "Overdue Tasks",
+  "filterTodayTasks": "Today Tasks",
+  "filterUpcomingTasks": "Upcoming Tasks",
+
+  "filterCancelButton": "Cancel",
+  "filterApplyButton": "Apply",
+  "allTasks": "All Tasks",
+
+  "noTasksForFilter": "No tasks found for this filter.",
+
+
+  "deleteTaskTitle": "Delete task?",
+  "deleteTaskMessage": "Are you sure you want to delete this task?",
+  "cancelAction": "Cancel",
+  "deleteAction": "Delete",
+  "editTaskTitle": "Edit",
+
+  "newTaskTitle": "New Task",
+  "saveAction": "Save",
+
+  "taskTitleLabel": "Task Title",
+  "taskTitleHint": "e.g., Design the new dashboard",
+
+  "taskDescriptionLabel": "Description",
+  "taskDescriptionHint": "Add details about the task...",
+
+  "dueDateLabel": "Due Date",
+  "timeLabel": "Time",
+
+  "priorityLabel": "Priority",
+  "priorityLow": "Low",
+  "priorityMedium": "Medium",
+  "priorityHigh": "High",
+  "priorityUrgent": "Urgent",
+
+  "categoryLabel": "Category",
+  "categoryWork": "Work",
+
+  "recurringTaskLabel": "Recurring Task",
+  "recurringTaskHint": "Set task to repeat",
+
+  "subtasksLabel": "Subtasks",
+  "subtasksProgressLabel": "Progress",
+  "subtasksCompletedStatus": "{completed} of {total} Completed",
+
+  "addSubtaskAction": "Add Subtask",
+
+  "createTaskAction": "Create Task",
+
+  "categoryWork": "Work",
+  "categoryPersonal": "Personal",
+  "categoryCustom": "Custom",
+  "enterCustomCategory": "Enter custom category",
+  "updating": "Updating...",
+  "creating": "Creating...",
+  "updateTaskAction": "Update Task",
+  "loginRequiredToAddTask": "You must be logged in to add tasks",
+  "taskCreated": "Task Created",
+  "taskUpdated": "Task Updated",
+
+  "noSubtasksAdded": "No subtasks added.",
+  "noDescriptionAdded": "No description added.",
+  "taskDetails": "Task Details",
+  "january": "January",
+  "february": "February",
+  "march": "March",
+  "april": "April",
+  "may": "May",
+  "june": "June",
+  "july": "July",
+  "august": "August",
+  "september": "September",
+  "october": "October",
+  "november": "November",
+  "december": "December",
+  "tasksFrom": "Tasks from",
+  "tasksFor": "Tasks for",
+  "tasksInThisRange": "task(s) in this range",
+  "tasksForThisDay": "task(s) for this day",
+  "noTasks": "No tasks...",
+  "month": "Month"
+}
+
+
+
+
+
+
+
+
+
+
+
+

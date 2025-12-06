@@ -1,0 +1,271 @@
+{
+  "@@locale": "ur",
+
+  "settings": "سیٹنگز",
+
+  "profileName": "انڈریا",
+  "profileEmail": "andria@email.com",
+
+  "appearance": "ظاہری شکل",
+  "darkMode": "ڈارک موڈ",
+  "systemDefault": "سسٹم ڈیفالٹ",
+
+  "defaultHomeView": "ڈیفالٹ ہوم ویو",
+  "today": "آج",
+
+  "general": "جنرل",
+  "defaultReminderTime": "ڈیفالٹ ریمائنڈر ٹائم",
+  "time0900am": "صبح 09:00",
+
+  "language": "زبان",
+  "english": "انگریزی",
+
+  "account": "اکاؤنٹ",
+  "logout": "لاگ آؤٹ",
+  "urdu":"اردو",
+  "week":"ہفتہ",
+
+
+ "tasksCompletedLabel": "مکمل شدہ ٹاسکس",
+  "onTimeRateLabel": "وقت پر مکمل کرنے کی شرح",
+  "currentStreakLabel": "موجودہ سلسلہ",
+
+  "profile": "پروفائل",
+  "fullName": "پورا نام",
+  "email": "ای میل",
+
+  "productivityInsights": "پروڈکٹیویٹی ان سائٹس",
+
+  "tasksCompleted": "{count} مکمل شدہ ٹاسکس",
+  "@tasksCompleted": {
+    "description": "Shows number of completed tasks",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "onTimeRate": "{percent}% وقت پر مکمل کرنے کی شرح",
+  "@onTimeRate": {
+    "description": "Shows percentage of on-time rate",
+    "placeholders": {
+      "percent": {
+        "type": "double"
+      }
+    }
+  },
+
+  "currentStreak": "{days} دن کا سلسلہ",
+  "@currentStreak": {
+    "description": "Shows current streak in days",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+
+  "notifications": "نوٹیفیکیشنز",
+  "saveChanges": "تبدیلیاں محفوظ کریں",
+  "clearAll":"تمام صاف کریں",
+
+
+  "noNotificationsTitle": "آپ مکمل طور پر اپ ٹو ڈیٹ ہیں!",
+  "noNotificationsSubtitle": "اس وقت کوئی نوٹیفیکیشن نہیں",
+
+
+
+  "notificationsYesterday": "گزشتہ دن",
+
+  "notificationDueSoonTitle": "جلد مکمل ہونے والا ٹاسک",
+  "notificationOverdueTitle": "وقت گزر جانے والا ٹاسک",
+  "notificationProductivityInsightTitle": "پیداواری کارکردگی",
+  "notificationCollaborationTitle": "تعاون کی تازہ کاری",
+
+  "notificationDueSoonMessage": "{taskTitle}: {relativeTime} میں مکمل کرنا ہے",
+  "@notificationDueSoonMessage": {
+    "description": "Shown when a task is due soon",
+    "placeholders": {
+      "taskTitle": {
+        "example": "پروجیکٹ الفا"
+      },
+      "relativeTime": {
+        "example": "15 منٹ"
+      }
+    }
+  },
+
+  "notificationOverdueMessage": "{taskTitle}: {relativeTime} پہلے",
+  "@notificationOverdueMessage": {
+    "description": "Shown when a task is overdue",
+    "placeholders": {
+      "taskTitle": {
+        "example": "پروجیکٹ رپورٹ مکمل کریں"
+      },
+      "relativeTime": {
+        "example": "1 گھنٹہ"
+      }
+    }
+  },
+
+  "notificationProductivityInsightMessage": "آپ نے کل {completedCount} ٹاسک مکمل کیے!",
+  "@notificationProductivityInsightMessage": {
+    "description": "Yesterday productivity summary",
+    "placeholders": {
+      "completedCount": {
+        "example": "5"
+      }
+    }
+  },
+
+  "notificationCollaborationMessage": "{assignerName} نے آپ کو نیا ٹاسک دیا ہے",
+  "@notificationCollaborationMessage": {
+    "description": "New task assigned by someone",
+    "placeholders": {
+      "assignerName": {
+        "example": "جان ڈو"
+      }
+    }
+  },
+  "notificationActivityTitle": "نئی ٹاسکس",
+  "notificationSnoozeButton": "اسنوز",
+  "notificationMarkDoneButton": "مکمل کریں",
+  "notificationActivityMessage": "آپ نے کل نئی ٹاسکس بنائیں۔",
+
+  "markAsDone": "مکمل کے طور پر نشان زد کریں",
+  "snooze": "مؤخر کریں",
+
+
+  "hi": "ہیلو",
+  "showAll": "سب دکھائیں",
+
+
+
+  "filterAll": "تمام",
+  "filterPersonal": "ذاتی",
+  "filterWork": "کام",
+
+  "tasksForDay": "{day}، {date} کے کام",
+  "@tasksForDay": {
+    "placeholders": {
+      "day": {},
+      "date": {}
+    }
+  },
+
+  "noTasksForDay": "آج کے لیے کوئی کام موجود نہیں",
+
+  "bottomNavHome": "ہوم",
+  "bottomNavCalendar": "کیلنڈر",
+  "bottomNavMe": "پروفائل",
+
+  "dayMon": "پیر",
+  "dayTue": "منگل",
+  "dayWed": "بدھ",
+  "dayThu": "جمعرات",
+  "dayFri": "جمعہ",
+  "daySat": "ہفتہ",
+  "daySun": "اتوار",
+
+
+  "filterTitleShow": "دکھائیں",
+
+  "filterAllTasks": "تمام (آج + زائد المیعاد + آنے والے)",
+  "filterOverdueTasks": "زائد المیعاد کام",
+  "filterTodayTasks": "آج کے کام",
+  "filterUpcomingTasks": "آنے والے کام",
+
+  "filterCancelButton": "منسوخ کریں",
+  "filterApplyButton": "لاگو کریں",
+  "allTasks": "All Tasks",
+
+  "noTasksForFilter": "اس فلٹر کے لیے کوئی کام نہیں ملا۔",
+
+  "deleteTaskTitle": "کام حذف کریں؟",
+  "deleteTaskMessage": "کیا آپ واقعی اس کام کو حذف کرنا چاہتے ہیں؟",
+  "cancelAction": "منسوخ کریں",
+  "deleteAction": "حذف کریں",
+
+  "editTaskTitle": "اپ ڈیٹ کریں",
+  "newTaskTitle": "نیا کام",
+  "saveAction": "محفوظ کریں",
+
+  "taskTitleLabel": "کام کا عنوان",
+  "taskTitleHint": "مثال کے طور پر، نیا ڈیش بورڈ ڈیزائن کریں",
+
+  "taskDescriptionLabel": "تفصیل",
+  "taskDescriptionHint": "کام کے بارے میں تفصیلات شامل کریں...",
+
+  "dueDateLabel": "مقررہ تاریخ",
+  "timeLabel": "وقت",
+
+  "priorityLabel": "اہمیت",
+  "priorityLow": "کم",
+  "priorityMedium": "درمیانی",
+  "priorityHigh": "ضروری",
+  "priorityUrgent": "انتہائی ضروری",
+
+  "categoryLabel": "زمرہ",
+  "categoryWork": "کام",
+
+  "recurringTaskLabel": "دوبارہ ہونے والا کام",
+  "recurringTaskHint": "کام کو بار بار ہونے کے لیے سیٹ کریں",
+
+  "subtasksLabel": "ذیلی کام",
+  "subtasksProgressLabel": "پیش رفت",
+  "subtasksCompletedStatus": "{completed} میں سے {total} مکمل",
+
+  "addSubtaskAction": "ذیلی کام شامل کریں",
+
+  "createTaskAction": "کام بنائیں",
+  "enterCustomCategory": "حسبِ ضرورت زمرہ درج کریں",
+  "categoryWork": "کام",
+  "categoryPersonal": "ذاتی",
+  "categoryCustom": "حسبِ ضرورت",
+  "updating": "اپ ڈیٹ کیا جا رہا ہے...",
+  "creating": "بنا یا جا رہا ہے...",
+  "updateTaskAction": "ٹاسک اپ ڈیٹ کریں",
+  "loginRequiredToAddTask": "ٹاسک شامل کرنے کے لیے لاگ ان ہونا ضروری ہے",
+  "taskCreated": "ٹاسک تخلیق ہوگیا",
+  "taskUpdated": "ٹاسک اپڈیٹ ہوگیا",
+  "noSubtasksAdded": "کوئی ذیلی ٹاسک شامل نہیں کیا گیا۔",
+  "noDescriptionAdded": "کوئی وضاحت شامل نہیں کی گئی۔",
+  "taskDetails": "ٹاسک کی تفصیلات",
+  "january": "جنوری",
+  "february": "فروری",
+  "march": "مارچ",
+  "april": "اپریل",
+  "may": "مئی",
+  "june": "جون",
+  "july": "جولائی",
+  "august": "اگست",
+  "september": "ستمبر",
+  "october": "اکتوبر",
+  "november": "نومبر",
+  "december": "دسمبر",
+  "tasksFrom": "ٹاسک سے",
+  "tasksFor": "ٹاسک کے لیے",
+  "tasksInThisRange": "اس حد میں ٹاسک",
+  "tasksForThisDay": "اس دن کے لیے ٹاسک",
+  "noTasks": "کوئی ٹاسک نہیں...",
+  "month": "مہینہ"
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

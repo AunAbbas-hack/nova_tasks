@@ -8,6 +8,8 @@ import 'package:nova_tasks/data/models/task_model.dart';
 import 'package:nova_tasks/features/home/presentation/viewmodels/home_viewmodel.dart';
 import 'package:nova_tasks/features/tasks/views/add_task_screen.dart';
 
+import '../../../l10n/app_localizations.dart';
+
 class TaskCard extends StatelessWidget {
   const TaskCard({super.key, required this.task});
 
@@ -220,27 +222,28 @@ class TaskCard extends StatelessWidget {
   }
 
   static Future<bool> _confirmDelete(BuildContext context) async {
+    final loc=AppLocalizations.of(context)!;
     return await showDialog<bool>(
           context: context,
           builder: (_) => AlertDialog(
             backgroundColor: const Color(0xFF1A1F2B),
-            title: const Text(
-              'Delete Task?',
+            title:  Text(
+              loc.deleteTaskTitle,
               style: TextStyle(color: Colors.white),
             ),
-            content: const Text(
-              'Are you sure you want to delete this task?',
+            content:  Text(
+              loc.deleteTaskMessage,
               style: TextStyle(color: Colors.white70),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancel'),
+                child:  Text(loc.filterCancelButton),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: const Text(
-                  'Delete',
+                child:  Text(
+                  'loc.deleteAction',
                   style: TextStyle(color: Colors.redAccent),
                 ),
               ),

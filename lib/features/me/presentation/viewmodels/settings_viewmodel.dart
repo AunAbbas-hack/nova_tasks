@@ -1,35 +1,40 @@
 // lib/features/settings/viewmodels/settings_viewmodel.dart
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class SettingsViewModel extends ChangeNotifier {
-  // keys for SharedPreferences
+  // SharedPrefs Keys
   static const _kDarkMode = 'dark_mode';
   static const _kDefaultHomeView = 'default_home_view';
   static const _kReminderHour = 'reminder_hour';
   static const _kReminderMinute = 'reminder_minute';
-  static const _kLanguage = 'language';
+  static const _kLanguage = 'language'; // ALWAYS "language"
 
   bool _isLoading = true;
   bool get isLoading => _isLoading;
 
-  bool _darkMode = false; // switch state
+
+
+  bool _darkMode = false;
   bool get darkMode => _darkMode;
 
-  String _defaultHomeView = 'Today'; // Today / Week
+  String _defaultHomeView = 'Today';
   String get defaultHomeView => _defaultHomeView;
 
   TimeOfDay _defaultReminderTime = const TimeOfDay(hour: 9, minute: 0);
   TimeOfDay get defaultReminderTime => _defaultReminderTime;
 
-  String _language = 'English';
-  String get language => _language;
-
   SettingsViewModel() {
     _loadSettings();
   }
 
+  Locale _locale =  Locale("ur");   // Locale("en")
+  String _languageCode = "en";               // "en" or "ur"
+  String get languageCode => _languageCode;
+  Locale get locale => _locale;
+  // 🔥 Load all settings
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
 
@@ -42,19 +47,28 @@ class SettingsViewModel extends ChangeNotifier {
       _defaultReminderTime = TimeOfDay(hour: h, minute: m);
     }
 
-    _language = prefs.getString(_kLanguage) ?? 'English';
+    // 🔥 Load saved language CORRECTLY
+    _languageCode = prefs.getString(_kLanguage) ?? "en";
+    _locale = Locale(_languageCode);
 
     _isLoading = false;
     notifyListeners();
   }
-
+  // 🔥 FINAL LANGUAGE HANDLER
+  Future<void> setLanguage(String code) async {
+    _languageCode = code;        // en / ur
+    _locale = Locale(_languageCode);  // Locale("en") or Locale("ur")
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_kLanguage, code);
+    notifyListeners();
+  }
+  // Theme, Reminder, HomeView
   Future<void> setDarkMode(bool value) async {
     _darkMode = value;
     notifyListeners();
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_kDarkMode, value);
-    // NOTE: yahan se tum later global theme change kara sakte ho
   }
 
   Future<void> setDefaultHomeView(String value) async {
@@ -74,20 +88,9 @@ class SettingsViewModel extends ChangeNotifier {
     await prefs.setInt(_kReminderMinute, time.minute);
   }
 
-  Future<void> setLanguage(String value) async {
-    _language = value;
-    notifyListeners();
-
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_kLanguage, value);
-  }
-
-  /// Logout: Firebase signOut + clear login flag (agar koi ho) etc.
+  // Logout
   Future<void> logout() async {
     await FirebaseAuth.instance.signOut();
-    // agar tum login flag SharedPreferences me rakh rahe ho to yahan clear karo
-    // final prefs = await SharedPreferences.getInstance();
-    // await prefs.remove('logged_in');
   }
 
   String? get currentUserName =>

@@ -8,8 +8,10 @@ import 'package:provider/provider.dart';
 
 import '../../../../core/widgets/app_text.dart';
 import '../../../../data/repositories/task_repository.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../auth/views/login_screen.dart';
 import '../viewmodels/me_viewmodel.dart';
+import '../viewmodels/settings_viewmodel.dart';
 
 class MeScreen extends StatelessWidget {
   final bool? showBack;
@@ -140,6 +142,7 @@ class _MeView extends StatelessWidget {
     final surfaceDark = const Color(0xFF11151F);
     final pillBg = const Color(0xFF1D2330);
     final primary = theme.colorScheme.primary;
+    final loc=AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
@@ -153,8 +156,8 @@ class _MeView extends StatelessWidget {
     icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
     )
         : null,  // tab nav hai, back ki zarurat nahi
-        title: const AppText(
-          'Profile',
+        title:  AppText(
+          loc.profile,
           fontSize: 18,
           fontWeight: FontWeight.w700,
         ),
@@ -195,14 +198,14 @@ class _MeView extends StatelessWidget {
                 children: [
                   _ProfileRow(
                     icon: Icons.person,
-                    title: 'Full Name',
+                    title: loc.fullName,
                     value: vm.name,
                     onTap: () => _showEditNameDialog(context),
                   ),
                   const Divider(color: Colors.white10, height: 24),
                   _ProfileRow(
                     icon: Icons.mail_outline,
-                    title: 'Email',
+                    title: loc.email,
                     value: vm.email,
                     // Email ko abhi read-only rakhte hain
                     onTap: null,
@@ -214,10 +217,10 @@ class _MeView extends StatelessWidget {
             const SizedBox(height: 24),
 
             // -------- Productivity Insights --------
-            const Align(
+             Align(
               alignment: Alignment.centerLeft,
               child: AppText(
-                'Productivity Insights',
+                loc.productivityInsights,
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
               ),
@@ -230,7 +233,7 @@ class _MeView extends StatelessWidget {
                   child: _StatCard(
                     bg: pillBg,
                     value: vm.tasksCompleted.toString(),
-                    label: 'Tasks\nCompleted',
+                    label: loc.tasksCompletedLabel,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -238,7 +241,7 @@ class _MeView extends StatelessWidget {
                   child: _StatCard(
                     bg: pillBg,
                     value: '${vm.onTimeRate}%',
-                    label: 'On-Time\nRate',
+                    label: loc.onTimeRateLabel,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -246,7 +249,7 @@ class _MeView extends StatelessWidget {
                   child: _StatCard(
                     bg: pillBg,
                     value: vm.currentStreak.toString(),
-                    label: 'Current\nStreak',
+                    label: loc.currentStreakLabel,
                   ),
                 ),
               ],
@@ -268,7 +271,7 @@ class _MeView extends StatelessWidget {
                   _MenuRow(
                     iconBg: pillBg,
                     icon: Icons.settings,
-                    label: 'Settings',
+                    label: loc.settings,
                     onTap: () {
                       // TODO: settings screen
                       Navigator.push(context, MaterialPageRoute(builder: (context)=>SettingsScreen())
@@ -279,7 +282,7 @@ class _MeView extends StatelessWidget {
                   _MenuRow(
                     iconBg: pillBg,
                     icon: Icons.notifications_none_rounded,
-                    label: 'Notifications',
+                    label: loc.notifications,
                     onTap: () {
                       // TODO: notifications screen
                       Navigator.push(context, MaterialPageRoute(builder: (context)=>NotificationsScreen()));
@@ -290,7 +293,7 @@ class _MeView extends StatelessWidget {
                     iconBg: const Color(0xFF3B1E1E),
                     icon: Icons.logout,
                     iconColor: Colors.redAccent,
-                    label: 'Log Out',
+                    label: loc.logout,
                     labelColor: Colors.redAccent,
                     onTap: () => _logout(context),
                   ),
@@ -440,6 +443,7 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      height: 135,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
       decoration: BoxDecoration(
         color: bg,
