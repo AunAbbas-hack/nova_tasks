@@ -36,18 +36,40 @@ class TaskDetailViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final now = DateTime.now();
-      final newCompletedAt = isCompleted ? null : now;
+      final newCompletedAt = isCompleted ? null : DateTime.now();
 
-      _task = _task.copyWith(completedAt: newCompletedAt);
+      // ✅ FIX: Manual task creation instead of copyWith
+      _task = TaskModel(
+        id: _task.id,
+        userId: _task.userId,
+        title: _task.title,
+        description: _task.description,
+        date: _task.date,
+        time: _task.time,
+        priority: _task.priority,
+        category: _task.category,
+        completedAt: newCompletedAt,  // ✅ Direct null assignment works
+        recurrenceRule: _task.recurrenceRule,
+        parentTaskId: _task.parentTaskId,
+        hasAttachment: _task.hasAttachment,
+        subtasks: _task.subtasks,
+        createdAt: _task.createdAt,
+        updatedAt: DateTime.now(),
+        dueAt: _task.dueAt,
+        reminder24Sent: _task.reminder24Sent,
+        reminder60Sent: _task.reminder60Sent,
+        reminder30Sent: _task.reminder30Sent,
+        reminder10Sent: _task.reminder10Sent,
+        reminder5Sent: _task.reminder5Sent,
+        overdueSent: _task.overdueSent,
+      );
+
       notifyListeners();
 
       await repo.updateTask(
         _task.userId,
         _task.id,
-        {
-          'completedAt': newCompletedAt,
-        },
+        {'completedAt': newCompletedAt},
       );
     } finally {
       _isUpdating = false;
@@ -58,11 +80,9 @@ class TaskDetailViewModel extends ChangeNotifier {
   Future<void> toggleSubtask(int index) async {
     if (index < 0 || index >= _task.subtasks.length) return;
 
-    final updatedSubtasks =
-    List<SubtaskModel>.from(_task.subtasks);
+    final updatedSubtasks = List<SubtaskModel>.from(_task.subtasks);
     final current = updatedSubtasks[index];
-    updatedSubtasks[index] =
-        current.copyWith(isDone: !current.isDone);
+    updatedSubtasks[index] = current.copyWith(isDone: !current.isDone);
 
     _task = _task.copyWith(subtasks: updatedSubtasks);
     notifyListeners();

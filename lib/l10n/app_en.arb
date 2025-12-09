@@ -148,7 +148,7 @@
   "filterPersonal": "Personal",
   "filterWork": "Work",
 
-  "tasksForDay": "Tasks for {day}, {date}",
+  "tasksForDay": "{day}, {date}",
   "@tasksForDay": {
     "placeholders": {
       "day": {},
@@ -254,17 +254,59 @@
   "tasksInThisRange": "task(s) in this range",
   "tasksForThisDay": "task(s) for this day",
   "noTasks": "No tasks...",
-  "month": "Month"
+  "month": "Month",
+  "addButton":"Add",
+  "markAsCompleted":"Mark as Completed",
+  "markAsIncomplete":"Mark as Incomplete",
+
+
+    "exitAppTitle": "Exit App",
+    "exitAppMessage": "Are you sure you want to exit the app?",
+    "no": "No",
+    "yes": "Yes",
+
+  "recurrenceRepeats": "Repeats",
+  "recurrenceDaily": "daily",
+  "recurrenceWeekly": "weekly",
+  "recurrenceMonthly": "monthly",
+  "recurrenceYearly": "yearly",
+
+  "recurrenceEvery": "every",
+
+  "weekdayMon": "Mon",
+  "weekdayTue": "Tue",
+  "weekdayWed": "Wed",
+  "weekdayThu": "Thu",
+  "weekdayFri": "Fri",
+  "weekdaySat": "Sat",
+  "weekdaySun": "Sun",
+
+  "recurrenceForever": "forever",
+  "recurrenceUntil": "until",
+  "recurrenceForOccurrences": "for {count} occurrences",
+
+
+
+  "recurrenceCancel": "Cancel",
+  "recurrenceSave": "Save",
+  "recurrenceSetTitle": "Set Recurrence",
+
+  "recurrenceDaily": "Daily",
+  "recurrenceWeekly": "Weekly",
+  "recurrenceMonthly": "Monthly",
+  "recurrenceYearly": "Yearly",
+
+  "recurrenceDailyDesc": "Repeats every day.",
+  "recurrenceMonthlyDesc": "Repeats every month on this date.",
+  "recurrenceYearlyDesc": "Repeats every year on this date.",
+
+  "recurrenceRepeatsOn": "Repeats On",
+
+  "recurrenceEnds": "Ends",
+  "recurrenceNever": "Never",
+  "recurrenceOnDate": "On Date",
+  "recurrenceAfterOccurrences": "After N occurrences"
 }
-
-
-
-
-
-
-
-
-
 
 
 

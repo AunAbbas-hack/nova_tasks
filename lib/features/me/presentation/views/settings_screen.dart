@@ -140,7 +140,7 @@ class _SettingsView extends StatelessWidget {
                     icon: Icons.home_rounded,
                     iconBgColor: const Color(0xFF111827),
                     title: text.defaultHomeView,
-                    subtitle: vm.defaultHomeView,
+                    subtitle: vm.getLocalizedHomeView(context),
                     onTap: () => _showHomeViewDialog(context, vm),
                     trailing: const Icon(Icons.chevron_right,
                         color: Colors.white54),

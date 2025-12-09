@@ -10,6 +10,7 @@ import 'package:nova_tasks/features/calendar/presentation/views/calendar_screen.
 import 'package:nova_tasks/features/home/presentation/views/home_screen.dart';
 import 'package:nova_tasks/features/me/presentation/views/me_screen.dart';
 import 'package:nova_tasks/features/auth/views/login_screen.dart';
+import 'package:nova_tasks/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
 import 'features/home/presentation/viewmodels/home_viewmodel.dart';
@@ -24,7 +25,7 @@ class NavigationWrapper extends StatefulWidget {
 class _NavigationWrapperState extends State<NavigationWrapper> {
   @override
   int currentIndex = 0;
-
+   AppLocalizations get loc => AppLocalizations.of(context)!;
   Future<bool> _showExitDialog() async {
     if (currentIndex!=0){
       setState(() {
@@ -33,17 +34,18 @@ class _NavigationWrapperState extends State<NavigationWrapper> {
       return false;
     }
     final result = await Get.dialog<bool>(
+
       AlertDialog(
-        title: const Text("Exit App"),
-        content: const Text("Are you sure you want to exit the app?"),
+        title:  Text(loc.exitAppTitle),
+        content:  Text(loc.exitAppMessage),
         actions: [
           TextButton(
             onPressed: () => Get.back(result: false),
-            child: const Text("No"),
+            child:  Text(loc.no),
           ),
           TextButton(
             onPressed: () => Get.back(result: true),
-            child: const Text("Yes"),
+            child:  Text(loc.yes),
           ),
         ],
       ),

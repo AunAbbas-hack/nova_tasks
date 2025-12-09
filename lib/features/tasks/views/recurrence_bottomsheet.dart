@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:nova_tasks/core/widgets/app_text.dart';
+import 'package:nova_tasks/l10n/app_localizations_en.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../l10n/app_localizations.dart';
 import '../viewmodels/recurrence_bottomsheet_viewmodel.dart';
 
 Future<RecurrenceSettings?> showRecurrenceBottomSheet(
@@ -33,7 +35,7 @@ class _RecurrenceSheetView extends StatelessWidget {
   Widget build(BuildContext context) {
     final vm = context.watch<RecurrenceViewModel>();
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
-
+    final loc=AppLocalizations.of(context)!;
     return SafeArea(
       top: false,
       child: Padding(
@@ -60,10 +62,10 @@ class _RecurrenceSheetView extends StatelessWidget {
               children: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const AppText("Cancel",color: AppColors.primary,)
+                  child:  AppText(loc.cancelAction,color: AppColors.primary,)
                 ),
-                const Text(
-                  'Set Recurrence',
+                 Text(
+                  loc.recurrenceSetTitle,
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 18,
@@ -73,7 +75,7 @@ class _RecurrenceSheetView extends StatelessWidget {
                 TextButton(
                   onPressed: () =>
                       Navigator.pop(context, vm.settings), // ✅ return settings
-                  child: const AppText("Save",color: AppColors.primary,),
+                  child:  AppText(loc.saveAction,color: AppColors.primary,),
                 ),
               ],
             ),
@@ -117,7 +119,7 @@ class _FrequencyTabs extends StatelessWidget {
   Widget build(BuildContext context) {
     final vm = context.watch<RecurrenceViewModel>();
     final freq = vm.frequency;
-
+    final loc=AppLocalizations.of(context)!;
     Widget pill(String label, RecurrenceFrequency value) {
       final selected = freq == value;
       return Expanded(
@@ -153,10 +155,10 @@ class _FrequencyTabs extends StatelessWidget {
       ),
       child: Row(
         children: [
-          pill('Daily', RecurrenceFrequency.daily),
-          pill('Weekly', RecurrenceFrequency.weekly),
-          pill('Monthly', RecurrenceFrequency.monthly),
-          pill('Yearly', RecurrenceFrequency.yearly),
+          pill(loc.recurrenceDaily, RecurrenceFrequency.daily),
+          pill(loc.recurrenceWeekly, RecurrenceFrequency.weekly),
+          pill(loc.recurrenceMonthly, RecurrenceFrequency.monthly),
+          pill(loc.recurrenceYearly, RecurrenceFrequency.yearly),
         ],
       ),
     );
@@ -167,31 +169,31 @@ class _FrequencyContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<RecurrenceViewModel>();
-
+    final loc=AppLocalizations.of(context)!;
     switch (vm.frequency) {
       case RecurrenceFrequency.daily:
-        return const Align(
+        return  Align(
           alignment: Alignment.centerLeft,
           child: Text(
-            'Repeats every day.',
+            loc.recurrenceDailyDesc,
             style: TextStyle(color: Colors.white70),
           ),
         );
       case RecurrenceFrequency.weekly:
         return const _WeeklySelector();
       case RecurrenceFrequency.monthly:
-        return const Align(
+        return  Align(
           alignment: Alignment.centerLeft,
           child: Text(
-            'Repeats every month on this date.',
+            loc.recurrenceMonthlyDesc,
             style: TextStyle(color: Colors.white70),
           ),
         );
       case RecurrenceFrequency.yearly:
-        return const Align(
+        return  Align(
           alignment: Alignment.centerLeft,
           child: Text(
-            'Repeats every year on this date.',
+            loc.recurrenceYearlyDesc,
             style: TextStyle(color: Colors.white70),
           ),
         );
@@ -206,15 +208,15 @@ class _WeeklySelector extends StatelessWidget {
   Widget build(BuildContext context) {
     final vm = context.watch<RecurrenceViewModel>();
     final selected = vm.weekDays;
-
+    final loc=AppLocalizations.of(context)!;
     const labels = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
     const weekdays = [7, 1, 2, 3, 4, 5, 6]; // start from Sunday for UI
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Repeats On',
+         Text(
+          loc.recurrenceRepeatsOn,
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w600,
@@ -257,7 +259,7 @@ class _EndsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final vm = context.watch<RecurrenceViewModel>();
     final endType = vm.endType;
-
+    final loc=AppLocalizations.of(context)!;
     Widget radioTile(String title, RecurrenceEndType type,
         {Widget? trailing}) {
       final selected = endType == type;
@@ -290,17 +292,17 @@ class _EndsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Ends',
+         Text(
+          loc.recurrenceEnds,
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: 8),
-        radioTile('Never', RecurrenceEndType.never),
+        radioTile(loc.recurrenceForever, RecurrenceEndType.never),
         radioTile(
-          'On Date',
+          loc.recurrenceUntil,
           RecurrenceEndType.onDate,
           trailing: IconButton(
             icon: const Icon(Icons.calendar_today, color: Colors.white70),
@@ -319,7 +321,7 @@ class _EndsSection extends StatelessWidget {
           ),
         ),
         radioTile(
-          'After N occurrences',
+         loc.recurrenceAfterOccurrences,
           RecurrenceEndType.afterCount,
           trailing: Row(
             mainAxisSize: MainAxisSize.min,

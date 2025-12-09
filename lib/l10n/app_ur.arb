@@ -146,7 +146,7 @@
   "filterPersonal": "ذاتی",
   "filterWork": "کام",
 
-  "tasksForDay": "{day}، {date} کے کام",
+  "tasksForDay": "{day}، {date} ",
   "@tasksForDay": {
     "placeholders": {
       "day": {},
@@ -245,27 +245,62 @@
   "november": "نومبر",
   "december": "دسمبر",
   "tasksFrom": "ٹاسک سے",
-  "tasksFor": "ٹاسک کے لیے",
+  "tasksFor": "ٹاسک",
   "tasksInThisRange": "اس حد میں ٹاسک",
   "tasksForThisDay": "اس دن کے لیے ٹاسک",
   "noTasks": "کوئی ٹاسک نہیں...",
-  "month": "مہینہ"
+  "month": "مہینہ",
+  "addButton":"شامل کریں",
+  "markAsCompleted":"مکمل کے طور پر نشان زد کریں",
+  "markAsIncomplete":"نامکمل کے طور پر نشان زد کریں",
+
+
+  "exitAppTitle": "ایپ بند کریں",
+  "exitAppMessage": "کیا آپ واقعی ایپ بند کرنا چاہتے ہیں؟",
+  "no": "نہیں",
+  "yes": "ہاں",
+
+
+  "recurrenceRepeats": "دہرایا جائے گا",
+  "recurrenceDaily": "روزانہ",
+  "recurrenceWeekly": "ہفتہ وار",
+  "recurrenceMonthly": "ماہانہ",
+  "recurrenceYearly": "سالانہ",
+
+  "recurrenceEvery": "ہر",
+
+  "weekdayMon": "پیر",
+  "weekdayTue": "منگل",
+  "weekdayWed": "بدھ",
+  "weekdayThu": "جمعرات",
+  "weekdayFri": "جمعہ",
+  "weekdaySat": "ہفتہ",
+  "weekdaySun": "اتوار",
+
+  "recurrenceForever": "ہمیشہ",
+  "recurrenceUntil": "تک",
+  "recurrenceForOccurrences": "{count} مرتبہ کے لیے",
+
+
+  "recurrenceCancel": "منسوخ",
+  "recurrenceSave": "محفوظ کریں",
+  "recurrenceSetTitle": "دہراؤ سیٹ کریں",
+
+  "recurrenceDaily": "روزانہ",
+  "recurrenceWeekly": "ہفتہ وار",
+  "recurrenceMonthly": "ماہانہ",
+  "recurrenceYearly": "سالانہ",
+
+  "recurrenceDailyDesc": "ہر دن دہرایا جائے گا۔",
+  "recurrenceMonthlyDesc": "ہر مہینے اسی تاریخ کو دہرایا جائے گا۔",
+  "recurrenceYearlyDesc": "ہر سال اسی تاریخ کو دہرایا جائے گا۔",
+
+  "recurrenceRepeatsOn": "دہراؤ کے دن",
+
+  "recurrenceEnds": "اختتام",
+  "recurrenceNever": "کبھی نہیں",
+  "recurrenceOnDate": "تاریخ پر",
+  "recurrenceAfterOccurrences": "مقررہ دفعہ کے بعد"
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

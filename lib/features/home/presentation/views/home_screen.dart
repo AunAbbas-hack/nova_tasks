@@ -57,82 +57,72 @@ class _HomeView extends StatelessWidget {
               const SizedBox(height: 24),
 
               // ------------- DATE + SHOW ALL ROW -------------
-              Row(
-                children: [
-                  GestureDetector(
-                    onTap: () => _openShowAllSheet(context, vm),
-                    child: AnimatedContainer(
-                      height: 44,
-                      duration: const Duration(milliseconds: 180),
-                      padding:
-                      const EdgeInsets.symmetric(horizontal: 18),
-                      decoration: BoxDecoration(
-                        color: vm.subset == HomeFilterSubset.all
-                            ? const Color(0xFF151A24)
-                            : theme.colorScheme.primary,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      alignment: Alignment.center,
-                      child: AppText(
-                        loc.showAll,
-                        color: vm.subset == HomeFilterSubset.all
-                            ? Colors.white70
-                            : Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: SizedBox(
-                      height: 44,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: dates.length,
-                        separatorBuilder: (_, __) =>
-                        const SizedBox(width: 10),
-                        itemBuilder: (_, i) {
-                          final date = dates[i];
-                          final isSel = vm.selectedDate != null &&
-                              _isSameDay(date, vm.selectedDate!);
+              SizedBox(
+                height: 44,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: dates.length + 1, // +1 for "Show All" button
+                  separatorBuilder: (_, __) => const SizedBox(width: 10),
+                  itemBuilder: (_, i) {
+                    // First item = "Show All" button
+                    if (i == 0) {
+                      return GestureDetector(
+                        onTap: () => _openShowAllSheet(context, vm),
+                        child: AnimatedContainer(
+                          height: 44,
+                          duration: const Duration(milliseconds: 180),
+                          padding: const EdgeInsets.symmetric(horizontal: 18),
+                          decoration: BoxDecoration(
+                            color: vm.subset == HomeFilterSubset.all
+                                ? const Color(0xFF151A24)
+                                : theme.colorScheme.primary,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          alignment: Alignment.center,
+                          child: AppText(
+                            loc.showAll,
+                            color: vm.subset == HomeFilterSubset.all
+                                ? Colors.white70
+                                : Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      );
+                    }
 
-                          return GestureDetector(
-                            onTap: () {
-                              if (isSel) {
-                                // same date tap -> clear date
-                                vm.clearSelectedDate();
-                              } else {
-                                vm.setSelectedDate(date);
-                              }
-                            },
-                            child: AnimatedContainer(
-                              duration:
-                              const Duration(milliseconds: 180),
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 18),
-                              decoration: BoxDecoration(
-                                color: isSel
-                                    ? theme.colorScheme.primary
-                                    : const Color(0xFF151A24),
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              alignment: Alignment.center,
-                              child: AppText(
-                                loc.tasksForDay(localizedWeekday(context, date), date.day),
-                                color: isSel
-                                    ? Colors.white
-                                    : Colors.white70,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          );
-                        },
+                    // Rest items = date buttons
+                    final date = dates[i - 1]; // -1 because first item is "Show All"
+                    final isSel = vm.selectedDate != null &&
+                        _isSameDay(date, vm.selectedDate!);
+
+                    return GestureDetector(
+                      onTap: () {
+                        if (isSel) {
+                          vm.clearSelectedDate();
+                        } else {
+                          vm.setSelectedDate(date);
+                        }
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 180),
+                        padding: const EdgeInsets.symmetric(horizontal: 18),
+                        decoration: BoxDecoration(
+                          color: isSel
+                              ? theme.colorScheme.primary
+                              : const Color(0xFF151A24),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        alignment: Alignment.center,
+                        child: AppText(
+                          loc.tasksForDay(localizedWeekday(context, date), date.day),
+                          color: isSel ? Colors.white : Colors.white70,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                  ),
-                ],
+                    );
+                  },
+                ),
               ),
-
               const SizedBox(height: 16),
 
               // ------------- CATEGORY ROW -------------
@@ -413,7 +403,8 @@ void _openShowAllSheet(BuildContext context, HomeViewModel vm) {
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
             decoration: BoxDecoration(
-              color: isSelected ? AppColors.primary : const Color(0xFF1A1E28),
+              border: Border.all(color: isSelected?AppColors.primary:const Color(0xFF1A1E28)),
+              // color: isSelected ? AppColors.primary : const Color(0xFF1A1E28),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -424,7 +415,7 @@ void _openShowAllSheet(BuildContext context, HomeViewModel vm) {
                   child: Text(
                     title,
                     style: TextStyle(
-                      color: isSelected ? Colors.black : Colors.white,
+                      color: isSelected ? AppColors.primaryBright : Colors.white,
                       fontSize: 16,
                       fontWeight:
                       isSelected ? FontWeight.w700 : FontWeight.w400,

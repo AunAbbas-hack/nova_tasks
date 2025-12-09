@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../../../../data/models/task_model.dart';
 import '../../../../data/repositories/task_repository.dart';
@@ -92,11 +93,16 @@ class HomeViewModel extends ChangeNotifier {
   /// *is day* pe yeh task show hona chahiye ya nahi.
   ///
   /// Supported rules:
-  ///  DAILY
-  ///  WEEKLY:1,3,5        (1 = Mon ... 7 = Sun)
-  ///  MONTHLY:15          (15th of every month)
-  ///  YEARLY:03-10        (MM-dd, e.g., March 10)
-  bool _occursOn(TaskModel task, DateTime day) {
+  ///  F=DAILY
+  ///  F=WEEKLY;BYDAY=1,3,5  (1 = Mon ... 7 = Sun)
+  ///  F=MONTHLY
+  ///  F=YEARLY
+  ///  UNTIL=2023-12-31     (end date)
+  ///  COUNT=10             (number of occurrences)
+  // In home_viewmodel.dart, update the _occursOn method:
+
+bool _occursOn(TaskModel task, DateTime day) {
+  try {
     final dayOnly = _only(day);
     final start = _only(task.date);
     final rule = task.recurrenceRule?.trim();
@@ -109,43 +115,99 @@ class HomeViewModel extends ChangeNotifier {
     // Do not show before start date
     if (dayOnly.isBefore(start)) return false;
 
-    // ------ DAILY ------
-    if (rule == 'DAILY') {
+    // Parse the recurrence rule
+    final parts = rule.split(';').map((e) => e.split('=')).toList();
+    final frequency = parts.firstWhereOrNull((e) => e[0] == 'F')?[1];
+    final until = parts.firstWhereOrNull((e) => e[0] == 'UNTIL');
+    final count = parts.firstWhereOrNull((e) => e[0] == 'COUNT');
+
+    // Check end conditions
+    if (until != null && until.length > 1) {
+      try {
+        String dateStr = until[1];
+        // Handle different date formats
+        DateTime untilDate;
+        if (dateStr.length == 10) { // YYYY-MM-DD format
+          final parts = dateStr.split('-');
+          if (parts.length == 3) {
+            final year = int.tryParse(parts[0]) ?? 0;
+            final month = int.tryParse(parts[1]) ?? 1;
+            final day = int.tryParse(parts[2]) ?? 1;
+            untilDate = DateTime(year, month, day);
+          } else {
+            throw FormatException('Invalid date format');
+          }
+        } else {
+          untilDate = DateTime.parse(dateStr);
+        }
+        
+        if (dayOnly.isAfter(untilDate)) {
+          return false;
+        }
+      } catch (e) {
+        debugPrint('Error parsing UNTIL date: ${until[1]} - $e');
+        return false;
+      }
+    }
+
+    if (count != null && count.length > 1) {
+      final maxOccurrences = int.tryParse(count[1]) ?? 0;
+      if (maxOccurrences > 0) {
+        int occurrences = 0;
+        DateTime current = start;
+        while (!current.isAfter(dayOnly) && occurrences <= maxOccurrences) {
+          if (_matchesRecurrencePattern(task, current, frequency, parts)) {
+            occurrences++;
+            if (_isSameDay(current, dayOnly)) {
+              return true;
+            }
+            if (occurrences >= maxOccurrences) {
+              return false;
+            }
+          }
+          current = current.add(const Duration(days: 1));
+        }
+        return false;
+      }
+    }
+
+    return _matchesRecurrencePattern(task, dayOnly, frequency, parts);
+  } catch (e) {
+    debugPrint('Error in _occursOn: $e');
+    return false;
+  }
+}
+
+  bool _matchesRecurrencePattern(TaskModel task, DateTime day, String? frequency, List<List<String>> parts) {
+    final start = _only(task.date);
+    
+    // If it's the start date, it should always be included
+    if (_isSameDay(start, day)) {
       return true;
     }
 
-    // ------ WEEKLY:1,3,5 ------
-    if (rule.startsWith('WEEKLY:')) {
-      final part = rule.substring('WEEKLY:'.length);
-      final days = part
-          .split(',')
-          .map((e) => int.tryParse(e.trim()))
-          .whereType<int>()
-          .toSet();
-      return days.contains(dayOnly.weekday);
+    // Check if the day matches the frequency pattern
+    switch (frequency) {
+      case 'DAILY':
+        return true;
+        
+      case 'WEEKLY':
+        final byDay = parts.firstWhereOrNull((e) => e[0] == 'BYDAY');
+        if (byDay != null) {
+          final weekDays = byDay[1].split(',').map(int.parse).toSet();
+          return weekDays.contains(day.weekday);
+        }
+        return day.weekday == start.weekday;
+        
+      case 'MONTHLY':
+        return day.day == start.day;
+        
+      case 'YEARLY':
+        return day.month == start.month && day.day == start.day;
+        
+      default:
+        return _isSameDay(start, day);
     }
-
-    // ------ MONTHLY:15 ------
-    if (rule.startsWith('MONTHLY:')) {
-      final part = rule.substring('MONTHLY:'.length);
-      final dom = int.tryParse(part.trim());
-      if (dom == null) return false;
-      return dayOnly.day == dom;
-    }
-
-    // ------ YEARLY:03-10 ------
-    if (rule.startsWith('YEARLY:')) {
-      final part = rule.substring('YEARLY:'.length);
-      final segs = part.split('-');
-      if (segs.length != 2) return false;
-      final month = int.tryParse(segs[0]);
-      final dayNum = int.tryParse(segs[1]);
-      if (month == null || dayNum == null) return false;
-      return dayOnly.month == month && dayOnly.day == dayNum;
-    }
-
-    // Unknown rule → fallback to only start date
-    return _isSameDay(start, dayOnly);
   }
 
   /// 24h + 12h (AM/PM) dono time formats ko parse karta hai
@@ -246,8 +308,15 @@ class HomeViewModel extends ChangeNotifier {
       }
 
       // Date filter (if selected, recurrence-aware)
-      if (_selectedDate != null && !_occursOn(t, _selectedDate!)) {
-        return false;
+      if (_selectedDate != null) {
+        // For recurring tasks, check if they occur on the selected date
+        if (_isRecurring(t)) {
+          return _occursOn(t, _selectedDate!);
+        }
+        // For non-recurring tasks, check if they match the selected date
+        else {
+          return _isSameDay(t.date, _selectedDate!);
+        }
       }
 
       return true;

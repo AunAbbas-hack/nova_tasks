@@ -149,13 +149,14 @@ class TaskModel {
     String? time,
     String? priority,
     String? category,
-    DateTime? completedAt,
+    Object? completedAt=_notProvided,
     String? recurrenceRule,
     String? parentTaskId,
     bool? hasAttachment,
     List<SubtaskModel>? subtasks,
     DateTime? createdAt,
     DateTime? updatedAt,
+
 
     // NEW
     DateTime? dueAt,
@@ -175,7 +176,7 @@ class TaskModel {
       time: time ?? this.time,
       priority: priority ?? this.priority,
       category: category ?? this.category,
-      completedAt: completedAt ?? this.completedAt,
+      completedAt: completedAt == _notProvided ? this.completedAt : completedAt as DateTime,
       recurrenceRule: recurrenceRule ?? this.recurrenceRule,
       parentTaskId: parentTaskId ?? this.parentTaskId,
       hasAttachment: hasAttachment ?? this.hasAttachment,
@@ -194,3 +195,4 @@ class TaskModel {
     );
   }
 }
+const Object _notProvided=Object();

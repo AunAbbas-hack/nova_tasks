@@ -222,7 +222,13 @@ class _NovaTableCalendar extends StatelessWidget {
     final vm = context.watch<CalendarViewModel>();
     final theme = Theme.of(context);
 
+    // ✅ Get current locale
+    final locale = Localizations.localeOf(context);
+
     return TableCalendar<TaskModel>(
+      // ✅ ADD THIS LINE - Calendar localization
+      locale: locale.toString(), // 'en_US', 'ur_PK', etc.
+
       firstDay: DateTime.utc(2015, 1, 1),
       lastDay: DateTime.utc(2035, 12, 31),
       focusedDay: vm.focusedDay,
@@ -294,7 +300,6 @@ class _NovaTableCalendar extends StatelessWidget {
       ),
 
       calendarBuilders: CalendarBuilders(
-        // small dot under day if has tasks
         markerBuilder: (context, day, events) {
           if (events.isEmpty) return const SizedBox.shrink();
           return const Positioned(
@@ -302,7 +307,7 @@ class _NovaTableCalendar extends StatelessWidget {
             child: Icon(
               Icons.circle,
               size: 5,
-              color: Color(0xFFF97316), // small orange dot
+              color: Color(0xFFF97316),
             ),
           );
         },
@@ -310,7 +315,6 @@ class _NovaTableCalendar extends StatelessWidget {
     );
   }
 }
-
 // ================== TASK TILE (LIST) ==================
 
 class _CalendarTaskTile extends StatelessWidget {

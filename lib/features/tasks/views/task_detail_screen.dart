@@ -135,7 +135,7 @@ class _TaskDetailView extends StatelessWidget {
                         color: Colors.white),
                   ),
                   const SizedBox(width: 4),
-                   Expanded(
+                  Expanded(
                     child: Center(
                       child: AppText(
                         loc.taskDetails,
@@ -159,7 +159,7 @@ class _TaskDetailView extends StatelessWidget {
                         builder: (_) => AlertDialog(
                           backgroundColor: const Color(0xFF1A1F2B),
                           title:  Text(
-                           loc.deleteTaskTitle ,
+                            loc.deleteTaskTitle ,
                             style: TextStyle(color: Colors.white),
                           ),
                           content:  Text(
@@ -264,7 +264,7 @@ class _TaskDetailView extends StatelessWidget {
                     const SizedBox(height: 24),
 
                     // Description
-                     AppText(
+                    AppText(
                       loc.taskDescriptionLabel,
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
@@ -291,7 +291,7 @@ class _TaskDetailView extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                         AppText(
+                        AppText(
                           loc.subtasksLabel,
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
@@ -320,8 +320,8 @@ class _TaskDetailView extends StatelessWidget {
                           ),
                           const SizedBox(height: 16),
                           if (task.subtasks.isEmpty)
-                             AppText(
-                             loc.noSubtasksAdded,
+                            AppText(
+                              loc.noSubtasksAdded,
                               color: Colors.white70,
                             )
                           else
@@ -371,8 +371,8 @@ class _TaskDetailView extends StatelessWidget {
                   icon: const Icon(Icons.check_rounded),
                   label: Text(
                     vm.isCompleted
-                        ? 'Mark as Incomplete'
-                        : 'Mark as Complete',
+                        ? loc.markAsIncomplete
+                        : loc.markAsCompleted
                   ),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),

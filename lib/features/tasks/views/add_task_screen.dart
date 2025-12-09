@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nova_tasks/core/theme/app_colors.dart';
 import 'package:nova_tasks/features/tasks/views/recurrence_bottomsheet.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -61,31 +62,115 @@ class _AddTaskPage extends StatelessWidget {
     }
   }
 
-  void _addSubtaskDialog(BuildContext context, AddTaskViewModel viewModel) {
-    final controller = TextEditingController();
-    showDialog<void>(
+  void _showSubtaskBottomSheet(BuildContext context, AddTaskViewModel viewModel) {
+    final loc=AppLocalizations.of(context)!;
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Add Subtask'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(hintText: 'Subtask title'),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              viewModel.addSubtask(controller.text);
-              Navigator.of(context).pop();
-            },
-            child: const Text('Add'),
-          ),
-        ],
+      isScrollControlled: true,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) {
+          final TextEditingController _controller = TextEditingController();
+          
+          return Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+              left: 16,
+              right: 16,
+              top: 16,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                     Text(
+                      loc.subtasksLabel,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Padding(
+                  padding: const EdgeInsets.only(top: 16.0, bottom: 8.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _controller,
+                          autofocus: true,
+                          decoration: InputDecoration(
+                            hintText: loc.addSubtaskAction,
+                            hintStyle: const TextStyle(color: Colors.white54),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Colors.white24),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Colors.white24),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: AppColors.primaryBright),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            filled: true,
+                            fillColor: const Color(0xFF151A24),
+                          ),
+                          style: const TextStyle(color: Colors.white),
+                          onSubmitted: (value) {
+                            _addSubtask(value, _controller, viewModel, setState);
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      TextButton(
+                        onPressed: () {
+                          _addSubtask(_controller.text, _controller, viewModel, setState);
+                        },
+                        child:  Text(
+                          loc.addButton,
+                          style: TextStyle(
+                            color: AppColors.primaryBright,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          backgroundColor: AppColors.primaryBright.withOpacity(0.1),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+              ],
+            ),
+          );
+        },
       ),
     );
+  }
+
+  void _addSubtask(String value, TextEditingController controller, AddTaskViewModel viewModel, StateSetter setState) {
+    if (value.trim().isNotEmpty) {
+      viewModel.addSubtask(value.trim());
+      controller.clear();
+      setState(() {});
+    }
   }
 
   String _formatDate(DateTime? date) {
@@ -407,17 +492,32 @@ class _AddTaskPage extends StatelessWidget {
                         );
                       }),
                       const SizedBox(height: 8),
-                      OutlinedButton.icon(
-                        onPressed: () => _addSubtaskDialog(context, viewModel),
-                        icon: const Icon(Icons.add),
-                        label:  Text(loc.addSubtaskAction),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          side: const BorderSide(color: Colors.white24),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
+                      // Replace the commented button section with this code
+                      ListTile(
+                        leading: const Icon(Icons.playlist_add, color: Colors.white70),
+                        title: Text(
+                        loc.addSubtaskAction,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
                           ),
                         ),
+                        trailing: Container(
+                          padding: EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.white24,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '${viewModel.subtasks.length}',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        contentPadding: EdgeInsets.symmetric(horizontal: 4),
+                        onTap: () => _showSubtaskBottomSheet(context, viewModel),
                       ),
                     ],
                   ),
