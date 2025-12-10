@@ -312,7 +312,8 @@
 
   "logoutTitle": "Logout",
   "logoutMessage": "Are you sure you want to log out?",
-  "logout": "Logout"
+  "logout": "Logout",
+  "selectLanguage":"Select Language"
 }
 
 

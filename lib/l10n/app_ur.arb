@@ -144,7 +144,7 @@
 
   "filterAll": "تمام",
   "filterPersonal": "ذاتی",
-  "filterWork": "کام",
+  "filterWork": "ٹاسک",
 
   "tasksForDay": "{day}، {date} ",
   "@tasksForDay": {
@@ -154,7 +154,7 @@
     }
   },
 
-  "noTasksForDay": "آج کے لیے کوئی کام موجود نہیں",
+  "noTasksForDay": "آج کے لیے کوئی ٹاسک موجود نہیں",
 
   "bottomNavHome": "ہوم",
   "bottomNavCalendar": "کیلنڈر",
@@ -172,30 +172,30 @@
   "filterTitleShow": "دکھائیں",
 
   "filterAllTasks": "تمام (آج + زائد المیعاد + آنے والے)",
-  "filterOverdueTasks": "زائد المیعاد کام",
-  "filterTodayTasks": "آج کے کام",
-  "filterUpcomingTasks": "آنے والے کام",
+  "filterOverdueTasks": "زائد المیعاد ٹاسک",
+  "filterTodayTasks": "آج کے ٹاسک",
+  "filterUpcomingTasks": "آنے والے ٹاسک",
 
   "filterCancelButton": "منسوخ کریں",
   "filterApplyButton": "لاگو کریں",
   "allTasks": "All Tasks",
 
-  "noTasksForFilter": "اس فلٹر کے لیے کوئی کام نہیں ملا۔",
+  "noTasksForFilter": "اس فلٹر کے لیے کوئی ٹاسک نہیں ملا۔",
 
-  "deleteTaskTitle": "کام حذف کریں؟",
-  "deleteTaskMessage": "کیا آپ واقعی اس کام کو حذف کرنا چاہتے ہیں؟",
+  "deleteTaskTitle": "ٹاسک حذف کریں؟",
+  "deleteTaskMessage": "کیا آپ واقعی اس ٹاسک کو حذف کرنا چاہتے ہیں؟",
   "cancelAction": "منسوخ کریں",
   "deleteAction": "حذف کریں",
 
   "editTaskTitle": "اپ ڈیٹ کریں",
-  "newTaskTitle": "نیا کام",
+  "newTaskTitle": "نیا ٹاسک",
   "saveAction": "محفوظ کریں",
 
-  "taskTitleLabel": "کام کا عنوان",
+  "taskTitleLabel": "ٹاسک کا عنوان",
   "taskTitleHint": "مثال کے طور پر، نیا ڈیش بورڈ ڈیزائن کریں",
 
   "taskDescriptionLabel": "تفصیل",
-  "taskDescriptionHint": "کام کے بارے میں تفصیلات شامل کریں...",
+  "taskDescriptionHint": "ٹاسک کے بارے میں تفصیلات شامل کریں...",
 
   "dueDateLabel": "مقررہ تاریخ",
   "timeLabel": "وقت",
@@ -207,22 +207,22 @@
   "priorityUrgent": "انتہائی ضروری",
 
   "categoryLabel": "زمرہ",
-  "categoryWork": "کام",
+  "categoryWork": "ٹاسک",
 
-  "recurringTaskLabel": "دوبارہ ہونے والا کام",
-  "recurringTaskHint": "کام کو بار بار ہونے کے لیے سیٹ کریں",
+  "recurringTaskLabel": "دوبارہ ہونے والا ٹاسک",
+  "recurringTaskHint": "ٹاسک کو بار بار ہونے کے لیے سیٹ کریں",
 
-  "subtasksLabel": "ذیلی کام",
+  "subtasksLabel": "ذیلی ٹاسک",
   "subtasksProgressLabel": "پیش رفت",
   "subtasksCompletedStatus": "{completed} میں سے {total} مکمل",
-  "enterSubTask":"ذیلی کام درج کریں۔",
+  "enterSubTask":"ذیلی ٹاسک درج کریں۔",
 
 
-  "addSubtaskAction": "ذیلی کام شامل کریں",
+  "addSubtaskAction": "ذیلی ٹاسک شامل کریں",
 
-  "createTaskAction": "کام بنائیں",
+  "createTaskAction": "ٹاسک بنائیں",
   "enterCustomCategory": "حسبِ ضرورت زمرہ درج کریں",
-  "categoryWork": "کام",
+  "categoryWork": "ٹاسک",
   "categoryPersonal": "ذاتی",
   "categoryCustom": "حسبِ ضرورت",
   "updating": "اپ ڈیٹ کیا جا رہا ہے...",
@@ -303,13 +303,14 @@
   "recurrenceNever": "کبھی نہیں",
   "recurrenceOnDate": "تاریخ پر",
   "recurrenceAfterOccurrences": "مقررہ دفعہ کے بعد",
-  "completedTasksText":"مکمل شدہ کام",
+  "completedTasksText":"مکمل شدہ ٹاسک",
 
 
 
   "logoutTitle": "لاگ آؤٹ",
   "logoutMessage": "کیا آپ واقعی لاگ آؤٹ کرنا چاہتے ہیں؟",
-  "logout": "لاگ آؤٹ"
+  "logout": "لاگ آؤٹ",
+  "selectLanguage":"زبان منتخب کریں۔"
 }
 
 

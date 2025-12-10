@@ -400,140 +400,150 @@ class _ShowAllSection extends StatelessWidget {
 
 
 void _openShowAllSheet(BuildContext context, HomeViewModel vm) {
+  final theme = Theme.of(context);
+  final loc = AppLocalizations.of(context)!;
+
+  final options = [
+    (HomeFilterSubset.all, loc.filterAllTasks),
+    (HomeFilterSubset.overdue, loc.filterOverdueTasks),
+    (HomeFilterSubset.today, loc.filterTodayTasks),
+    (HomeFilterSubset.upcoming, loc.filterUpcomingTasks),
+  ];
+
+  HomeFilterSubset? temp = vm.subset;
+
   showModalBottomSheet<void>(
     context: context,
     backgroundColor: const Color(0xFF11151F),
+    isScrollControlled: true,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
     ),
-    builder: (_) {
-      HomeFilterSubset selected = vm.subset; // temporary selection
-
-      Widget buildOption(String title, HomeFilterSubset value,void Function(void Function()) setStateSheet) {
-        bool isSelected = selected == value;
-
-        return GestureDetector(
-          onTap: () {
-            // (context as Element).markNeedsBuild();
-            // selected = value;
-            setStateSheet((){
-              selected = value;
-            });
-          },
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-            decoration: BoxDecoration(
-              border: Border.all(color: isSelected?AppColors.primary:const Color(0xFF1A1E28)),
-              // color: isSelected ? AppColors.primary : const Color(0xFF1A1E28),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              children: [
-
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    title,
-                    style: TextStyle(
-                      color: isSelected ? AppColors.primaryBright : Colors.white,
-                      fontSize: 16,
-                      fontWeight:
-                      isSelected ? FontWeight.w700 : FontWeight.w400,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      }
-
+    builder: (context) {
       return StatefulBuilder(
-        builder: (context, setStateSheet) {
-          final loc=AppLocalizations.of(context)!;
+        builder: (context, setState) {
           return SafeArea(
             top: false,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SizedBox(height: 12),
-                Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.white24,
-                    borderRadius: BorderRadius.circular(999),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Handle
+                  Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.white24,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
+                  // Title
+                  AppText(
+                    loc.showAll,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  const SizedBox(height: 16),
 
-
-
-                buildOption(loc.filterAllTasks, HomeFilterSubset.all,setStateSheet),
-                buildOption(loc.filterOverdueTasks, HomeFilterSubset.overdue,setStateSheet),
-                buildOption(loc.filterTodayTasks, HomeFilterSubset.today,setStateSheet),
-                buildOption(loc.filterUpcomingTasks, HomeFilterSubset.upcoming,setStateSheet),
-
-                const SizedBox(height: 16),
-
-                // BUTTONS SECTION
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    children: [
-                      // CANCEL
-                      Expanded(
-                        child: OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: Colors.white30),
-                            foregroundColor: Colors.white,
+                  // Filter options - scrollable if needed
+                  ...options.map((option) {
+                    final value = option.$1;
+                    final title = option.$2;
+                    final isSelected = temp == value;
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            temp = value;
+                          });
+                        },
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 16,
+                            ),
+                            height: 56, // Same height as Save button
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? theme.colorScheme.primary.withOpacity(0.2)
+                                  : const Color(0xFF151A24),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: isSelected
+                                    ? theme.colorScheme.primary
+                                    : const Color(0xFF1A1E28),
+                                width: 1,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: AppText(
+                                    title,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: isSelected
+                                        ? theme.colorScheme.primary
+                                        : Colors.white,
+                                  ),
+                                ),
+                                Radio<HomeFilterSubset>(
+                                  value: value,
+                                  groupValue: temp,
+                                  onChanged: (v) {
+                                    if (v == null) return;
+                                    setState(() {
+                                      temp = v;
+                                    });
+                                  },
+                                  activeColor: theme.colorScheme.primary,
+                                ),
+                              ],
+                            ),
                           ),
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          child:  Text(loc.filterCancelButton),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                    );
+                  }),
 
-                      // APPLY
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.black,
-                          ),
-                          onPressed: () {
-                            // switch logic
-                            switch (selected) {
-                              case HomeFilterSubset.overdue:
-                                vm.setSubset(HomeFilterSubset.overdue);
-                                break;
-                              case HomeFilterSubset.today:
-                                vm.setSubset(HomeFilterSubset.today);
-                                break;
-                              case HomeFilterSubset.upcoming:
-                                vm.setSubset(HomeFilterSubset.upcoming);
-                                break;
-                              case HomeFilterSubset.all:
-                              default:
-                                vm.setSubset(HomeFilterSubset.all);
-                                break;
-                            }
+                  const SizedBox(height: 16),
 
-                            Navigator.pop(context);
-                          },
-                          child:  Text(loc.filterApplyButton),
+                  // Save button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        if (temp != null) {
+                          vm.setSubset(temp!);
+                        }
+                        Navigator.pop(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: theme.colorScheme.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
                         ),
                       ),
-                    ],
+                      child: Text(
+                        loc.filterApplyButton,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-
-                const SizedBox(height: 16),
-              ],
+                ],
+              ),
             ),
           );
         },

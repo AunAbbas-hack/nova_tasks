@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:nova_tasks/core/theme/app_colors.dart';
 import 'package:nova_tasks/features/tasks/views/recurrence_bottomsheet.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -450,9 +449,16 @@ class _SubtasksSectionAddTaskState extends State<_SubtasksSectionAddTask> {
             ],
           ),
           const SizedBox(height: 8),
-          LinearProgressIndicator(
-            value: viewModel.progress,
-            minHeight: 5,
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: LinearProgressIndicator(
+              value: viewModel.progress,
+              minHeight: 6,
+              backgroundColor: const Color(0xFF1A1E28),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                theme.colorScheme.primary,
+              ),
+            ),
           ),
           const SizedBox(height: 16),
 

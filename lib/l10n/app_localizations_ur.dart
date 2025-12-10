@@ -541,4 +541,7 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get logoutMessage => 'کیا آپ واقعی لاگ آؤٹ کرنا چاہتے ہیں؟';
+
+  @override
+  String get selectLanguage => 'زبان منتخب کریں۔';
 }

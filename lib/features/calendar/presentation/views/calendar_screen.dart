@@ -263,8 +263,8 @@ class _NovaTableCalendar extends StatelessWidget {
       ),
 
       daysOfWeekStyle: const DaysOfWeekStyle(
-        weekdayStyle: TextStyle(color: Colors.white54),
-        weekendStyle: TextStyle(color: Colors.white54),
+        weekdayStyle: TextStyle(color: Colors.white,fontSize: 12),
+        weekendStyle: TextStyle(color: Colors.white54,fontSize: 12),
       ),
 
       calendarStyle: CalendarStyle(

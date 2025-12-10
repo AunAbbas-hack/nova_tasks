@@ -2,11 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nova_tasks/features/me/presentation/views/me_screen.dart';
 import 'package:provider/provider.dart';
-
 import 'package:nova_tasks/core/widgets/app_text.dart';
 import 'package:nova_tasks/features/auth/views/login_screen.dart';
-
-import '../../../../core/utils/language/change_language.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../viewmodels/settings_viewmodel.dart';
 
@@ -262,6 +259,7 @@ class _SettingsView extends StatelessWidget {
       SettingsViewModel vm,
       ) async {
     final loc = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
 
     final options = {
       "en": loc.english,
@@ -270,57 +268,154 @@ class _SettingsView extends StatelessWidget {
 
     String temp = vm.languageCode;
 
-    await showDialog(
+    await showModalBottomSheet<void>(
       context: context,
+      backgroundColor: const Color(0xFF11151F),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
-            return AlertDialog(
-              backgroundColor: const Color(0xFF11151F),
-              title: Text(
-                loc.language,
-                style: const TextStyle(color: Colors.white),
-              ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: options.entries.map((entry) {
-                  return RadioListTile<String>(
-                    value: entry.key,
-                    groupValue: temp,
-                    onChanged: (v) async {
-                      if (v == null) return;
-
-                      setState(() => temp = v);
-
-                      // ✅ Change language
-                      await vm.setLanguage(v);
-                      Get.forceAppUpdate();
-                      // ✅ Close dialog
-                      if (context.mounted) {
-                        Navigator.pop(context);
-                      }
-
-                      // ✅ Show confirmation
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              v == 'ur'
-                                  ? 'زبان تبدیل ہو گئی'
-                                  : 'Language changed',
-                            ),
-                            duration: const Duration(seconds: 2),
-                          ),
-                        );
-                      }
-                    },
-                    title: Text(
-                      entry.value,
-                      style: const TextStyle(color: Colors.white),
+            return SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Handle
+                    Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.white24,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
                     ),
-                    activeColor: Theme.of(context).colorScheme.primary,
-                  );
-                }).toList(),
+                    const SizedBox(height: 20),
+                    
+                    // Title
+                    AppText(
+                      loc.selectLanguage,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Language options
+                    ...options.entries.map((entry) {
+                      final isSelected = temp == entry.key;
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              temp = entry.key;
+                            });
+                          },
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 16,
+                              ),
+                              height: 56, // Same height as Save button
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? theme.colorScheme.primary.withOpacity(0.2)
+                                    : const Color(0xFF151A24),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? theme.colorScheme.primary
+                                      : const Color(0xFF1A1E28),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: AppText(
+                                      entry.value,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: isSelected
+                                          ? theme.colorScheme.primary
+                                          : Colors.white,
+                                    ),
+                                  ),
+                                  Radio<String>(
+                                    value: entry.key,
+                                    groupValue: temp,
+                                    onChanged: (v) {
+                                      if (v == null) return;
+                                      setState(() {
+                                        temp = v;
+                                      });
+                                    },
+                                    activeColor: theme.colorScheme.primary,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+
+                    const SizedBox(height: 24),
+
+                    // Save button
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          // ✅ Change language
+                          await vm.setLanguage(temp);
+                          Get.forceAppUpdate();
+                          
+                          // ✅ Close bottom sheet
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                          }
+
+                          // ✅ Show confirmation
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  temp == 'ur'
+                                      ? 'زبان تبدیل ہو گئی'
+                                      : 'Language changed',
+                                ),
+                                duration: const Duration(seconds: 2),
+                              ),
+                            );
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: theme.colorScheme.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        child: Text(
+                          loc.saveAction,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                ),
               ),
             );
           },

@@ -64,7 +64,7 @@ class TaskModel {
     final dateTs = data['date'] as Timestamp?;
     final baseDate = dateTs?.toDate() ?? DateTime.now();
 
-    // 🔥 Try reading dueAt, otherwise fallback to date-only
+    //  Try reading dueAt, otherwise fallback to date-only
     DateTime? dueAt;
     final dueAtRaw = data['dueAt'];
     if (dueAtRaw is Timestamp) {
@@ -127,8 +127,6 @@ class TaskModel {
       ],
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
-
-      // 🔥 NEW FIELDS
       'dueAt': Timestamp.fromDate(
         dueAt ?? date, // fallback: at least date le lo
       ),
@@ -166,9 +164,6 @@ class TaskModel {
     List<SubtaskModel>? subtasks,
     DateTime? createdAt,
     DateTime? updatedAt,
-
-
-    // NEW
     DateTime? dueAt,
     bool? reminder24Sent,
     bool? reminder60Sent,
@@ -194,8 +189,6 @@ class TaskModel {
       subtasks: subtasks ?? this.subtasks,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? DateTime.now(),
-
-      // NEW
       dueAt: dueAt ?? this.dueAt,
       reminder24Sent: reminder24Sent ?? this.reminder24Sent,
       reminder60Sent: reminder60Sent ?? this.reminder60Sent,

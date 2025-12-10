@@ -397,9 +397,16 @@ class _SubtasksSectionState extends State<_SubtasksSection> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          LinearProgressIndicator(
-            value: vm.subtasksProgress,
-            minHeight: 5,
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: LinearProgressIndicator(
+              value: vm.subtasksProgress,
+              minHeight: 8,
+              backgroundColor: const Color(0xFF1A1E28),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                Theme.of(context).colorScheme.primary,
+              ),
+            ),
           ),
           const SizedBox(height: 16),
 
