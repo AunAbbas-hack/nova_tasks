@@ -220,6 +220,7 @@
   "subtasksCompletedStatus": "{completed} of {total} Completed",
 
   "addSubtaskAction": "Add Subtask",
+  "enterSubTask":"Enter Subtask",
 
   "createTaskAction": "Create Task",
 

@@ -333,6 +333,9 @@ class AppLocalizationsUr extends AppLocalizations {
   String get addSubtaskAction => 'ذیلی کام شامل کریں';
 
   @override
+  String get enterSubTask => 'ذیلی کام درج کریں۔';
+
+  @override
   String get createTaskAction => 'کام بنائیں';
 
   @override

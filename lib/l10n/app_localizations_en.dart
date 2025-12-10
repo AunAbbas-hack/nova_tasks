@@ -333,6 +333,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addSubtaskAction => 'Add Subtask';
 
   @override
+  String get enterSubTask => 'Enter Subtask';
+
+  @override
   String get createTaskAction => 'Create Task';
 
   @override

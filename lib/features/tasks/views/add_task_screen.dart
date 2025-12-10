@@ -62,116 +62,6 @@ class _AddTaskPage extends StatelessWidget {
     }
   }
 
-  void _showSubtaskBottomSheet(BuildContext context, AddTaskViewModel viewModel) {
-    final loc=AppLocalizations.of(context)!;
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) {
-          final TextEditingController _controller = TextEditingController();
-          
-          return Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
-              left: 16,
-              right: 16,
-              top: 16,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Header
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                     Text(
-                      loc.subtasksLabel,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Padding(
-                  padding: const EdgeInsets.only(top: 16.0, bottom: 8.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _controller,
-                          autofocus: true,
-                          decoration: InputDecoration(
-                            hintText: loc.addSubtaskAction,
-                            hintStyle: const TextStyle(color: Colors.white54),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Colors.white24),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Colors.white24),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: AppColors.primaryBright),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                            filled: true,
-                            fillColor: const Color(0xFF151A24),
-                          ),
-                          style: const TextStyle(color: Colors.white),
-                          onSubmitted: (value) {
-                            _addSubtask(value, _controller, viewModel, setState);
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      TextButton(
-                        onPressed: () {
-                          _addSubtask(_controller.text, _controller, viewModel, setState);
-                        },
-                        child:  Text(
-                          loc.addButton,
-                          style: TextStyle(
-                            color: AppColors.primaryBright,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          backgroundColor: AppColors.primaryBright.withOpacity(0.1),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 8),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  void _addSubtask(String value, TextEditingController controller, AddTaskViewModel viewModel, StateSetter setState) {
-    if (value.trim().isNotEmpty) {
-      viewModel.addSubtask(value.trim());
-      controller.clear();
-      setState(() {});
-    }
-  }
 
   String _formatDate(DateTime? date) {
     if (date == null) return 'Select date';
@@ -451,77 +341,7 @@ class _AddTaskPage extends StatelessWidget {
                 const SizedBox(height: 16),
 
                 // ---------------- SUBTASKS ----------------
-                _SectionCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                       AppText(loc.subtasksLabel, fontWeight: FontWeight.w600),
-                      const SizedBox(height: 12),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                           AppText(loc.subtasksProgressLabel, fontWeight: FontWeight.w600),
-                          AppText(
-                            '${(viewModel.progress * 100).round()}% ${loc.tasksCompletedLabel}',
-                            color: Colors.white70,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      LinearProgressIndicator(
-                        value: viewModel.progress,
-                        minHeight: 5,
-                      ),
-                      const SizedBox(height: 16),
-
-                      ...viewModel.subtasks.asMap().entries.map((entry) {
-                        final index = entry.key;
-                        final subtask = entry.value;
-                        return CheckboxListTile(
-                          value: subtask.isDone,
-                          onChanged: (_) => viewModel.toggleSubtask(index),
-                          dense: true,
-                          contentPadding: EdgeInsets.zero,
-                          title: AppText(
-                            subtask.title,
-                            color: subtask.isDone
-                                ? Colors.white54
-                                : Colors.white,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        );
-                      }),
-                      const SizedBox(height: 8),
-                      // Replace the commented button section with this code
-                      ListTile(
-                        leading: const Icon(Icons.playlist_add, color: Colors.white70),
-                        title: Text(
-                        loc.addSubtaskAction,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                          ),
-                        ),
-                        trailing: Container(
-                          padding: EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: Colors.white24,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            '${viewModel.subtasks.length}',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 4),
-                        onTap: () => _showSubtaskBottomSheet(context, viewModel),
-                      ),
-                    ],
-                  ),
-                ),
+                _SubtasksSectionAddTask(viewModel: viewModel),
                 const SizedBox(height: 24),
 
                 // ---------------- CREATE / UPDATE BUTTON ----------------
@@ -565,6 +385,173 @@ class _AddTaskPage extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+// Subtasks Section for Add Task Screen
+class _SubtasksSectionAddTask extends StatefulWidget {
+  final AddTaskViewModel viewModel;
+  const _SubtasksSectionAddTask({required this.viewModel});
+
+  @override
+  State<_SubtasksSectionAddTask> createState() => _SubtasksSectionAddTaskState();
+}
+
+class _SubtasksSectionAddTaskState extends State<_SubtasksSectionAddTask> {
+  final TextEditingController _subtaskController = TextEditingController();
+
+  @override
+  void dispose() {
+    _subtaskController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Sync controller with viewmodel
+    _subtaskController.text = widget.viewModel.subtaskText;
+    _subtaskController.addListener(() {
+      widget.viewModel.setSubtaskText(_subtaskController.text);
+    });
+  }
+
+  @override
+  void didUpdateWidget(_SubtasksSectionAddTask oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Update controller when viewmodel text changes
+    if (_subtaskController.text != widget.viewModel.subtaskText) {
+      _subtaskController.text = widget.viewModel.subtaskText;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final viewModel = widget.viewModel;
+    final loc = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+
+    return _SectionCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          AppText(loc.subtasksLabel, fontWeight: FontWeight.w600),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              AppText(loc.subtasksProgressLabel, fontWeight: FontWeight.w600),
+              AppText(
+                '${(viewModel.progress * 100).round()}% ${loc.tasksCompletedLabel}',
+                color: Colors.white70,
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          LinearProgressIndicator(
+            value: viewModel.progress,
+            minHeight: 5,
+          ),
+          const SizedBox(height: 16),
+
+          // Existing subtasks
+          if (viewModel.subtasks.isNotEmpty)
+            ...viewModel.subtasks.asMap().entries.map((entry) {
+              final index = entry.key;
+              final subtask = entry.value;
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Row(
+                  children: [
+                    Checkbox(
+                      value: subtask.isDone,
+                      onChanged: (_) => viewModel.toggleSubtask(index),
+                      activeColor: theme.colorScheme.primary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: AppText(
+                        subtask.title,
+                        color: subtask.isDone ? Colors.white54 : Colors.white,
+                        decoration: subtask.isDone ? TextDecoration.lineThrough : null,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white54, size: 20),
+                      onPressed: () => viewModel.removeSubtask(index),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                  ],
+                ),
+              );
+            }),
+
+          // Add subtask textfield (when adding)
+          if (viewModel.isAddingSubtask) ...[
+            Row(
+              children: [
+                Checkbox(
+                  value: false,
+                  onChanged: null,
+                  activeColor: theme.colorScheme.primary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: TextField(
+                    controller: _subtaskController,
+                    autofocus: true,
+                    style:  TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: loc.enterSubTask,
+                      hintStyle: const TextStyle(color: Colors.white54),
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                    onSubmitted: (_) => viewModel.addSubtaskFromText(),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close, color: Colors.white54, size: 20),
+                  onPressed: viewModel.cancelAddingSubtask,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            // Add subtasks button
+            TextButton(
+              onPressed: viewModel.addSubtaskFromText,
+              style: TextButton.styleFrom(
+                foregroundColor: theme.colorScheme.primary,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              ),
+              child: Text(loc.addSubtaskAction),
+            ),
+          ] else
+            // Initial "Add subtask" text
+            GestureDetector(
+              onTap: viewModel.startAddingSubtask,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: AppText(
+                  loc.addSubtaskAction,
+                  color: theme.colorScheme.primary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

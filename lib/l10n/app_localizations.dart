@@ -710,6 +710,12 @@ abstract class AppLocalizations {
   /// **'Add Subtask'**
   String get addSubtaskAction;
 
+  /// No description provided for @enterSubTask.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Subtask'**
+  String get enterSubTask;
+
   /// No description provided for @createTaskAction.
   ///
   /// In en, this message translates to:

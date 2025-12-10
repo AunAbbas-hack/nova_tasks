@@ -305,53 +305,7 @@ class _TaskDetailView extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF11151F),
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          LinearProgressIndicator(
-                            value: vm.subtasksProgress,
-                            minHeight: 5,
-                          ),
-                          const SizedBox(height: 16),
-                          if (task.subtasks.isEmpty)
-                            AppText(
-                              loc.noSubtasksAdded,
-                              color: Colors.white70,
-                            )
-                          else
-                            ...task.subtasks.asMap().entries.map(
-                                  (entry) {
-                                final index = entry.key;
-                                final sub = entry.value;
-                                return CheckboxListTile(
-                                  value: sub.isDone,
-                                  onChanged: (_) =>
-                                      vm.toggleSubtask(index),
-                                  dense: true,
-                                  contentPadding: EdgeInsets.zero,
-                                  controlAffinity:
-                                  ListTileControlAffinity.leading,
-                                  title: AppText(
-                                    sub.title,
-                                    color: sub.isDone
-                                        ? Colors.white54
-                                        : Colors.white,
-                                    decoration: sub.isDone
-                                        ? TextDecoration.lineThrough
-                                        : null,
-                                  ),
-                                );
-                              },
-                            ),
-                        ],
-                      ),
-                    ),
+                    _SubtasksSection(vm: vm),
 
                     const SizedBox(height: 80),
                   ],
@@ -389,6 +343,165 @@ class _TaskDetailView extends StatelessWidget {
     );
   }
 
+}
+
+// Subtasks Section with new flow
+class _SubtasksSection extends StatefulWidget {
+  final TaskDetailViewModel vm;
+  const _SubtasksSection({required this.vm});
+
+  @override
+  State<_SubtasksSection> createState() => _SubtasksSectionState();
+}
+
+class _SubtasksSectionState extends State<_SubtasksSection> {
+  final TextEditingController _subtaskController = TextEditingController();
+
+  @override
+  void dispose() {
+    _subtaskController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Sync controller with viewmodel
+    _subtaskController.text = widget.vm.subtaskText;
+    _subtaskController.addListener(() {
+      widget.vm.setSubtaskText(_subtaskController.text);
+    });
+  }
+
+  @override
+  void didUpdateWidget(_SubtasksSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Update controller when viewmodel text changes
+    if (_subtaskController.text != widget.vm.subtaskText) {
+      _subtaskController.text = widget.vm.subtaskText;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final vm = widget.vm;
+    final task = vm.task;
+    final loc = AppLocalizations.of(context)!;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF11151F),
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          LinearProgressIndicator(
+            value: vm.subtasksProgress,
+            minHeight: 5,
+          ),
+          const SizedBox(height: 16),
+
+          // Existing subtasks
+          if (task.subtasks.isNotEmpty)
+            ...task.subtasks.asMap().entries.map((entry) {
+              final index = entry.key;
+              final sub = entry.value;
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Row(
+                  children: [
+                    Checkbox(
+                      value: sub.isDone,
+                      onChanged: (_) => vm.toggleSubtask(index),
+                      activeColor: Theme.of(context).colorScheme.primary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: AppText(
+                        sub.title,
+                        color: sub.isDone ? Colors.white54 : Colors.white,
+                        decoration: sub.isDone ? TextDecoration.lineThrough : null,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white54, size: 20),
+                      onPressed: () => vm.deleteSubtask(index),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                  ],
+                ),
+              );
+            }),
+
+          // Add subtask textfield (when adding)
+          if (vm.isAddingSubtask) ...[
+            Row(
+              children: [
+                Checkbox(
+                  value: false,
+                  onChanged: null,
+                  activeColor: Theme.of(context).colorScheme.primary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: TextField(
+                    controller: _subtaskController,
+                    autofocus: true,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: 'Enter subtask',
+                      hintStyle: const TextStyle(color: Colors.white54),
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                    onSubmitted: (_) => vm.addSubtaskFromText(),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close, color: Colors.white54, size: 20),
+                  onPressed: vm.cancelAddingSubtask,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            // Add subtasks button
+            TextButton(
+              onPressed: vm.addSubtaskFromText,
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.primary,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              ),
+              child: Text(loc.addSubtaskAction),
+            ),
+          ] else
+            // Initial "Add subtask" text
+            GestureDetector(
+              onTap: vm.startAddingSubtask,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: AppText(
+                  loc.addSubtaskAction,
+                  color: Theme.of(context).colorScheme.primary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 }
 
 // Small reusable row for "Due Date / Priority / Category"

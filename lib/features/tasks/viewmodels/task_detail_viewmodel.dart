@@ -18,7 +18,15 @@ class TaskDetailViewModel extends ChangeNotifier {
   bool _isUpdating = false;
   bool get isUpdating => _isUpdating;
 
+  // Subtask adding state
+  bool _isAddingSubtask = false;
+  String _subtaskText = '';
+
   bool get isCompleted => _task.completedAt != null;
+
+  // Subtask adding state getters
+  bool get isAddingSubtask => _isAddingSubtask;
+  String get subtaskText => _subtaskText;
 
   int get totalSubtasks => _task.subtasks.length;
 
@@ -83,6 +91,81 @@ class TaskDetailViewModel extends ChangeNotifier {
     final updatedSubtasks = List<SubtaskModel>.from(_task.subtasks);
     final current = updatedSubtasks[index];
     updatedSubtasks[index] = current.copyWith(isDone: !current.isDone);
+
+    _task = _task.copyWith(subtasks: updatedSubtasks);
+    notifyListeners();
+
+    await repo.updateTask(
+      _task.userId,
+      _task.id,
+      {
+        'subtasks': [
+          for (final s in updatedSubtasks) {'id': s.id, ...s.toJson()},
+        ],
+      },
+    );
+  }
+
+  // Subtask adding state management
+  void startAddingSubtask() {
+    _isAddingSubtask = true;
+    _subtaskText = '';
+    notifyListeners();
+  }
+
+  void cancelAddingSubtask() {
+    _isAddingSubtask = false;
+    _subtaskText = '';
+    notifyListeners();
+  }
+
+  void setSubtaskText(String text) {
+    _subtaskText = text;
+    notifyListeners();
+  }
+
+  Future<void> addSubtask(String title) async {
+    if (title.trim().isEmpty) return;
+
+    final newSubtask = SubtaskModel(
+      id: '${_task.id}_${DateTime.now().millisecondsSinceEpoch}',
+      taskId: _task.id,
+      title: title.trim(),
+      isDone: false,
+    );
+
+    final updatedSubtasks = List<SubtaskModel>.from(_task.subtasks)..add(newSubtask);
+
+    _task = _task.copyWith(subtasks: updatedSubtasks);
+    notifyListeners();
+
+    await repo.updateTask(
+      _task.userId,
+      _task.id,
+      {
+        'subtasks': [
+          for (final s in updatedSubtasks) {'id': s.id, ...s.toJson()},
+        ],
+      },
+    );
+  }
+
+  Future<void> addSubtaskFromText() async {
+    if (_subtaskText.trim().isEmpty) {
+      cancelAddingSubtask();
+      return;
+    }
+    await addSubtask(_subtaskText.trim());
+    _subtaskText = '';
+    // Keep adding mode open for next subtask
+    _isAddingSubtask = true;
+    notifyListeners();
+  }
+
+  Future<void> deleteSubtask(int index) async {
+    if (index < 0 || index >= _task.subtasks.length) return;
+
+    final updatedSubtasks = List<SubtaskModel>.from(_task.subtasks)..removeAt(index);
 
     _task = _task.copyWith(subtasks: updatedSubtasks);
     notifyListeners();

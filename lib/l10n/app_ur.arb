@@ -215,6 +215,8 @@
   "subtasksLabel": "ذیلی کام",
   "subtasksProgressLabel": "پیش رفت",
   "subtasksCompletedStatus": "{completed} میں سے {total} مکمل",
+  "enterSubTask":"ذیلی کام درج کریں۔",
+
 
   "addSubtaskAction": "ذیلی کام شامل کریں",
 

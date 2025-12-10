@@ -70,6 +70,10 @@ class AddTaskViewModel extends ChangeNotifier {
   bool _isSaving = false;
   TaskModel? _editingTask; // null => create, not-null => edit
 
+  // Subtask adding state
+  bool _isAddingSubtask = false;
+  String _subtaskText = '';
+
   // ---------------- GETTERS ----------------
 
   DateTime? get dueDate => _dueDate;
@@ -84,6 +88,10 @@ class AddTaskViewModel extends ChangeNotifier {
   bool get isEditing => _editingTask != null;
   List<Subtask> get subtasks => List.unmodifiable(_subtasks);
   String get customCategory => customCategoryController.text;
+
+  // Subtask adding state getters
+  bool get isAddingSubtask => _isAddingSubtask;
+  String get subtaskText => _subtaskText;
 
   double get progress {
     if (_subtasks.isEmpty) return 0;
@@ -115,9 +123,39 @@ class AddTaskViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Subtask management
+  void startAddingSubtask() {
+    _isAddingSubtask = true;
+    _subtaskText = '';
+    notifyListeners();
+  }
+
+  void cancelAddingSubtask() {
+    _isAddingSubtask = false;
+    _subtaskText = '';
+    notifyListeners();
+  }
+
+  void setSubtaskText(String text) {
+    _subtaskText = text;
+    notifyListeners();
+  }
+
   void addSubtask(String title) {
     if (title.trim().isEmpty) return;
     _subtasks.add(Subtask(title: title.trim()));
+    notifyListeners();
+  }
+
+  void addSubtaskFromText() {
+    if (_subtaskText.trim().isEmpty) {
+      cancelAddingSubtask();
+      return;
+    }
+    addSubtask(_subtaskText.trim());
+    _subtaskText = '';
+    // Keep adding mode open for next subtask
+    _isAddingSubtask = true;
     notifyListeners();
   }
 
