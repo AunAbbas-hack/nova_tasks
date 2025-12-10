@@ -529,4 +529,7 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get recurrenceAfterOccurrences => 'مقررہ دفعہ کے بعد';
+
+  @override
+  String get completedTasksText => 'مکمل شدہ کام';
 }

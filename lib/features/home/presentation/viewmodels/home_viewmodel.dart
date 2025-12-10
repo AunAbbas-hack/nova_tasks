@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -21,6 +22,18 @@ class HomeViewModel extends ChangeNotifier {
 
   List<TaskModel> _tasks = [];
   List<TaskModel> get tasks => _tasks;
+
+  /// Completed tasks (those with a non-null completedAt or recurring tasks with completed dates)
+  List<TaskModel> get completedTasks {
+    return _tasks.where((t) {
+      // Non-recurring tasks: check completedAt
+      if (!_isRecurring(t)) {
+        return t.completedAt != null;
+      }
+      // Recurring tasks: check if any date is completed
+      return t.completedDates.isNotEmpty;
+    }).toList();
+  }
 
   bool isLoading = true;
 
@@ -125,28 +138,34 @@ bool _occursOn(TaskModel task, DateTime day) {
     if (until != null && until.length > 1) {
       try {
         String dateStr = until[1];
-        // Handle different date formats
         DateTime untilDate;
-        if (dateStr.length == 10) { // YYYY-MM-DD format
-          final parts = dateStr.split('-');
-          if (parts.length == 3) {
-            final year = int.tryParse(parts[0]) ?? 0;
-            final month = int.tryParse(parts[1]) ?? 1;
-            final day = int.tryParse(parts[2]) ?? 1;
+
+        // Try parsing with different formats
+        try {
+          // First try parsing directly
+          untilDate = DateTime.parse(dateStr);
+        } catch (_) {
+          // If direct parsing fails, try handling YYYY-MM-DD format
+          final dateParts = dateStr.split('-');
+          if (dateParts.length == 3) {
+            final year = int.tryParse(dateParts[0]) ?? 0;
+            final month = int.tryParse(dateParts[1]) ?? 1;
+            final day = int.tryParse(dateParts[2]) ?? 1;
             untilDate = DateTime(year, month, day);
           } else {
-            throw FormatException('Invalid date format');
+            // If all parsing fails, assume no end date
+            debugPrint('Could not parse UNTIL date: $dateStr');
+            return true;
           }
-        } else {
-          untilDate = DateTime.parse(dateStr);
         }
-        
-        if (dayOnly.isAfter(untilDate)) {
+
+        if (dayOnly.isAfter(_only(untilDate))) {
           return false;
         }
       } catch (e) {
-        debugPrint('Error parsing UNTIL date: ${until[1]} - $e');
-        return false;
+        debugPrint('Error in UNTIL date handling: $e');
+        // If we can't parse the until date, assume the task should be shown
+        return true;
       }
     }
 
@@ -173,14 +192,15 @@ bool _occursOn(TaskModel task, DateTime day) {
 
     return _matchesRecurrencePattern(task, dayOnly, frequency, parts);
   } catch (e) {
-    debugPrint('Error in _occursOn: $e');
-    return false;
+    debugPrint('Error in _occursOn for task ${task.id}: $e');
+    // If there's any error, show the task to avoid hiding it due to a parsing error
+    return true;
   }
 }
 
   bool _matchesRecurrencePattern(TaskModel task, DateTime day, String? frequency, List<List<String>> parts) {
     final start = _only(task.date);
-    
+
     // If it's the start date, it should always be included
     if (_isSameDay(start, day)) {
       return true;
@@ -190,7 +210,7 @@ bool _occursOn(TaskModel task, DateTime day) {
     switch (frequency) {
       case 'DAILY':
         return true;
-        
+
       case 'WEEKLY':
         final byDay = parts.firstWhereOrNull((e) => e[0] == 'BYDAY');
         if (byDay != null) {
@@ -198,13 +218,13 @@ bool _occursOn(TaskModel task, DateTime day) {
           return weekDays.contains(day.weekday);
         }
         return day.weekday == start.weekday;
-        
+
       case 'MONTHLY':
         return day.day == start.day;
-        
+
       case 'YEARLY':
         return day.month == start.month && day.day == start.day;
-        
+
       default:
         return _isSameDay(start, day);
     }
@@ -301,7 +321,24 @@ bool _occursOn(TaskModel task, DateTime day) {
   // -------------------------------------------------
 
   List<TaskModel> _baseFiltered() {
-    return _tasks.where((t) {
+    // Core pipeline only works on *active* (incomplete) tasks.
+    // Completed tasks are shown separately in the UI dropdown.
+    // For recurring tasks, check if the specific date is completed
+    final active = _tasks.where((t) {
+      if (_isRecurring(t)) {
+        // For recurring tasks, check if the current date is in completedDates
+        if (_selectedDate != null) {
+          final dateOnly = _only(_selectedDate!);
+          return !t.completedDates.any((d) => _isSameDay(d, dateOnly));
+        }
+        // If no date selected, show if not all dates are completed (check original date)
+        final dateOnly = _only(t.date);
+        return !t.completedDates.any((d) => _isSameDay(d, dateOnly));
+      }
+      return t.completedAt == null;
+    }).toList();
+
+    return active.where((t) {
       // Category filter
       if (_selectedCategory != 'All' && t.category != _selectedCategory) {
         return false;
@@ -528,13 +565,39 @@ bool _occursOn(TaskModel task, DateTime day) {
     return 'Repeats';
   }
 
+
   // -------------------------------------------------
   //  TOGGLE COMPLETE
   // -------------------------------------------------
 
-  Future<void> toggleComplete(TaskModel task) async {
-    await repo.updateTask(task.userId, task.id, {
-      'completedAt': task.completedAt == null ? DateTime.now() : null,
-    });
+  Future<void> toggleComplete(TaskModel task, {DateTime? occurrenceDate}) async {
+    final isRecurring = _isRecurring(task);
+    
+    if (isRecurring && occurrenceDate != null) {
+      // For recurring tasks, track completed dates
+      final dateOnly = _only(occurrenceDate);
+      final currentCompletedDates = List<DateTime>.from(task.completedDates);
+      
+      // Check if this date is already completed
+      final isDateCompleted = currentCompletedDates.any((d) => _isSameDay(d, dateOnly));
+      
+      if (isDateCompleted) {
+        // Remove this date from completed dates
+        currentCompletedDates.removeWhere((d) => _isSameDay(d, dateOnly));
+      } else {
+        // Add this date to completed dates
+        currentCompletedDates.add(dateOnly);
+      }
+      
+      await repo.updateTask(task.userId, task.id, {
+        'completedDates': currentCompletedDates.map((d) => Timestamp.fromDate(d)).toList(),
+      });
+    } else {
+      // For non-recurring tasks, use the old behavior
+      await repo.updateTask(task.userId, task.id, {
+        'completedAt': task.completedAt == null ? DateTime.now() : null,
+      });
+    }
   }
+
 }

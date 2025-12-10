@@ -346,7 +346,11 @@ class AddTaskViewModel extends ChangeNotifier {
       case RecurrenceEndType.onDate:
         if (r.endDate != null) {
           final d = r.endDate!;
-          buffer.write(';UNTIL=${d.year}-${d.month}-${d.day}');
+          // Format date as yyyy-MM-dd with zero-padding
+          final year = d.year.toString();
+          final month = d.month.toString().padLeft(2, '0');
+          final day = d.day.toString().padLeft(2, '0');
+          buffer.write(';UNTIL=$year-$month-$day');
         }
         break;
       case RecurrenceEndType.afterCount:

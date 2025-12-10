@@ -166,6 +166,12 @@ class _HomeView extends StatelessWidget {
                   ? _DateModeSection(vm: vm)
                   : _ShowAllSection(vm: vm),
 
+                    const SizedBox(height: 24),
+
+                    // ------------- COMPLETED TASKS EXPANSION TILE -------------
+              if (vm.completedTasks.isNotEmpty)
+                      const _CompletedTasksExpansionTile(),
+
               const SizedBox(height: 80),
             ],
           ),
@@ -228,7 +234,10 @@ class _DateModeSection extends StatelessWidget {
                   builder: (_) => TaskDetailScreen(task: task),
                 ),
               ),
-              child: TaskCard(task: task),
+              child: TaskCard(
+                task: task,
+                occurrenceDate: vm.selectedDate, // Pass the selected date for recurring tasks
+              ),
             ),
           ),
         ),
@@ -264,7 +273,10 @@ class _ShowAllSection extends StatelessWidget {
             ...vm.todayTasks.map(
                   (t) => Padding(
                 padding: const EdgeInsets.only(bottom: 12),
-                child: TaskCard(task: t),
+                child: TaskCard(
+                  task: t,
+                  occurrenceDate: DateTime.now(), // Today's date for recurring tasks
+                ),
               ),
             ),
             const SizedBox(height: 24),
@@ -282,7 +294,10 @@ class _ShowAllSection extends StatelessWidget {
             ...vm.overdueTasks.map(
                   (t) => Padding(
                 padding: const EdgeInsets.only(bottom: 12),
-                child: TaskCard(task: t),
+                child: TaskCard(
+                  task: t,
+                  occurrenceDate: t.date, // Task's date for recurring tasks
+                ),
               ),
             ),
             const SizedBox(height: 24),
@@ -310,7 +325,10 @@ class _ShowAllSection extends StatelessWidget {
                   ...entry.value.map(
                         (t) => Padding(
                       padding: const EdgeInsets.only(bottom: 12),
-                      child: TaskCard(task: t),
+                      child: TaskCard(
+                        task: t,
+                        occurrenceDate: entry.key, // The date for this occurrence
+                      ),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -365,7 +383,10 @@ class _ShowAllSection extends StatelessWidget {
         ...list.map(
               (t) => Padding(
             padding: const EdgeInsets.only(bottom: 12),
-            child: TaskCard(task: t),
+            child: TaskCard(
+              task: t,
+              occurrenceDate: t.date, // Task's date for recurring tasks
+            ),
           ),
         ),
       ],
@@ -521,6 +542,7 @@ void _openShowAllSheet(BuildContext context, HomeViewModel vm) {
   );
 }
 
+
 // -------------------------------------------------
 //  HEADER
 // -------------------------------------------------
@@ -595,6 +617,80 @@ final loc=AppLocalizations.of(context)!;
           ],
         ),
       ],
+    );
+  }
+}
+
+// -------------------------------------------------
+//  COMPLETED TASKS EXPANSION TILE
+// -------------------------------------------------
+
+class _CompletedTasksExpansionTile extends StatelessWidget {
+  const _CompletedTasksExpansionTile();
+
+  @override
+  Widget build(BuildContext context) {
+    final vm = context.watch<HomeViewModel>();
+    final completedTasks = vm.completedTasks;
+    final loc=AppLocalizations.of(context)!;
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF11151F),
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Theme(
+        data: Theme.of(context).copyWith(
+          dividerColor: Colors.transparent,
+          unselectedWidgetColor: Colors.white70,
+        ),
+        child: ExpansionTile(
+          initiallyExpanded: false,
+          tilePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          childrenPadding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+          iconColor: Colors.white70,
+          collapsedIconColor: Colors.white70,
+          leading: const Icon(
+            Icons.check_circle_outline,
+            color: Colors.white70,
+            size: 24,
+          ),
+          title: AppText(
+            '${completedTasks.length} ${loc.completedTasksText}',
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Colors.white70,
+          ),
+          children: completedTasks.map((task) {
+            // For recurring tasks, use the most recent completed date, otherwise use task date
+            final isRecurring = task.recurrenceRule?.trim().isNotEmpty ?? false;
+            DateTime? occurrenceDate;
+            if (isRecurring && task.completedDates.isNotEmpty) {
+              // Sort dates descending and use the most recent one
+              final sortedDates = List<DateTime>.from(task.completedDates)..sort((a, b) => b.compareTo(a));
+              occurrenceDate = sortedDates.first;
+            } else {
+              occurrenceDate = task.date;
+            }
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => TaskDetailScreen(task: task),
+                    ),
+                  );
+                },
+                child: TaskCard(
+                  task: task,
+                  occurrenceDate: occurrenceDate,
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
     );
   }
 }

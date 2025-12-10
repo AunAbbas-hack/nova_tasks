@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -94,6 +95,23 @@ class CalendarViewModel extends ChangeNotifier {
 
   void _addTaskToDate(TaskModel task, DateTime date) {
     final key = _only(date);
+    final dateOnly = _only(date);
+    
+    // For recurring tasks, check if this specific date is completed
+    final isRecurring = task.recurrenceRule?.trim().isNotEmpty ?? false;
+    if (isRecurring) {
+      final isDateCompleted = task.completedDates.any((d) => _isSameDay(d, dateOnly));
+      if (isDateCompleted) {
+        // Don't add completed recurring tasks to the list
+        return;
+      }
+    } else {
+      // For non-recurring tasks, check completedAt
+      if (task.completedAt != null) {
+        return;
+      }
+    }
+    
     _tasksByDate.putIfAbsent(key, () => []).add(task);
   }
 
@@ -111,10 +129,37 @@ class CalendarViewModel extends ChangeNotifier {
     final until = parts.firstWhereOrNull((e) => e[0] == 'UNTIL');
     final count = parts.firstWhereOrNull((e) => e[0] == 'COUNT');
 
-    if (until != null) {
-      final untilDate = DateTime.parse(until[1]);
-      if (dayOnly.isAfter(_only(untilDate))) {
-        return false;
+    if (until != null && until.length > 1) {
+      try {
+        String dateStr = until[1];
+        DateTime untilDate;
+        
+        // Try parsing with different formats
+        try {
+          // First try parsing directly (works for ISO format like 2024-01-05)
+          untilDate = DateTime.parse(dateStr);
+        } catch (_) {
+          // If direct parsing fails, try handling YYYY-MM-DD format manually
+          final dateParts = dateStr.split('-');
+          if (dateParts.length == 3) {
+            final year = int.tryParse(dateParts[0]) ?? 0;
+            final month = int.tryParse(dateParts[1]) ?? 1;
+            final day = int.tryParse(dateParts[2]) ?? 1;
+            untilDate = DateTime(year, month, day);
+          } else {
+            // If all parsing fails, assume no end date
+            debugPrint('Could not parse UNTIL date: $dateStr');
+            return _matchesRecurrencePattern(task, dayOnly, frequency, parts);
+          }
+        }
+        
+        if (dayOnly.isAfter(_only(untilDate))) {
+          return false;
+        }
+      } catch (e) {
+        debugPrint('Error in UNTIL date handling: $e');
+        // If we can't parse the until date, continue with pattern matching
+        return _matchesRecurrencePattern(task, dayOnly, frequency, parts);
       }
     }
 
@@ -241,23 +286,58 @@ class CalendarViewModel extends ChangeNotifier {
 
   // ------------------- TASK ACTIONS -------------------
 
-  Future<void> toggleComplete(TaskModel task) async {
-    final newCompletedAt = task.completedAt == null ? DateTime.now() : null;
+  Future<void> toggleComplete(TaskModel task, {DateTime? occurrenceDate}) async {
+    final isRecurring = task.recurrenceRule?.trim().isNotEmpty ?? false;
+    
+    if (isRecurring && occurrenceDate != null) {
+      // For recurring tasks, track completed dates
+      final dateOnly = _only(occurrenceDate);
+      final currentCompletedDates = List<DateTime>.from(task.completedDates);
+      
+      // Check if this date is already completed
+      final isDateCompleted = currentCompletedDates.any((d) => _isSameDay(d, dateOnly));
+      
+      if (isDateCompleted) {
+        // Remove this date from completed dates
+        currentCompletedDates.removeWhere((d) => _isSameDay(d, dateOnly));
+      } else {
+        // Add this date to completed dates
+        currentCompletedDates.add(dateOnly);
+      }
+      
+      // Optimistic update in local list
+      final idx = _tasks.indexWhere((t) => t.id == task.id);
+      if (idx != -1) {
+        final updated = task.copyWith(completedDates: currentCompletedDates);
+        _tasks[idx] = updated;
+        _rebuildByDate();
+        notifyListeners();
+      }
+      
+      await repo.updateTask(
+        task.userId,
+        task.id,
+        {'completedDates': currentCompletedDates.map((d) => Timestamp.fromDate(d)).toList()},
+      );
+    } else {
+      // For non-recurring tasks, use the old behavior
+      final newCompletedAt = task.completedAt == null ? DateTime.now() : null;
 
-    // Optimistic update in local list
-    final idx = _tasks.indexWhere((t) => t.id == task.id);
-    if (idx != -1) {
-      final updated = task.copyWith(completedAt: newCompletedAt);
-      _tasks[idx] = updated;
-      _rebuildByDate();
-      notifyListeners();
+      // Optimistic update in local list
+      final idx = _tasks.indexWhere((t) => t.id == task.id);
+      if (idx != -1) {
+        final updated = task.copyWith(completedAt: newCompletedAt);
+        _tasks[idx] = updated;
+        _rebuildByDate();
+        notifyListeners();
+      }
+
+      await repo.updateTask(
+        task.userId,
+        task.id,
+        {'completedAt': newCompletedAt},
+      );
     }
-
-    await repo.updateTask(
-      task.userId,
-      task.id,
-      {'completedAt': newCompletedAt},
-    );
   }
 
   // ------------------- HELPERS -------------------

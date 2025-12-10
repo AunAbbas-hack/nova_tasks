@@ -300,7 +300,8 @@
   "recurrenceEnds": "اختتام",
   "recurrenceNever": "کبھی نہیں",
   "recurrenceOnDate": "تاریخ پر",
-  "recurrenceAfterOccurrences": "مقررہ دفعہ کے بعد"
+  "recurrenceAfterOccurrences": "مقررہ دفعہ کے بعد",
+  "completedTasksText":"مکمل شدہ کام"
 }
 
 

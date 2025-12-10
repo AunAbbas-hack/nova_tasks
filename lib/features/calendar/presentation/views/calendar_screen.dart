@@ -58,7 +58,7 @@ class _CalendarView extends StatelessWidget {
         onPressed: () {
           Navigator.push(context, MaterialPageRoute(builder: (context)=>AddTaskScreen()));
         },
-        shape: const CircleBorder(),
+        // shape: const CircleBorder(),
         child: const Icon(Icons.add, color: Colors.white),
       ),      body: SafeArea(
         child: Stack(
@@ -85,7 +85,7 @@ class _CalendarView extends StatelessWidget {
                   // ---------- Month / Week Toggle ----------
                   _CalendarFormatToggle(),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 10),
 
                   // ---------- TableCalendar ----------
                   _NovaTableCalendar(),
@@ -95,7 +95,7 @@ class _CalendarView extends StatelessWidget {
             ),
 
             DraggableScrollableSheet(
-              initialChildSize: 0.38,
+              initialChildSize: 0.3,
               minChildSize: 0.30,
               maxChildSize: 0.9,
               builder: (context, scrollController) {
@@ -324,8 +324,19 @@ class _CalendarTaskTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.read<CalendarViewModel>();
-    final isDone = task.completedAt != null;
+    final vm = context.watch<CalendarViewModel>();
+    final isRecurring = task.recurrenceRule?.trim().isNotEmpty ?? false;
+    
+    // For recurring tasks, check if the specific date is completed
+    bool isDone = false;
+    if (isRecurring && vm.selectedDay != null) {
+      final dateOnly = DateTime(vm.selectedDay!.year, vm.selectedDay!.month, vm.selectedDay!.day);
+      isDone = task.completedDates.any((d) => 
+        d.year == dateOnly.year && d.month == dateOnly.month && d.day == dateOnly.day
+      );
+    } else {
+      isDone = task.completedAt != null;
+    }
 
     final timeText = task.time.isEmpty
         ? ''
@@ -344,7 +355,14 @@ class _CalendarTaskTile extends StatelessWidget {
           children: [
             // Checkbox-like circle
             GestureDetector(
-              onTap: () => vm.toggleComplete(task),
+              onTap: () {
+                // For recurring tasks, pass the selected day
+                if (isRecurring && vm.selectedDay != null) {
+                  vm.toggleComplete(task, occurrenceDate: vm.selectedDay);
+                } else {
+                  vm.toggleComplete(task);
+                }
+              },
               child: Container(
                 width: 24,
                 height: 24,

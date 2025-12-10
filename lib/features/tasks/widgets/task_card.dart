@@ -11,9 +11,14 @@ import 'package:nova_tasks/features/tasks/views/add_task_screen.dart';
 import '../../../l10n/app_localizations.dart';
 
 class TaskCard extends StatelessWidget {
-  const TaskCard({super.key, required this.task});
+  const TaskCard({
+    super.key,
+    required this.task,
+    this.occurrenceDate,
+  });
 
   final TaskModel task;
+  final DateTime? occurrenceDate; // For recurring tasks - the specific date this occurrence is for
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +33,19 @@ class TaskCard extends StatelessWidget {
       if (task.time.isEmpty) return dateStr;
       return '$dateStr - ${task.time}';
     }
-    final isRecurring=task.recurrenceRule !=null &&task.recurrenceRule!.trim().isNotEmpty;
+    final isRecurring = task.recurrenceRule != null && task.recurrenceRule!.trim().isNotEmpty;
+    
+    // For recurring tasks, check if this specific date is completed
+    bool isCompleted = false;
+    if (isRecurring && occurrenceDate != null) {
+      final dateOnly = DateTime(occurrenceDate!.year, occurrenceDate!.month, occurrenceDate!.day);
+      isCompleted = task.completedDates.any((d) => 
+        d.year == dateOnly.year && d.month == dateOnly.month && d.day == dateOnly.day
+      );
+    } else {
+      isCompleted = task.completedAt != null;
+    }
+    
     return GestureDetector(
       onTap: (){
         Navigator.push(context, MaterialPageRoute(builder: (context)=>TaskDetailScreen(task: task)));
@@ -62,10 +79,10 @@ class TaskCard extends StatelessWidget {
                     task.title,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: task.completedAt == null
-                        ? Colors.white
-                        : Colors.white54,
-                    decoration: task.completedAt != null
+                    color: isCompleted
+                        ? Colors.white54
+                        : Colors.white,
+                    decoration: isCompleted
                         ? TextDecoration.lineThrough
                         : null,
                   ),
@@ -125,8 +142,15 @@ class TaskCard extends StatelessWidget {
                 Row(
                   children: [
                     Checkbox(
-                      value: task.completedAt != null,
-                      onChanged: (_) => homeVm.toggleComplete(task),
+                      value: isCompleted,
+                      onChanged: (_) {
+                        // For recurring tasks, pass the occurrence date
+                        if (isRecurring && occurrenceDate != null) {
+                          homeVm.toggleComplete(task, occurrenceDate: occurrenceDate);
+                        } else {
+                          homeVm.toggleComplete(task);
+                        }
+                      },
                       activeColor: priorityColor,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(6),
@@ -243,7 +267,7 @@ class TaskCard extends StatelessWidget {
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
                 child:  Text(
-                  'loc.deleteAction',
+                  loc.deleteAction,
                   style: TextStyle(color: Colors.redAccent),
                 ),
               ),

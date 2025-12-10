@@ -1099,6 +1099,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'After N occurrences'**
   String get recurrenceAfterOccurrences;
+
+  /// No description provided for @completedTasksText.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed Tasks'**
+  String get completedTasksText;
 }
 
 class _AppLocalizationsDelegate

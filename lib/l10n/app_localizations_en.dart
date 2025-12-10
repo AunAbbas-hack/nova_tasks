@@ -528,4 +528,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recurrenceAfterOccurrences => 'After N occurrences';
+
+  @override
+  String get completedTasksText => 'Completed Tasks';
 }

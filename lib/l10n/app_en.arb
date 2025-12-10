@@ -305,7 +305,8 @@
   "recurrenceEnds": "Ends",
   "recurrenceNever": "Never",
   "recurrenceOnDate": "On Date",
-  "recurrenceAfterOccurrences": "After N occurrences"
+  "recurrenceAfterOccurrences": "After N occurrences",
+  "completedTasksText":"Completed Tasks"
 }
 
 
