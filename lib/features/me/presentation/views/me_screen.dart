@@ -93,27 +93,28 @@ class _MeView extends StatelessWidget {
   }
 
   Future<void> _logout(BuildContext context) async {
+    final loc=AppLocalizations.of(context)!;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: const Color(0xFF11151F),
-        title: const Text(
-          'Log out',
+        title:  Text(
+          loc.logoutTitle,
           style: TextStyle(color: Colors.white),
         ),
-        content: const Text(
-          'Are you sure you want to log out?',
+        content:  Text(
+          loc.logoutMessage,
           style: TextStyle(color: Colors.white70),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child:  Text(loc.cancelAction),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text(
-              'Log Out',
+            child:  Text(
+              loc.logout,
               style: TextStyle(color: Colors.redAccent),
             ),
           ),

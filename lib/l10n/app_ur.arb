@@ -301,7 +301,13 @@
   "recurrenceNever": "کبھی نہیں",
   "recurrenceOnDate": "تاریخ پر",
   "recurrenceAfterOccurrences": "مقررہ دفعہ کے بعد",
-  "completedTasksText":"مکمل شدہ کام"
+  "completedTasksText":"مکمل شدہ کام",
+
+
+
+  "logoutTitle": "لاگ آؤٹ",
+  "logoutMessage": "کیا آپ واقعی لاگ آؤٹ کرنا چاہتے ہیں؟",
+  "logout": "لاگ آؤٹ"
 }
 
 

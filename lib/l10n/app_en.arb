@@ -306,7 +306,12 @@
   "recurrenceNever": "Never",
   "recurrenceOnDate": "On Date",
   "recurrenceAfterOccurrences": "After N occurrences",
-  "completedTasksText":"Completed Tasks"
+  "completedTasksText":"Completed Tasks",
+
+
+  "logoutTitle": "Logout",
+  "logoutMessage": "Are you sure you want to log out?",
+  "logout": "Logout"
 }
 
 

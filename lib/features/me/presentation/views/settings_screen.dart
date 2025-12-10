@@ -331,25 +331,26 @@ class _SettingsView extends StatelessWidget {
 
   static Future<void> _confirmLogout(
       BuildContext context, SettingsViewModel vm) async {
+    final loc=AppLocalizations.of(context)!;
     final yes = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: const Color(0xFF11151F),
-        title: const Text('Logout',
+        title:  Text(loc.logoutTitle,
             style: TextStyle(color: Colors.white)),
-        content: const Text(
-          'Are you sure you want to log out?',
+        content:  Text(
+          loc.logoutMessage,
           style: TextStyle(color: Colors.white70),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child:  Text(loc.cancelAction),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text(
-              'Logout',
+            child:  Text(
+              loc.logout,
               style: TextStyle(color: Color(0xFFEF4444)),
             ),
           ),

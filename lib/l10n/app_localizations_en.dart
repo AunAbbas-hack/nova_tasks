@@ -531,4 +531,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get completedTasksText => 'Completed Tasks';
+
+  @override
+  String get logoutTitle => 'Logout';
+
+  @override
+  String get logoutMessage => 'Are you sure you want to log out?';
 }

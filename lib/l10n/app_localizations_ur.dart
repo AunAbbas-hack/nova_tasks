@@ -532,4 +532,10 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get completedTasksText => 'مکمل شدہ کام';
+
+  @override
+  String get logoutTitle => 'لاگ آؤٹ';
+
+  @override
+  String get logoutMessage => 'کیا آپ واقعی لاگ آؤٹ کرنا چاہتے ہیں؟';
 }
