@@ -57,6 +57,7 @@ class _MeView extends StatelessWidget {
         ),
         content: TextField(
           controller: controller,
+          textCapitalization: TextCapitalization.sentences,
           style: const TextStyle(color: Colors.white),
           decoration: const InputDecoration(
             hintText: 'Enter your name',

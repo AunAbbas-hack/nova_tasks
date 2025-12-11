@@ -83,7 +83,7 @@
   "notificationProductivityInsightTitle": "پیداواری کارکردگی",
   "notificationCollaborationTitle": "تعاون کی تازہ کاری",
 
-  "notificationDueSoonMessage": "{taskTitle}: {relativeTime} میں مکمل کرنا ہے",
+  "notificationDueSoonMessage": "{taskTitle} کو {relativeTime} تک مکمل کرنا ہے",
   "@notificationDueSoonMessage": {
     "description": "Shown when a task is due soon",
     "placeholders": {
@@ -96,7 +96,7 @@
     }
   },
 
-  "notificationOverdueMessage": "{taskTitle}: {relativeTime} پہلے",
+  "notificationOverdueMessage": "{relativeTime} پر {taskTitle} ",
   "@notificationOverdueMessage": {
     "description": "Shown when a task is overdue",
     "placeholders": {
@@ -206,7 +206,7 @@
   "priorityHigh": "ضروری",
   "priorityUrgent": "انتہائی ضروری",
 
-  "categoryLabel": "زمرہ",
+  "categoryLabel": "قسم",
   "categoryWork": "ٹاسک",
 
   "recurringTaskLabel": "دوبارہ ہونے والا ٹاسک",
@@ -221,7 +221,7 @@
   "addSubtaskAction": "ذیلی ٹاسک شامل کریں",
 
   "createTaskAction": "ٹاسک بنائیں",
-  "enterCustomCategory": "حسبِ ضرورت زمرہ درج کریں",
+  "enterCustomCategory": "حسبِ ضرورت قسم درج کریں",
   "categoryWork": "ٹاسک",
   "categoryPersonal": "ذاتی",
   "categoryCustom": "حسبِ ضرورت",

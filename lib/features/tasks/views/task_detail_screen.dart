@@ -366,20 +366,6 @@ class _SubtasksSectionState extends State<_SubtasksSection> {
   @override
   void initState() {
     super.initState();
-    // Sync controller with viewmodel
-    _subtaskController.text = widget.vm.subtaskText;
-    _subtaskController.addListener(() {
-      widget.vm.setSubtaskText(_subtaskController.text);
-    });
-  }
-
-  @override
-  void didUpdateWidget(_SubtasksSection oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // Update controller when viewmodel text changes
-    if (_subtaskController.text != widget.vm.subtaskText) {
-      _subtaskController.text = widget.vm.subtaskText;
-    }
   }
 
   @override
@@ -388,124 +374,150 @@ class _SubtasksSectionState extends State<_SubtasksSection> {
     final task = vm.task;
     final loc = AppLocalizations.of(context)!;
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF11151F),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: LinearProgressIndicator(
-              value: vm.subtasksProgress,
-              minHeight: 8,
-              backgroundColor: const Color(0xFF1A1E28),
-              valueColor: AlwaysStoppedAnimation<Color>(
-                Theme.of(context).colorScheme.primary,
+    return GestureDetector(
+      onTap: FocusScope.of(context).unfocus,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFF11151F),
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: LinearProgressIndicator(
+                value: vm.subtasksProgress,
+                minHeight: 8,
+                backgroundColor: const Color(0xFF1A1E28),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  Theme.of(context).colorScheme.primary,
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 16),
+            const SizedBox(height: 16),
 
-          // Existing subtasks
-          if (task.subtasks.isNotEmpty)
-            ...task.subtasks.asMap().entries.map((entry) {
-              final index = entry.key;
-              final sub = entry.value;
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Row(
-                  children: [
-                    Checkbox(
-                      value: sub.isDone,
-                      onChanged: (_) => vm.toggleSubtask(index),
-                      activeColor: Theme.of(context).colorScheme.primary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
+            // Existing subtasks
+            if (task.subtasks.isNotEmpty)
+              ...task.subtasks.asMap().entries.map((entry) {
+                final index = entry.key;
+                final sub = entry.value;
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Row(
+                    children: [
+                      Checkbox(
+                        value: sub.isDone,
+                        onChanged: (_) => vm.toggleSubtask(index),
+                        activeColor: Theme.of(context).colorScheme.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6),
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: AppText(
-                        sub.title,
-                        color: sub.isDone ? Colors.white54 : Colors.white,
-                        decoration: sub.isDone ? TextDecoration.lineThrough : null,
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: AppText(
+                          sub.title,
+                          color: sub.isDone ? Colors.white54 : Colors.white,
+                          decoration: sub.isDone ? TextDecoration.lineThrough : null,
+                        ),
                       ),
+                      IconButton(
+                        icon: const Icon(Icons.close, color: Colors.white54, size: 20),
+                        onPressed: () => vm.deleteSubtask(index),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+
+            // Add subtask textfield (when adding)
+            if (vm.isAddingSubtask) ...[
+              Row(
+                children: [
+                  Checkbox(
+                    value: false,
+                    onChanged: null,
+                    activeColor: Theme.of(context).colorScheme.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6),
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.close, color: Colors.white54, size: 20),
-                      onPressed: () => vm.deleteSubtask(index),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: TextField(
+                      controller: _subtaskController,
+                      autofocus: true,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        hintText: 'Enter subtask',
+                        hintStyle: const TextStyle(color: Colors.white54),
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        disabledBorder: InputBorder.none,
+                        errorBorder: InputBorder.none,
+                        focusedErrorBorder: InputBorder.none,
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                      onSubmitted: (_) async {
+                        final text = _subtaskController.text.trim();
+                        if (text.isNotEmpty) {
+                          await vm.addSubtask(text);
+                          _subtaskController.clear();
+                          // Keep textfield open - viewmodel already handles this
+                        } else {
+                          vm.cancelAddingSubtask();
+                        }
+                      },
                     ),
-                  ],
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, color: Colors.white54, size: 20),
+                    onPressed: vm.cancelAddingSubtask,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              // Add subtasks button
+              TextButton(
+                onPressed: () async {
+                  final text = _subtaskController.text.trim();
+                  if (text.isNotEmpty) {
+                    await vm.addSubtask(text);
+                    _subtaskController.clear();
+                    // Keep textfield open - viewmodel already handles this
+                  } else {
+                    vm.cancelAddingSubtask();
+                  }
+                },
+                style: TextButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.primary,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 ),
-              );
-            }),
-
-          // Add subtask textfield (when adding)
-          if (vm.isAddingSubtask) ...[
-            Row(
-              children: [
-                Checkbox(
-                  value: false,
-                  onChanged: null,
-                  activeColor: Theme.of(context).colorScheme.primary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
+                child: Text(loc.addSubtaskAction),
+              ),
+            ] else
+              // Initial "Add subtask" text
+              GestureDetector(
+                onTap: vm.startAddingSubtask,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: AppText(
+                    loc.addSubtaskAction,
+                    color: Theme.of(context).colorScheme.primary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: TextField(
-                    controller: _subtaskController,
-                    autofocus: true,
-                    style: const TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      hintText: 'Enter subtask',
-                      hintStyle: const TextStyle(color: Colors.white54),
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                    onSubmitted: (_) => vm.addSubtaskFromText(),
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close, color: Colors.white54, size: 20),
-                  onPressed: vm.cancelAddingSubtask,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            // Add subtasks button
-            TextButton(
-              onPressed: vm.addSubtaskFromText,
-              style: TextButton.styleFrom(
-                foregroundColor: Theme.of(context).colorScheme.primary,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               ),
-              child: Text(loc.addSubtaskAction),
-            ),
-          ] else
-            // Initial "Add subtask" text
-            GestureDetector(
-              onTap: vm.startAddingSubtask,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: AppText(
-                  loc.addSubtaskAction,
-                  color: Theme.of(context).colorScheme.primary,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

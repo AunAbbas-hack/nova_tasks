@@ -14,7 +14,7 @@ class PrimaryTextField extends StatefulWidget {
     this.isPassword = false,
     this.onChanged,
     this.errorText,
-
+    this.textCapitalization,
     super.key,
   });
 final String? errorText;
@@ -27,7 +27,7 @@ final String? errorText;
   final IconData? prefixIcon;
   final Widget? suffixIcon;
   final bool isPassword;
-
+  final TextCapitalization? textCapitalization;
   final ValueChanged<String>? onChanged;
 
   @override
@@ -69,7 +69,7 @@ class _PrimaryTextFieldState extends State<PrimaryTextField> {
 autovalidateMode: AutovalidateMode.onUserInteraction,
           onChanged: widget.onChanged,
 
-
+textCapitalization: TextCapitalization.sentences,
           decoration: InputDecoration(
             errorText: widget.errorText,
             hintText: widget.hint,

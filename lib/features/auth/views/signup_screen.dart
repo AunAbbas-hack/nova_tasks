@@ -57,10 +57,10 @@ class _SignupView extends StatelessWidget {
           await PushNotificationService().init();
           await PushNotificationService().saveUserToken(userId: user.uid);
         }
-        Get.snackbar("Verify Email", "Verification email sent. Please check inbox.",
-        titleText: Text("Verify Email",style: TextStyle(color: AppColors.textPrimary),),
-          messageText: Text("Verification email sent. Please check inbox.",style: TextStyle(color: AppColors.textPrimary),),
-        );
+        // Get.snackbar("Verify Email", "Verification email sent. Please check inbox.",
+        // titleText: Text("Verify Email",style: TextStyle(color: AppColors.textPrimary),),
+        //   messageText: Text("Verification email sent. Please check inbox.",style: TextStyle(color: AppColors.textPrimary),),
+        // );
         Navigator.pop(context);
       },
       onError: () => Get.snackbar("Error", "Sign up failed ",

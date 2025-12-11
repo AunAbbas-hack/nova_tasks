@@ -185,7 +185,6 @@ class TaskCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 2),
 
-                    // 🗑 Delete button
                     IconButton(
                       icon: const Icon(
                         Icons.delete,
@@ -222,11 +221,11 @@ class TaskCard extends StatelessWidget {
   static Color _priorityColor(String priority) {
     switch (priority.toLowerCase()) {
       case 'low':
-        return const Color(0xFF60A5FA); // blue
+        return  Colors.blueGrey; // blue
       case 'medium':
-        return const Color(0xFFF59E0B); // amber
+        return const Color(0xFF60A5FA); // amber
       case 'high':
-        return const Color(0xFFFB7185); // pink
+        return Colors.orange; // pink
       case 'urgent':
         return const Color(0xFFEF4444); // red
       default:
@@ -241,7 +240,7 @@ class TaskCard extends StatelessWidget {
       case 'personal':
         return const Color(0xFF34D399); // green
       default:
-        return const Color(0xFFA855F7); // purple for custom
+        return Colors.white70; // purple for custom
     }
   }
 

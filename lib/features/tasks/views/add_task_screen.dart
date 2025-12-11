@@ -127,6 +127,7 @@ class _AddTaskPage extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       TextFormField(
+                        textCapitalization: TextCapitalization.sentences,
                         focusNode: FocusNode(
                         ),
                         controller: viewModel.descriptionController,
@@ -285,6 +286,7 @@ class _AddTaskPage extends StatelessWidget {
                           label: '',
                           hint: loc.enterCustomCategory,
                           controller: viewModel.customCategoryController,
+                          textCapitalization: TextCapitalization.words,
                         ),
                       ],
                     ],
@@ -363,21 +365,34 @@ class _AddTaskPage extends StatelessWidget {
                       return;
                     }
 
-                    await viewModel.saveTask(
-                      userId: user.uid,
-                      onSuccess: () {
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              isEditing
-                                  ? loc.taskUpdated
-                                  : loc.taskCreated,
+                    try {
+                      await viewModel.saveTask(
+                        userId: user.uid,
+                        onSuccess: () {
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                isEditing
+                                    ? loc.taskUpdated
+                                    : loc.taskCreated,
+                              ),
                             ),
+                          );
+                        },
+                      );
+                    } catch (e) {
+                      // Show error to user
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Error: ${e.toString()}',
                           ),
-                        );
-                      },
-                    );
+                          backgroundColor: Colors.red,
+                          duration: const Duration(seconds: 4),
+                        ),
+                      );
+                    }
                   },
                 ),
               ],
@@ -410,20 +425,6 @@ class _SubtasksSectionAddTaskState extends State<_SubtasksSectionAddTask> {
   @override
   void initState() {
     super.initState();
-    // Sync controller with viewmodel
-    _subtaskController.text = widget.viewModel.subtaskText;
-    _subtaskController.addListener(() {
-      widget.viewModel.setSubtaskText(_subtaskController.text);
-    });
-  }
-
-  @override
-  void didUpdateWidget(_SubtasksSectionAddTask oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // Update controller when viewmodel text changes
-    if (_subtaskController.text != widget.viewModel.subtaskText) {
-      _subtaskController.text = widget.viewModel.subtaskText;
-    }
   }
 
   @override
@@ -467,33 +468,36 @@ class _SubtasksSectionAddTaskState extends State<_SubtasksSectionAddTask> {
             ...viewModel.subtasks.asMap().entries.map((entry) {
               final index = entry.key;
               final subtask = entry.value;
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Row(
-                  children: [
-                    Checkbox(
-                      value: subtask.isDone,
-                      onChanged: (_) => viewModel.toggleSubtask(index),
-                      activeColor: theme.colorScheme.primary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
+              return GestureDetector(
+                onTap: FocusScope.of(context).unfocus,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Row(
+                    children: [
+                      Checkbox(
+                        value: subtask.isDone,
+                        onChanged: (_) => viewModel.toggleSubtask(index),
+                        activeColor: theme.colorScheme.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6),
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: AppText(
-                        subtask.title,
-                        color: subtask.isDone ? Colors.white54 : Colors.white,
-                        decoration: subtask.isDone ? TextDecoration.lineThrough : null,
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: AppText(
+                          subtask.title,
+                          color: subtask.isDone ? Colors.white54 : Colors.white,
+                          decoration: subtask.isDone ? TextDecoration.lineThrough : null,
+                        ),
                       ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close, color: Colors.white54, size: 20),
-                      onPressed: () => viewModel.removeSubtask(index),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    ),
-                  ],
+                      IconButton(
+                        icon: const Icon(Icons.close, color: Colors.white54, size: 20),
+                        onPressed: () => viewModel.removeSubtask(index),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                    ],
+                  ),
                 ),
               );
             }),
@@ -513,16 +517,31 @@ class _SubtasksSectionAddTaskState extends State<_SubtasksSectionAddTask> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: TextField(
+                    textCapitalization: TextCapitalization.sentences,
                     controller: _subtaskController,
                     autofocus: true,
-                    style:  TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: loc.enterSubTask,
                       hintStyle: const TextStyle(color: Colors.white54),
                       border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      disabledBorder: InputBorder.none,
+                      errorBorder: InputBorder.none,
+                      focusedErrorBorder: InputBorder.none,
                       contentPadding: EdgeInsets.zero,
                     ),
-                    onSubmitted: (_) => viewModel.addSubtaskFromText(),
+                    onSubmitted: (_) {
+                      final text = _subtaskController.text.trim();
+                      if (text.isNotEmpty) {
+                        viewModel.addSubtask(text);
+                        _subtaskController.clear();
+                        // Keep textfield open - viewmodel already handles this
+                      } else {
+                        viewModel.cancelAddingSubtask();
+                      }
+                    },
                   ),
                 ),
                 IconButton(
@@ -536,7 +555,16 @@ class _SubtasksSectionAddTaskState extends State<_SubtasksSectionAddTask> {
             const SizedBox(height: 8),
             // Add subtasks button
             TextButton(
-              onPressed: viewModel.addSubtaskFromText,
+              onPressed: () {
+                final text = _subtaskController.text.trim();
+                if (text.isNotEmpty) {
+                  viewModel.addSubtask(text);
+                  _subtaskController.clear();
+                  // Keep textfield open - viewmodel already handles this
+                } else {
+                  viewModel.cancelAddingSubtask();
+                }
+              },
               style: TextButton.styleFrom(
                 foregroundColor: theme.colorScheme.primary,
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

@@ -144,6 +144,8 @@ class AddTaskViewModel extends ChangeNotifier {
   void addSubtask(String title) {
     if (title.trim().isEmpty) return;
     _subtasks.add(Subtask(title: title.trim()));
+    // Keep adding mode open for next subtask
+    _isAddingSubtask = true;
     notifyListeners();
   }
 
@@ -270,12 +272,20 @@ class AddTaskViewModel extends ChangeNotifier {
 
       final repo = TaskRepository();
 
+      debugPrint('💾 Saving task: ${task.title}');
+      debugPrint('💾 Task ID: ${task.id}');
+      debugPrint('💾 User ID: $userId');
+
       if (existing == null) {
         // New task
+        debugPrint('💾 Creating new task...');
         await repo.addTask(task);
+        debugPrint('✅ Task created successfully');
       } else {
         // Edit task → poora document overwrite (safe because hum sab fields de rahe)
+        debugPrint('💾 Updating existing task...');
         await repo.updateTask(userId, task.id, task.toFirestore());
+        debugPrint('✅ Task updated successfully');
       }
 
       onSuccess();
@@ -283,8 +293,11 @@ class AddTaskViewModel extends ChangeNotifier {
       if (existing == null) {
         _resetForm();
       }
-    } catch (e) {
-      debugPrint('Error saving task: $e');
+    } catch (e, stackTrace) {
+      debugPrint('❌ Error saving task: $e');
+      debugPrint('Stack trace: $stackTrace');
+      // Re-throw to let UI handle it
+      rethrow;
     } finally {
       _isSaving = false;
       notifyListeners();

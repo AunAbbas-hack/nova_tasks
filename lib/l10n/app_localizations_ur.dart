@@ -136,12 +136,12 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String notificationDueSoonMessage(Object taskTitle, Object relativeTime) {
-    return '$taskTitle: $relativeTime میں مکمل کرنا ہے';
+    return '$taskTitle کو $relativeTime تک مکمل کرنا ہے';
   }
 
   @override
   String notificationOverdueMessage(Object taskTitle, Object relativeTime) {
-    return '$taskTitle: $relativeTime پہلے';
+    return '$relativeTime پر $taskTitle ';
   }
 
   @override
@@ -185,7 +185,7 @@ class AppLocalizationsUr extends AppLocalizations {
   String get filterPersonal => 'ذاتی';
 
   @override
-  String get filterWork => 'کام';
+  String get filterWork => 'ٹاسک';
 
   @override
   String tasksForDay(Object day, Object date) {
@@ -193,7 +193,7 @@ class AppLocalizationsUr extends AppLocalizations {
   }
 
   @override
-  String get noTasksForDay => 'آج کے لیے کوئی کام موجود نہیں';
+  String get noTasksForDay => 'آج کے لیے کوئی ٹاسک موجود نہیں';
 
   @override
   String get bottomNavHome => 'ہوم';
@@ -232,13 +232,13 @@ class AppLocalizationsUr extends AppLocalizations {
   String get filterAllTasks => 'تمام (آج + زائد المیعاد + آنے والے)';
 
   @override
-  String get filterOverdueTasks => 'زائد المیعاد کام';
+  String get filterOverdueTasks => 'زائد المیعاد ٹاسک';
 
   @override
-  String get filterTodayTasks => 'آج کے کام';
+  String get filterTodayTasks => 'آج کے ٹاسک';
 
   @override
-  String get filterUpcomingTasks => 'آنے والے کام';
+  String get filterUpcomingTasks => 'آنے والے ٹاسک';
 
   @override
   String get filterCancelButton => 'منسوخ کریں';
@@ -250,13 +250,13 @@ class AppLocalizationsUr extends AppLocalizations {
   String get allTasks => 'All Tasks';
 
   @override
-  String get noTasksForFilter => 'اس فلٹر کے لیے کوئی کام نہیں ملا۔';
+  String get noTasksForFilter => 'اس فلٹر کے لیے کوئی ٹاسک نہیں ملا۔';
 
   @override
-  String get deleteTaskTitle => 'کام حذف کریں؟';
+  String get deleteTaskTitle => 'ٹاسک حذف کریں؟';
 
   @override
-  String get deleteTaskMessage => 'کیا آپ واقعی اس کام کو حذف کرنا چاہتے ہیں؟';
+  String get deleteTaskMessage => 'کیا آپ واقعی اس ٹاسک کو حذف کرنا چاہتے ہیں؟';
 
   @override
   String get cancelAction => 'منسوخ کریں';
@@ -268,13 +268,13 @@ class AppLocalizationsUr extends AppLocalizations {
   String get editTaskTitle => 'اپ ڈیٹ کریں';
 
   @override
-  String get newTaskTitle => 'نیا کام';
+  String get newTaskTitle => 'نیا ٹاسک';
 
   @override
   String get saveAction => 'محفوظ کریں';
 
   @override
-  String get taskTitleLabel => 'کام کا عنوان';
+  String get taskTitleLabel => 'ٹاسک کا عنوان';
 
   @override
   String get taskTitleHint => 'مثال کے طور پر، نیا ڈیش بورڈ ڈیزائن کریں';
@@ -283,7 +283,7 @@ class AppLocalizationsUr extends AppLocalizations {
   String get taskDescriptionLabel => 'تفصیل';
 
   @override
-  String get taskDescriptionHint => 'کام کے بارے میں تفصیلات شامل کریں...';
+  String get taskDescriptionHint => 'ٹاسک کے بارے میں تفصیلات شامل کریں...';
 
   @override
   String get dueDateLabel => 'مقررہ تاریخ';
@@ -307,19 +307,19 @@ class AppLocalizationsUr extends AppLocalizations {
   String get priorityUrgent => 'انتہائی ضروری';
 
   @override
-  String get categoryLabel => 'زمرہ';
+  String get categoryLabel => 'قسم';
 
   @override
-  String get categoryWork => 'کام';
+  String get categoryWork => 'ٹاسک';
 
   @override
-  String get recurringTaskLabel => 'دوبارہ ہونے والا کام';
+  String get recurringTaskLabel => 'دوبارہ ہونے والا ٹاسک';
 
   @override
-  String get recurringTaskHint => 'کام کو بار بار ہونے کے لیے سیٹ کریں';
+  String get recurringTaskHint => 'ٹاسک کو بار بار ہونے کے لیے سیٹ کریں';
 
   @override
-  String get subtasksLabel => 'ذیلی کام';
+  String get subtasksLabel => 'ذیلی ٹاسک';
 
   @override
   String get subtasksProgressLabel => 'پیش رفت';
@@ -330,13 +330,13 @@ class AppLocalizationsUr extends AppLocalizations {
   }
 
   @override
-  String get addSubtaskAction => 'ذیلی کام شامل کریں';
+  String get addSubtaskAction => 'ذیلی ٹاسک شامل کریں';
 
   @override
-  String get enterSubTask => 'ذیلی کام درج کریں۔';
+  String get enterSubTask => 'ذیلی ٹاسک درج کریں۔';
 
   @override
-  String get createTaskAction => 'کام بنائیں';
+  String get createTaskAction => 'ٹاسک بنائیں';
 
   @override
   String get categoryPersonal => 'ذاتی';
@@ -345,7 +345,7 @@ class AppLocalizationsUr extends AppLocalizations {
   String get categoryCustom => 'حسبِ ضرورت';
 
   @override
-  String get enterCustomCategory => 'حسبِ ضرورت زمرہ درج کریں';
+  String get enterCustomCategory => 'حسبِ ضرورت قسم درج کریں';
 
   @override
   String get updating => 'اپ ڈیٹ کیا جا رہا ہے...';
@@ -534,7 +534,7 @@ class AppLocalizationsUr extends AppLocalizations {
   String get recurrenceAfterOccurrences => 'مقررہ دفعہ کے بعد';
 
   @override
-  String get completedTasksText => 'مکمل شدہ کام';
+  String get completedTasksText => 'مکمل شدہ ٹاسک';
 
   @override
   String get logoutTitle => 'لاگ آؤٹ';

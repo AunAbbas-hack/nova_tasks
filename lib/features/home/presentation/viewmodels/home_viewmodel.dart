@@ -594,9 +594,9 @@ bool _occursOn(TaskModel task, DateTime day) {
       });
     } else {
       // For non-recurring tasks, use the old behavior
-      await repo.updateTask(task.userId, task.id, {
-        'completedAt': task.completedAt == null ? DateTime.now() : null,
-      });
+    await repo.updateTask(task.userId, task.id, {
+      'completedAt': task.completedAt == null ? DateTime.now() : null,
+    });
     }
   }
 

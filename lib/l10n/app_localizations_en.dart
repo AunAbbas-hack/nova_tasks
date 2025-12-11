@@ -136,12 +136,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String notificationDueSoonMessage(Object taskTitle, Object relativeTime) {
-    return '$taskTitle: Due in $relativeTime';
+    return '$taskTitle Due at $relativeTime';
   }
 
   @override
   String notificationOverdueMessage(Object taskTitle, Object relativeTime) {
-    return '$taskTitle: $relativeTime ago';
+    return '$taskTitle at  $relativeTime ';
   }
 
   @override

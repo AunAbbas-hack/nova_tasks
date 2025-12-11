@@ -85,7 +85,7 @@
   "notificationProductivityInsightTitle": "Productivity Insight",
   "notificationCollaborationTitle": "New Tasks",
 
-  "notificationDueSoonMessage": "{taskTitle}: Due in {relativeTime}",
+  "notificationDueSoonMessage": "{taskTitle} Due at {relativeTime}",
   "@notificationDueSoonMessage": {
     "description": "Shown when a task is due soon",
     "placeholders": {
@@ -98,7 +98,7 @@
     }
   },
 
-  "notificationOverdueMessage": "{taskTitle}: {relativeTime} ago",
+  "notificationOverdueMessage": "{taskTitle} at  {relativeTime} ",
   "@notificationOverdueMessage": {
     "description": "Shown when a task is overdue",
     "placeholders": {

@@ -352,7 +352,7 @@ class _ShowAllSection extends StatelessWidget {
         break;
       case HomeFilterSubset.today:
         title = loc.filterTodayTasks;
-        color = Colors.white;
+        color = AppColors.primary;
         break;
       case HomeFilterSubset.upcoming:
         title = loc.filterUpcomingTasks;
@@ -493,17 +493,6 @@ void _openShowAllSheet(BuildContext context, HomeViewModel vm) {
                                         : Colors.white,
                                   ),
                                 ),
-                                Radio<HomeFilterSubset>(
-                                  value: value,
-                                  groupValue: temp,
-                                  onChanged: (v) {
-                                    if (v == null) return;
-                                    setState(() {
-                                      temp = v;
-                                    });
-                                  },
-                                  activeColor: theme.colorScheme.primary,
-                                ),
                               ],
                             ),
                           ),
@@ -583,7 +572,7 @@ final loc=AppLocalizations.of(context)!;
               ),
               child:  CircleAvatar(
                 radius: 26,
-                backgroundColor: Color(0xFFEEC9B7),
+                backgroundColor: AppColors.primaryBright,
                 backgroundImage: profilePhoto != null
                     ? NetworkImage(profilePhoto)
                     : null,

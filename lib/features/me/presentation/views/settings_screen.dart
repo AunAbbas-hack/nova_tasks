@@ -4,6 +4,7 @@ import 'package:nova_tasks/features/me/presentation/views/me_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:nova_tasks/core/widgets/app_text.dart';
 import 'package:nova_tasks/features/auth/views/login_screen.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../viewmodels/settings_viewmodel.dart';
 
@@ -80,10 +81,10 @@ class _SettingsView extends StatelessWidget {
                         height: 56,
                         decoration: const BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Color(0xFFE5D3B0),
+                          color: AppColors.primaryBright,
                         ),
                         child: const Center(
-                          child: Icon(Icons.person, color: Colors.white),
+                          child: Icon(Icons.person, color: Colors.black45),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -345,17 +346,6 @@ class _SettingsView extends StatelessWidget {
                                           ? theme.colorScheme.primary
                                           : Colors.white,
                                     ),
-                                  ),
-                                  Radio<String>(
-                                    value: entry.key,
-                                    groupValue: temp,
-                                    onChanged: (v) {
-                                      if (v == null) return;
-                                      setState(() {
-                                        temp = v;
-                                      });
-                                    },
-                                    activeColor: theme.colorScheme.primary,
                                   ),
                                 ],
                               ),

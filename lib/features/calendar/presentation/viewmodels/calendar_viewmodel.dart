@@ -153,8 +153,8 @@ class CalendarViewModel extends ChangeNotifier {
           }
         }
         
-        if (dayOnly.isAfter(_only(untilDate))) {
-          return false;
+      if (dayOnly.isAfter(_only(untilDate))) {
+        return false;
         }
       } catch (e) {
         debugPrint('Error in UNTIL date handling: $e');
@@ -321,22 +321,22 @@ class CalendarViewModel extends ChangeNotifier {
       );
     } else {
       // For non-recurring tasks, use the old behavior
-      final newCompletedAt = task.completedAt == null ? DateTime.now() : null;
+    final newCompletedAt = task.completedAt == null ? DateTime.now() : null;
 
-      // Optimistic update in local list
-      final idx = _tasks.indexWhere((t) => t.id == task.id);
-      if (idx != -1) {
-        final updated = task.copyWith(completedAt: newCompletedAt);
-        _tasks[idx] = updated;
-        _rebuildByDate();
-        notifyListeners();
-      }
+    // Optimistic update in local list
+    final idx = _tasks.indexWhere((t) => t.id == task.id);
+    if (idx != -1) {
+      final updated = task.copyWith(completedAt: newCompletedAt);
+      _tasks[idx] = updated;
+      _rebuildByDate();
+      notifyListeners();
+    }
 
-      await repo.updateTask(
-        task.userId,
-        task.id,
-        {'completedAt': newCompletedAt},
-      );
+    await repo.updateTask(
+      task.userId,
+      task.id,
+      {'completedAt': newCompletedAt},
+    );
     }
   }
 

@@ -9,6 +9,7 @@ import '../../../../core/widgets/app_text.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../data/repositories/task_repository.dart';
 import '../viewmodels/notification_viewmodel.dart'; // if you want reuse styles
+import '../../../tasks/views/task_detail_screen.dart';
 
 class NotificationsScreen extends StatelessWidget {
   const NotificationsScreen({super.key});
@@ -128,7 +129,7 @@ class _EmptyState extends StatelessWidget {
     final loc=AppLocalizations.of(context)!;
     return  Center(
       child: AppText(
-        "${loc.noNotificationsTitle}/n${loc.noNotificationsSubtitle}",
+        "${loc.noNotificationsTitle}\n${loc.noNotificationsSubtitle}",
         textAlign: TextAlign.center,
         color: Colors.white54,
       ),
@@ -205,14 +206,26 @@ class _NotificationCard extends StatelessWidget {
             item.kind == NotificationKind.overdue;
     final loc=AppLocalizations.of(context)!;
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
-      decoration: BoxDecoration(
-        color: const Color(0xFF11151F),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Column(
+    return InkWell(
+      onTap: item.task != null
+          ? () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => TaskDetailScreen(task: item.task!),
+                ),
+              );
+            }
+          : null,
+      borderRadius: BorderRadius.circular(24),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
+        decoration: BoxDecoration(
+          color: const Color(0xFF11151F),
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // top row
@@ -277,6 +290,7 @@ class _NotificationCard extends StatelessWidget {
               ],
             ),
         ],
+      ),
       ),
     );
   }

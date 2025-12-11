@@ -137,6 +137,8 @@ class TaskDetailViewModel extends ChangeNotifier {
     final updatedSubtasks = List<SubtaskModel>.from(_task.subtasks)..add(newSubtask);
 
     _task = _task.copyWith(subtasks: updatedSubtasks);
+    // Keep adding mode open for next subtask
+    _isAddingSubtask = true;
     notifyListeners();
 
     await repo.updateTask(

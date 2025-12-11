@@ -341,13 +341,13 @@ abstract class AppLocalizations {
   /// Shown when a task is due soon
   ///
   /// In en, this message translates to:
-  /// **'{taskTitle}: Due in {relativeTime}'**
+  /// **'{taskTitle} Due at {relativeTime}'**
   String notificationDueSoonMessage(Object taskTitle, Object relativeTime);
 
   /// Shown when a task is overdue
   ///
   /// In en, this message translates to:
-  /// **'{taskTitle}: {relativeTime} ago'**
+  /// **'{taskTitle} at  {relativeTime} '**
   String notificationOverdueMessage(Object taskTitle, Object relativeTime);
 
   /// Yesterday productivity summary
