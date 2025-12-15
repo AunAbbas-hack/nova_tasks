@@ -32,7 +32,7 @@ class _SettingsView extends StatelessWidget {
 
     final name = vm.currentUserName ?? 'User';
     final email = vm.currentUserEmail ?? 'no-email';
-    final text=AppLocalizations.of(context)!;
+    final loc=AppLocalizations.of(context)!;
 
     return Scaffold(
       body: SafeArea(
@@ -52,7 +52,7 @@ class _SettingsView extends StatelessWidget {
                   Expanded(
                     child: Center(
                       child: AppText(
-                        text.settings,
+                        loc.settings,
                         fontSize: 22,
                         fontWeight: FontWeight.w700,
                       ),
@@ -114,7 +114,7 @@ class _SettingsView extends StatelessWidget {
               const SizedBox(height: 24),
 
               // --------- APPEARANCE ----------
-               _SectionHeader(title: text.appearance),
+               _SectionHeader(title: loc.appearance),
               const SizedBox(height: 12),
 
               // Dark Mode
@@ -123,13 +123,14 @@ class _SettingsView extends StatelessWidget {
                   _IconTile(
                     icon: Icons.dark_mode_rounded,
                     iconBgColor: const Color(0xFF111827),
-                    title: text.darkMode,
-                    subtitle: text.systemDefault,
+                    title: loc.darkMode,
+                    subtitle: loc.systemDefault,
                     trailing: Switch(
                       value: vm.darkMode,
                       onChanged: (val) {
                         vm.setDarkMode(val);
-                        // NOTE: Tum baad me yahan actual theme change hook kar sakte ho
+                        Get.snackbar(loc.snackbar_message_title, loc.snackbar_message_body,
+                        snackPosition: SnackPosition.BOTTOM,colorText: Colors.white, backgroundColor: Colors.red);
                       },
                     ),
                   ),
@@ -137,9 +138,13 @@ class _SettingsView extends StatelessWidget {
                   _IconTile(
                     icon: Icons.home_rounded,
                     iconBgColor: const Color(0xFF111827),
-                    title: text.defaultHomeView,
+                    title: loc.defaultHomeView,
                     subtitle: vm.getLocalizedHomeView(context),
-                    onTap: () => _showHomeViewDialog(context, vm),
+                    onTap: () {
+                      Get.snackbar(loc.snackbar_message_title, loc.snackbar_message_body,
+                          snackPosition: SnackPosition.BOTTOM,colorText: Colors.white, backgroundColor: Colors.red);
+
+                    },
                     trailing: const Icon(Icons.chevron_right,
                         color: Colors.white54),
                   ),
@@ -149,7 +154,7 @@ class _SettingsView extends StatelessWidget {
               const SizedBox(height: 24),
 
               // --------- GENERAL ----------
-               _SectionHeader(title: text.general),
+               _SectionHeader(title: loc.general),
               const SizedBox(height: 12),
 
               _SettingsCard(
@@ -167,10 +172,10 @@ class _SettingsView extends StatelessWidget {
                   _IconTile(
                     icon: Icons.language_rounded,
                     iconBgColor: const Color(0xFF111827),
-                    title: text.language,
+                    title: loc.language,
                     subtitle: vm.languageCode == "en"
-                        ? text.english
-                        : text.urdu,
+                        ? loc.english
+                        : loc.urdu,
                     onTap: () => _showLanguageDialog(context, vm),
                     trailing: const Icon(Icons.chevron_right,
                         color: Colors.white54),
@@ -181,7 +186,7 @@ class _SettingsView extends StatelessWidget {
               const SizedBox(height: 24),
 
               // --------- ACCOUNT ----------
-              _SectionHeader(title: text.account),
+              _SectionHeader(title: loc.account),
               const SizedBox(height: 12),
 
               _SettingsCard(
@@ -190,7 +195,7 @@ class _SettingsView extends StatelessWidget {
                     icon: Icons.logout_rounded,
                     iconBgColor: const Color(0xFF3F1D1D),
                     iconColor: const Color(0xFFEF4444),
-                    title: text.logout,
+                    title: loc.logout,
                     titleColor: const Color(0xFFEF4444),
                     onTap: () => _confirmLogout(context, vm),
                   ),
@@ -213,13 +218,13 @@ class _SettingsView extends StatelessWidget {
       AppLocalizations.of(context)!.week
   };
     String temp = vm.defaultHomeView;
-    final text=AppLocalizations.of(context)!;
+    final loc=AppLocalizations.of(context)!;
 
     await showDialog<void>(
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: const Color(0xFF11151F),
-        title: Text(text.defaultHomeView,
+        title: Text(loc.defaultHomeView,
             style: TextStyle(color: Colors.white)),
         content: Column(
           mainAxisSize: MainAxisSize.min,

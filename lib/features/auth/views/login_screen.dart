@@ -93,7 +93,7 @@ class _LoginView extends StatelessWidget {
                           const _LogoBadge(),
                           const SizedBox(height: 12),
                           AppText(
-                            'TaskFlow',
+                            'Nova Tasks',
                             fontSize: 24,
                             fontWeight: FontWeight.w700,
                           ),

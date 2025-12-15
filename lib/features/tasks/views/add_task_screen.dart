@@ -62,15 +62,17 @@ class _AddTaskPage extends StatelessWidget {
   }
 
 
-  String _formatDate(DateTime? date) {
-    if (date == null) return 'Select date';
+  String _formatDate(BuildContext context,DateTime? date) {
+    final loc=AppLocalizations.of(context)!;
+    if (date == null) return loc.selectDate;
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
-  String _formatTime(TimeOfDay? time) {
-    if (time == null) return 'Select time';
+  String _formatTime(BuildContext context,TimeOfDay? time) {
+    final loc=AppLocalizations.of(context)!;
+    if (time == null) return loc.selectTime;
     final hour = time.hourOfPeriod == 0 ? 12 : time.hourOfPeriod;
-    final suffix = time.period == DayPeriod.am ? 'AM' : 'PM';
+    final suffix = time.period == DayPeriod.am ? loc.time_am : loc.time_pm;
     return '$hour:${time.minute.toString().padLeft(2, '0')} $suffix';
   }
 
@@ -176,7 +178,7 @@ class _AddTaskPage extends StatelessWidget {
                       const SizedBox(height: 8),
                       _PickerTile(
                         icon: Icons.calendar_today_outlined,
-                        label: _formatDate(viewModel.dueDate),
+                        label: _formatDate(context,viewModel.dueDate),
                         onTap: () => _pickDate(context, viewModel),
                       ),
                       const SizedBox(height: 16),
@@ -184,7 +186,7 @@ class _AddTaskPage extends StatelessWidget {
                       const SizedBox(height: 8),
                       _PickerTile(
                         icon: Icons.access_time_rounded,
-                        label: _formatTime(viewModel.dueTime),
+                        label: _formatTime(context,viewModel.dueTime),
                         onTap: () => _pickTime(context, viewModel),
                       ),
                     ],

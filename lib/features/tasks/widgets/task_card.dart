@@ -23,15 +23,27 @@ class TaskCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final homeVm = context.read<HomeViewModel>();
-    String formattedTime = DateFormat('hh:mm a').format(task.createdAt);
+    final loc=AppLocalizations.of(context)!;
+
+    String localizeAmPm(String timeString) {
+
+      return timeString
+          .replaceAll('AM', loc.time_am)
+          .replaceAll('PM', loc.time_pm);
+    }
+    String formattedTime =  localizeAmPm(DateFormat(loc.time_format).format(task.createdAt));
 
     // Priority & category colors
     final priorityColor = _priorityColor(task.priority);
     final categoryChipColor = _categoryChipColor(task.category);
     String _formatDue(TaskModel task) {
-      final dateStr = DateFormat('MMM d, yyyy').format(task.date);
+      final dateStr = DateFormat(loc.date_format).format(task.date);
+
       if (task.time.isEmpty) return dateStr;
-      return '$dateStr - ${task.time}';
+
+      final localizedTime = localizeAmPm(task.time);
+
+      return '$dateStr - $localizedTime';
     }
     final isRecurring = task.recurrenceRule != null && task.recurrenceRule!.trim().isNotEmpty;
     

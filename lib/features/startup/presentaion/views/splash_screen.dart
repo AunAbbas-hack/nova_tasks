@@ -51,6 +51,8 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
+
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -61,32 +63,27 @@ class _SplashScreenState extends State<SplashScreen> {
             children: [
               Center(
                 child: Container(
-                  width: 72,
-                  height: 72,
+                  width: 100,
+                  height: 100,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [AppColors.primaryBright, AppColors.primary],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(24),
+                    color: primary.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+
                   ),
-                  child: const Icon(
-                    Icons.add_task_rounded,
-                    size: 36,
-                    color: Colors.white,
+                  child: Icon(
+                    Icons.task_alt_rounded,
+                    size: 60,
+                    color: primary,
                   ),
                 ),
               ),
               const SizedBox(height: 32),
               Text(
-                'TaskFlow',
+                'Nova Tasks',
                 style: theme.textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(height: 24),
-              const CircularProgressIndicator(), // 👈 loading while prefs check
             ],
           ),
         ),

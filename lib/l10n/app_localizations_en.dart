@@ -111,12 +111,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noNotificationsSubtitle => 'No notifications right now';
 
   @override
-  String get notificationsTitle => 'Notifications';
-
-  @override
-  String get notificationsClearAll => 'Clear All';
-
-  @override
   String get notificationsToday => 'Today';
 
   @override
@@ -326,7 +320,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String subtasksCompletedStatus(Object completed, Object total) {
-    return '$completed of $total Completed';
+    return '$completed of $total Subtasks Completed';
   }
 
   @override
@@ -543,4 +537,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get selectLanguage => 'Select Language';
+
+  @override
+  String get snackbar_message_title => 'Message';
+
+  @override
+  String get snackbar_message_body =>
+      'This feature will be available in next update';
+
+  @override
+  String get selectTime => 'Select Time';
+
+  @override
+  String get selectDate => 'Select Date';
+
+  @override
+  String get date_format => 'MMM d, yyyy';
+
+  @override
+  String get time_format => 'hh:mm a';
+
+  @override
+  String get time_am => 'AM';
+
+  @override
+  String get time_pm => 'PM';
 }

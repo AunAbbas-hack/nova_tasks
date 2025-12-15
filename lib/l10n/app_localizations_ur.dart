@@ -82,7 +82,7 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String tasksCompleted(int count) {
-    return '$count مکمل شدہ ٹاسکس';
+    return '/$count مکمل شدہ ٹاسکس';
   }
 
   @override
@@ -111,13 +111,7 @@ class AppLocalizationsUr extends AppLocalizations {
   String get noNotificationsSubtitle => 'اس وقت کوئی نوٹیفیکیشن نہیں';
 
   @override
-  String get notificationsTitle => 'Notifications';
-
-  @override
-  String get notificationsClearAll => 'Clear All';
-
-  @override
-  String get notificationsToday => 'Today';
+  String get notificationsToday => 'آج';
 
   @override
   String get notificationsYesterday => 'گزشتہ دن';
@@ -326,7 +320,7 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String subtasksCompletedStatus(Object completed, Object total) {
-    return '$completed میں سے $total مکمل';
+    return '$completed میں سے $total  ذیلی ٹاسک مکمل';
   }
 
   @override
@@ -544,4 +538,28 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get selectLanguage => 'زبان منتخب کریں۔';
+
+  @override
+  String get snackbar_message_title => 'پیغام';
+
+  @override
+  String get snackbar_message_body => 'یہ فیچر اگلی اپڈیٹ میں دستیاب ہوگا';
+
+  @override
+  String get selectTime => 'وقت منتخب کریں';
+
+  @override
+  String get selectDate => 'تاریخ منتخب کریں';
+
+  @override
+  String get date_format => 'MMM d, yyyy';
+
+  @override
+  String get time_format => 'hh:mm a';
+
+  @override
+  String get time_am => 'صبح';
+
+  @override
+  String get time_pm => 'شام';
 }

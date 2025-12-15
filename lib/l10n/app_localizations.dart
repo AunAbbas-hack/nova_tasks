@@ -290,18 +290,6 @@ abstract class AppLocalizations {
   /// **'No notifications right now'**
   String get noNotificationsSubtitle;
 
-  /// No description provided for @notificationsTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Notifications'**
-  String get notificationsTitle;
-
-  /// No description provided for @notificationsClearAll.
-  ///
-  /// In en, this message translates to:
-  /// **'Clear All'**
-  String get notificationsClearAll;
-
   /// No description provided for @notificationsToday.
   ///
   /// In en, this message translates to:
@@ -701,7 +689,7 @@ abstract class AppLocalizations {
   /// No description provided for @subtasksCompletedStatus.
   ///
   /// In en, this message translates to:
-  /// **'{completed} of {total} Completed'**
+  /// **'{completed} of {total} Subtasks Completed'**
   String subtasksCompletedStatus(Object completed, Object total);
 
   /// No description provided for @addSubtaskAction.
@@ -1129,6 +1117,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Select Language'**
   String get selectLanguage;
+
+  /// No description provided for @snackbar_message_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get snackbar_message_title;
+
+  /// No description provided for @snackbar_message_body.
+  ///
+  /// In en, this message translates to:
+  /// **'This feature will be available in next update'**
+  String get snackbar_message_body;
+
+  /// No description provided for @selectTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Time'**
+  String get selectTime;
+
+  /// No description provided for @selectDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Date'**
+  String get selectDate;
+
+  /// No description provided for @date_format.
+  ///
+  /// In en, this message translates to:
+  /// **'MMM d, yyyy'**
+  String get date_format;
+
+  /// No description provided for @time_format.
+  ///
+  /// In en, this message translates to:
+  /// **'hh:mm a'**
+  String get time_format;
+
+  /// No description provided for @time_am.
+  ///
+  /// In en, this message translates to:
+  /// **'AM'**
+  String get time_am;
+
+  /// No description provided for @time_pm.
+  ///
+  /// In en, this message translates to:
+  /// **'PM'**
+  String get time_pm;
 }
 
 class _AppLocalizationsDelegate

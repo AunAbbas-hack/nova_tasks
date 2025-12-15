@@ -40,11 +40,11 @@ class _TaskDetailView extends StatelessWidget {
   Color _priorityColor(String priority) {
     switch (priority.toLowerCase()) {
       case 'low':
-        return const Color(0xFF60A5FA);
+        return Colors.blueGrey ;
       case 'medium':
-        return const Color(0xFFF59E0B);
+        return const Color(0xFF60A5FA);
       case 'high':
-        return const Color(0xFFFB7185);
+        return Colors.orange;
       case 'urgent':
         return const Color(0xFFEF4444);
       default:
@@ -68,7 +68,7 @@ class _TaskDetailView extends StatelessWidget {
     final vm = context.watch<TaskDetailViewModel>();
     final task = vm.task;
     final theme = Theme.of(context);
-
+    final isRecurring = task.recurrenceRule != null && task.recurrenceRule!.trim().isNotEmpty;
     final priorityColor = _priorityColor(task.priority);
     final categoryColor = _categoryColor(task.category);
     final loc=AppLocalizations.of(context)!;
@@ -112,6 +112,8 @@ class _TaskDetailView extends StatelessWidget {
                             : null,
                       ),
                     ),
+                    if(isRecurring)
+                      IconButton(onPressed: (){}, icon: Icon(Icons.repeat,color: Colors.white,size: 20,)),
                   ],
                 ),
               ),
@@ -297,7 +299,7 @@ class _TaskDetailView extends StatelessWidget {
                           fontWeight: FontWeight.w700,
                         ),
                         AppText(
-                          '${vm.completedSubtasks} of ${vm.totalSubtasks} ${loc.tasksCompletedLabel}',
+                          loc.subtasksCompletedStatus(vm.totalSubtasks, vm.completedSubtasks),
                           color: Colors.white70,
                           fontSize: 12,
                           fontWeight: FontWeight.w500,

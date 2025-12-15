@@ -83,7 +83,7 @@ class _OtpView extends StatelessWidget {
                   const _LogoBadge(),
                   const SizedBox(height: 16),
                   AppText(
-                    'NovaTasks',
+                    'Nova Tasks',
                     fontSize: 24,
                     fontWeight: FontWeight.w700,
                     textAlign: TextAlign.center,

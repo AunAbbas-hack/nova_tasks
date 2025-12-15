@@ -1,42 +1,30 @@
 {
   "@@locale": "ur",
-
   "settings": "سیٹنگز",
-
   "profileName": "انڈریا",
   "profileEmail": "andria@email.com",
-
   "appearance": "ظاہری شکل",
   "darkMode": "ڈارک موڈ",
   "systemDefault": "سسٹم ڈیفالٹ",
-
   "defaultHomeView": "ڈیفالٹ ہوم ویو",
   "today": "آج",
-
   "general": "جنرل",
   "defaultReminderTime": "ڈیفالٹ ریمائنڈر ٹائم",
   "time0900am": "صبح 09:00",
-
   "language": "زبان",
   "english": "انگریزی",
-
   "account": "اکاؤنٹ",
   "logout": "لاگ آؤٹ",
   "urdu":"اردو",
   "week":"ہفتہ",
-
-
  "tasksCompletedLabel": "مکمل شدہ ٹاسکس",
   "onTimeRateLabel": "وقت پر مکمل کرنے کی شرح",
   "currentStreakLabel": "موجودہ سلسلہ",
-
   "profile": "پروفائل",
   "fullName": "پورا نام",
   "email": "ای میل",
-
   "productivityInsights": "پروڈکٹیویٹی ان سائٹس",
-
-  "tasksCompleted": "{count} مکمل شدہ ٹاسکس",
+  "tasksCompleted": "/{count} مکمل شدہ ٹاسکس",
   "@tasksCompleted": {
     "description": "Shows number of completed tasks",
     "placeholders": {
@@ -45,7 +33,6 @@
       }
     }
   },
-
   "onTimeRate": "{percent}% وقت پر مکمل کرنے کی شرح",
   "@onTimeRate": {
     "description": "Shows percentage of on-time rate",
@@ -55,7 +42,6 @@
       }
     }
   },
-
   "currentStreak": "{days} دن کا سلسلہ",
   "@currentStreak": {
     "description": "Shows current streak in days",
@@ -65,24 +51,17 @@
       }
     }
   },
-
   "notifications": "نوٹیفیکیشنز",
   "saveChanges": "تبدیلیاں محفوظ کریں",
+  "notificationsToday": "آج",
   "clearAll":"تمام صاف کریں",
-
-
   "noNotificationsTitle": "آپ مکمل طور پر اپ ٹو ڈیٹ ہیں!",
   "noNotificationsSubtitle": "اس وقت کوئی نوٹیفیکیشن نہیں",
-
-
-
   "notificationsYesterday": "گزشتہ دن",
-
   "notificationDueSoonTitle": "جلد مکمل ہونے والا ٹاسک",
   "notificationOverdueTitle": "وقت گزر جانے والا ٹاسک",
   "notificationProductivityInsightTitle": "پیداواری کارکردگی",
   "notificationCollaborationTitle": "تعاون کی تازہ کاری",
-
   "notificationDueSoonMessage": "{taskTitle} کو {relativeTime} تک مکمل کرنا ہے",
   "@notificationDueSoonMessage": {
     "description": "Shown when a task is due soon",
@@ -95,7 +74,6 @@
       }
     }
   },
-
   "notificationOverdueMessage": "{relativeTime} پر {taskTitle} ",
   "@notificationOverdueMessage": {
     "description": "Shown when a task is overdue",
@@ -108,7 +86,6 @@
       }
     }
   },
-
   "notificationProductivityInsightMessage": "آپ نے کل {completedCount} ٹاسک مکمل کیے!",
   "@notificationProductivityInsightMessage": {
     "description": "Yesterday productivity summary",
@@ -118,7 +95,6 @@
       }
     }
   },
-
   "notificationCollaborationMessage": "{assignerName} نے آپ کو نیا ٹاسک دیا ہے",
   "@notificationCollaborationMessage": {
     "description": "New task assigned by someone",
@@ -132,20 +108,13 @@
   "notificationSnoozeButton": "اسنوز",
   "notificationMarkDoneButton": "مکمل کریں",
   "notificationActivityMessage": "آپ نے کل نئی ٹاسکس بنائیں۔",
-
   "markAsDone": "مکمل کے طور پر نشان زد کریں",
   "snooze": "مؤخر کریں",
-
-
   "hi": "ہیلو",
   "showAll": "سب دکھائیں",
-
-
-
   "filterAll": "تمام",
   "filterPersonal": "ذاتی",
   "filterWork": "ٹاسک",
-
   "tasksForDay": "{day}، {date} ",
   "@tasksForDay": {
     "placeholders": {
@@ -153,13 +122,10 @@
       "date": {}
     }
   },
-
   "noTasksForDay": "آج کے لیے کوئی ٹاسک موجود نہیں",
-
   "bottomNavHome": "ہوم",
   "bottomNavCalendar": "کیلنڈر",
   "bottomNavMe": "پروفائل",
-
   "dayMon": "پیر",
   "dayTue": "منگل",
   "dayWed": "بدھ",
@@ -167,59 +133,42 @@
   "dayFri": "جمعہ",
   "daySat": "ہفتہ",
   "daySun": "اتوار",
-
-
   "filterTitleShow": "دکھائیں",
-
   "filterAllTasks": "تمام (آج + زائد المیعاد + آنے والے)",
   "filterOverdueTasks": "زائد المیعاد ٹاسک",
   "filterTodayTasks": "آج کے ٹاسک",
   "filterUpcomingTasks": "آنے والے ٹاسک",
-
   "filterCancelButton": "منسوخ کریں",
   "filterApplyButton": "لاگو کریں",
   "allTasks": "All Tasks",
-
   "noTasksForFilter": "اس فلٹر کے لیے کوئی ٹاسک نہیں ملا۔",
-
   "deleteTaskTitle": "ٹاسک حذف کریں؟",
   "deleteTaskMessage": "کیا آپ واقعی اس ٹاسک کو حذف کرنا چاہتے ہیں؟",
   "cancelAction": "منسوخ کریں",
   "deleteAction": "حذف کریں",
-
   "editTaskTitle": "اپ ڈیٹ کریں",
   "newTaskTitle": "نیا ٹاسک",
   "saveAction": "محفوظ کریں",
-
   "taskTitleLabel": "ٹاسک کا عنوان",
   "taskTitleHint": "مثال کے طور پر، نیا ڈیش بورڈ ڈیزائن کریں",
-
   "taskDescriptionLabel": "تفصیل",
   "taskDescriptionHint": "ٹاسک کے بارے میں تفصیلات شامل کریں...",
-
   "dueDateLabel": "مقررہ تاریخ",
   "timeLabel": "وقت",
-
   "priorityLabel": "اہمیت",
   "priorityLow": "کم",
   "priorityMedium": "درمیانی",
   "priorityHigh": "ضروری",
   "priorityUrgent": "انتہائی ضروری",
-
   "categoryLabel": "قسم",
   "categoryWork": "ٹاسک",
-
   "recurringTaskLabel": "دوبارہ ہونے والا ٹاسک",
   "recurringTaskHint": "ٹاسک کو بار بار ہونے کے لیے سیٹ کریں",
-
   "subtasksLabel": "ذیلی ٹاسک",
   "subtasksProgressLabel": "پیش رفت",
-  "subtasksCompletedStatus": "{completed} میں سے {total} مکمل",
+  "subtasksCompletedStatus": "{completed} میں سے {total}  ذیلی ٹاسک مکمل",
   "enterSubTask":"ذیلی ٹاسک درج کریں۔",
-
-
   "addSubtaskAction": "ذیلی ٹاسک شامل کریں",
-
   "createTaskAction": "ٹاسک بنائیں",
   "enterCustomCategory": "حسبِ ضرورت قسم درج کریں",
   "categoryWork": "ٹاسک",
@@ -255,22 +204,16 @@
   "addButton":"شامل کریں",
   "markAsCompleted":"مکمل کے طور پر نشان زد کریں",
   "markAsIncomplete":"نامکمل کے طور پر نشان زد کریں",
-
-
   "exitAppTitle": "ایپ بند کریں",
   "exitAppMessage": "کیا آپ واقعی ایپ بند کرنا چاہتے ہیں؟",
   "no": "نہیں",
   "yes": "ہاں",
-
-
   "recurrenceRepeats": "دہرایا جائے گا",
   "recurrenceDaily": "روزانہ",
   "recurrenceWeekly": "ہفتہ وار",
   "recurrenceMonthly": "ماہانہ",
   "recurrenceYearly": "سالانہ",
-
   "recurrenceEvery": "ہر",
-
   "weekdayMon": "پیر",
   "weekdayTue": "منگل",
   "weekdayWed": "بدھ",
@@ -278,39 +221,35 @@
   "weekdayFri": "جمعہ",
   "weekdaySat": "ہفتہ",
   "weekdaySun": "اتوار",
-
   "recurrenceForever": "ہمیشہ",
   "recurrenceUntil": "تک",
   "recurrenceForOccurrences": "{count} مرتبہ کے لیے",
-
-
   "recurrenceCancel": "منسوخ",
   "recurrenceSave": "محفوظ کریں",
   "recurrenceSetTitle": "دہراؤ سیٹ کریں",
-
   "recurrenceDaily": "روزانہ",
   "recurrenceWeekly": "ہفتہ وار",
   "recurrenceMonthly": "ماہانہ",
   "recurrenceYearly": "سالانہ",
-
   "recurrenceDailyDesc": "ہر دن دہرایا جائے گا۔",
   "recurrenceMonthlyDesc": "ہر مہینے اسی تاریخ کو دہرایا جائے گا۔",
   "recurrenceYearlyDesc": "ہر سال اسی تاریخ کو دہرایا جائے گا۔",
-
   "recurrenceRepeatsOn": "دہراؤ کے دن",
-
   "recurrenceEnds": "اختتام",
   "recurrenceNever": "کبھی نہیں",
   "recurrenceOnDate": "تاریخ پر",
   "recurrenceAfterOccurrences": "مقررہ دفعہ کے بعد",
   "completedTasksText":"مکمل شدہ ٹاسک",
-
-
-
   "logoutTitle": "لاگ آؤٹ",
   "logoutMessage": "کیا آپ واقعی لاگ آؤٹ کرنا چاہتے ہیں؟",
   "logout": "لاگ آؤٹ",
-  "selectLanguage":"زبان منتخب کریں۔"
+  "selectLanguage":"زبان منتخب کریں۔",
+  "snackbar_message_title": "پیغام",
+  "snackbar_message_body": "یہ فیچر اگلی اپڈیٹ میں دستیاب ہوگا",
+  "selectDate": "تاریخ منتخب کریں",
+  "selectTime": "وقت منتخب کریں",
+  "time_am": "صبح",
+  "time_pm": "شام",
+  "date_format": "MMM d, yyyy",
+  "time_format": "hh:mm a"
 }
-
-

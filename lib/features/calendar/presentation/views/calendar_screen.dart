@@ -77,7 +77,6 @@ class _CalendarView extends StatelessWidget {
                         fontSize: 28,
                         fontWeight: FontWeight.w700,
                       ),
-                      Icon(Icons.calendar_today_outlined, color: Colors.white),
                     ],
                   ),
                   const SizedBox(height: 24),

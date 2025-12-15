@@ -89,6 +89,8 @@ class _Badge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+
     return Container(
       width: 92,
       height: 92,
@@ -101,17 +103,14 @@ class _Badge extends StatelessWidget {
           width: 72,
           height: 72,
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [AppColors.primaryBright, AppColors.primary],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(24),
+            color: primary.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
+
           ),
-          child: const Icon(
-            Icons.add_task_rounded,
+          child:  Icon(
+            Icons.task_alt_rounded,
             size: 36,
-            color: Colors.white,
+            color: primary ,
           ),
         ),
       ),

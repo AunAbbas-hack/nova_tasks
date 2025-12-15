@@ -15,6 +15,13 @@ class AppColors {
   static const Color mutedGrey = Color(0xFF5C6677);
   static const Color success = Color(0xFF2ED8A7);
   static const Color error = Color(0xFFFF5A5A);
+  static const Color priorityLow=Colors.blueGrey;
+  static const Color priorityHigh = Colors.orange;
+  static const Color priorityMedium = Color(0xFF60A5FA);
+  static const Color priorityUrgent = Color(0xFFEF4444);
+
+
+
 
   const AppColors._();
 }

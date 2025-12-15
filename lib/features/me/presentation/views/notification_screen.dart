@@ -2,6 +2,7 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:nova_tasks/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
@@ -183,9 +184,24 @@ class _NotificationCard extends StatelessWidget {
     final task=n.task;
     switch (n.kind) {
       case NotificationKind.dueSoon:
-        return loc.notificationDueSoonMessage(task?.title??"", task?.time??"");
-      case NotificationKind.overdue:
-        return loc.notificationOverdueMessage(task?.title??"", task?.time??"");
+        final hasTime = task?.time != null && task!.time.isNotEmpty;
+        if (!hasTime) {
+          // No time → send date
+          return loc.notificationDueSoonMessage(task?.title??"",DateFormat("MMM, d").format(task!.date));
+        }
+        return loc.notificationDueSoonMessage(task.title, task.time);
+        case NotificationKind.overdue:
+        final hasTime = task?.time != null && task!.time.isNotEmpty;
+
+        if (!hasTime) {
+          // No time → send date
+          return loc.notificationOverdueMessage(
+            task?.title ?? "",DateFormat("MMM, d").format(task!.date));
+        }
+        return loc.notificationOverdueMessage(
+          task.title,
+          task.time,
+        );
         case NotificationKind.productivityInsight:
         return loc.notificationProductivityInsightMessage(task?.title??"");
       case NotificationKind.activityInfo:
