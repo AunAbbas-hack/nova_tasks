@@ -483,14 +483,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get weekdaySun => 'Sun';
 
   @override
-  String get recurrenceForever => 'forever';
+  String get recurrenceForever => 'Forever';
 
   @override
-  String get recurrenceUntil => 'until';
+  String get recurrenceUntil => 'Until';
 
   @override
   String recurrenceForOccurrences(Object count) {
-    return 'for $count occurrences';
+    return 'for $count Occurrences';
   }
 
   @override
@@ -524,7 +524,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recurrenceOnDate => 'On Date';
 
   @override
-  String get recurrenceAfterOccurrences => 'After N occurrences';
+  String get recurrenceAfterOccurrences => 'After N Occurrences';
 
   @override
   String get completedTasksText => 'Completed Tasks';

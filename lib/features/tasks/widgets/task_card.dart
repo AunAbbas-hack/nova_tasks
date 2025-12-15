@@ -252,10 +252,10 @@ class TaskCard extends StatelessWidget {
                                 await homeVm!.deleteAllRecurrences(task);
                                 break;
                               case RecurringDeleteOption.deleteUpcoming:
-                                await homeVm!.deleteUpcomingRecurrences(task);
+                                await homeVm!.deleteUpcomingRecurrences(task, occurrenceDate: occurrenceDate);
                                 break;
                               case RecurringDeleteOption.deleteToday:
-                                await homeVm!.deleteTodayRecurrence(task);
+                                await homeVm!.deleteTodayRecurrence(task, occurrenceDate: occurrenceDate);
                                 break;
                             }
                           }

@@ -145,22 +145,57 @@ class HomeViewModel extends ChangeNotifier {
     await repo.deleteTask(task.userId, task.id);
   }
 
-  /// Delete upcoming recurrences (set UNTIL date to today)
-  Future<void> deleteUpcomingRecurrences(TaskModel task) async {
+  /// Delete upcoming recurrences from a specific occurrence date onwards
+  /// UNTIL is inclusive, so we set it to the day before the occurrence to delete
+  /// occurrenceDate: The date from which to delete (this date and onwards will be deleted)
+  Future<void> deleteUpcomingRecurrences(TaskModel task, {DateTime? occurrenceDate}) async {
     if (task.recurrenceRule == null || task.recurrenceRule!.isEmpty) {
       return;
     }
 
-    final today = DateTime.now();
-    final untilDateStr = '${today.year.toString().padLeft(4, '0')}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+    // If no occurrence date specified, use today
+    final deleteFromDate = occurrenceDate != null ? _only(occurrenceDate) : _only(DateTime.now());
     
     // Parse existing recurrence rule
     final parts = task.recurrenceRule!.split(';').map((e) => e.split('=')).toList();
+    final frequency = parts.firstWhereOrNull((e) => e[0] == 'F')?[1];
+    final start = _only(task.date);
+    
+    // Find the last occurrence that should be kept (day before deleteFromDate)
+    // We'll iterate backwards from deleteFromDate to find the last valid occurrence
+    DateTime lastValidDate = deleteFromDate.subtract(const Duration(days: 1));
+    
+    // For daily tasks, last valid date is the day before deleteFromDate
+    if (frequency == 'DAILY') {
+      lastValidDate = deleteFromDate.subtract(const Duration(days: 1));
+    } else {
+      // For weekly/monthly/yearly, find the last occurrence before deleteFromDate
+      DateTime current = deleteFromDate.subtract(const Duration(days: 1));
+      int iterations = 0;
+      bool found = false;
+      
+      while ((current.isAfter(start) || _isSameDay(current, start)) && iterations < 365) {
+        if (_matchesRecurrencePatternForDate(task, current, frequency, parts)) {
+          lastValidDate = current;
+          found = true;
+          break;
+        }
+        current = current.subtract(const Duration(days: 1));
+        iterations++;
+      }
+      
+      // If no valid occurrence found before deleteFromDate, use task start date
+      if (!found) {
+        lastValidDate = start;
+      }
+    }
+    
+    final untilDateStr = '${lastValidDate.year.toString().padLeft(4, '0')}-${lastValidDate.month.toString().padLeft(2, '0')}-${lastValidDate.day.toString().padLeft(2, '0')}';
     
     // Remove existing UNTIL if present
     parts.removeWhere((part) => part.isNotEmpty && part[0] == 'UNTIL');
     
-    // Add new UNTIL date
+    // Add new UNTIL date (last valid date, which is inclusive)
     parts.add(['UNTIL', untilDateStr]);
     
     final newRecurrenceRule = parts.map((part) => part.join('=')).join(';');
@@ -171,20 +206,52 @@ class HomeViewModel extends ChangeNotifier {
       {'recurrenceRule': newRecurrenceRule},
     );
   }
+  
+  /// Helper to check if a specific date matches the recurrence pattern
+  bool _matchesRecurrencePatternForDate(TaskModel task, DateTime day, String? frequency, List<List<String>> parts) {
+    final start = _only(task.date);
+    
+    // If it's the start date, it should always match
+    if (_isSameDay(start, day)) {
+      return true;
+    }
+    
+    // Check if the day matches the frequency pattern
+    switch (frequency) {
+      case 'DAILY':
+        return true;
+      case 'WEEKLY':
+        final byDay = parts.firstWhereOrNull((e) => e[0] == 'BYDAY');
+        if (byDay != null && byDay.length > 1) {
+          final weekDays = byDay[1].split(',').map((e) => int.tryParse(e) ?? 1).toSet();
+          return weekDays.contains(day.weekday);
+        }
+        return day.weekday == start.weekday;
+      case 'MONTHLY':
+        return day.day == start.day;
+      case 'YEARLY':
+        return day.month == start.month && day.day == start.day;
+      default:
+        return _isSameDay(start, day);
+    }
+  }
 
-  /// Delete today's recurrence (add today to exception dates)
-  Future<void> deleteTodayRecurrence(TaskModel task) async {
-    final today = DateTime.now();
-    final todayOnly = DateTime(today.year, today.month, today.day);
+  /// Delete a specific occurrence (add to exception dates)
+  /// occurrenceDate: The specific date to delete (if null, uses today)
+  Future<void> deleteTodayRecurrence(TaskModel task, {DateTime? occurrenceDate}) async {
+    // Use occurrenceDate if provided, otherwise use today
+    final dateToDelete = occurrenceDate != null 
+        ? _only(occurrenceDate) 
+        : _only(DateTime.now());
     
     // Check if already in exception dates
     final existingExceptions = List<DateTime>.from(task.exceptionDates);
     final isAlreadyException = existingExceptions.any((d) => 
-      d.year == todayOnly.year && d.month == todayOnly.month && d.day == todayOnly.day
+      _isSameDay(d, dateToDelete)
     );
     
     if (!isAlreadyException) {
-      existingExceptions.add(todayOnly);
+      existingExceptions.add(dateToDelete);
       
       await repo.updateTask(
         task.userId,
@@ -207,6 +274,14 @@ bool _occursOn(TaskModel task, DateTime day) {
     final dayOnly = _only(day);
     final start = _only(task.date);
     final rule = task.recurrenceRule?.trim();
+
+    // Check if this date is in exception dates (for recurring tasks)
+    if (rule != null && rule.isNotEmpty) {
+      final isException = task.exceptionDates.any((d) => _isSameDay(d, dayOnly));
+      if (isException) {
+        return false; // This date is excluded from recurrence
+      }
+    }
 
     // No recurrence → single instance
     if (rule == null || rule.isEmpty) {

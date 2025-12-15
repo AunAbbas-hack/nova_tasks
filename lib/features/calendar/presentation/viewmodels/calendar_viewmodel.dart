@@ -104,6 +104,14 @@ class CalendarViewModel extends ChangeNotifier {
     final start = _only(task.date);
     final rule = task.recurrenceRule?.trim();
 
+    // Check if this date is in exception dates (for recurring tasks)
+    if (rule != null && rule.isNotEmpty) {
+      final isException = task.exceptionDates.any((d) => _isSameDay(d, dayOnly));
+      if (isException) {
+        return false; // This date is excluded from recurrence
+      }
+    }
+
     if (rule == null || rule.isEmpty || dayOnly.isBefore(start)) {
       return _isSameDay(start, dayOnly);
     }
@@ -331,14 +339,21 @@ class CalendarViewModel extends ChangeNotifier {
     await repo.deleteTask(task.userId, task.id);
   }
 
-  /// Delete upcoming recurrences (set UNTIL date to today)
-  Future<void> deleteUpcomingRecurrences(TaskModel task) async {
+  /// Delete upcoming recurrences from a specific occurrence date onwards
+  /// occurrenceDate: The date from which to delete (this date and onwards will be deleted)
+  Future<void> deleteUpcomingRecurrences(TaskModel task, {DateTime? occurrenceDate}) async {
     if (task.recurrenceRule == null || task.recurrenceRule!.isEmpty) {
       return;
     }
 
-    final today = DateTime.now();
-    final untilDateStr = '${today.year.toString().padLeft(4, '0')}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+    // If no occurrence date specified, use the selected day or today
+    final deleteFromDate = occurrenceDate != null 
+        ? _only(occurrenceDate) 
+        : (_selectedDay != null ? _only(_selectedDay!) : _only(DateTime.now()));
+    
+    // The last day to keep is the day before deleteFromDate
+    final lastValidDate = deleteFromDate.subtract(const Duration(days: 1));
+    final untilDateStr = '${lastValidDate.year.toString().padLeft(4, '0')}-${lastValidDate.month.toString().padLeft(2, '0')}-${lastValidDate.day.toString().padLeft(2, '0')}';
     
     // Parse existing recurrence rule
     final parts = task.recurrenceRule!.split(';').map((e) => e.split('=')).toList();
@@ -358,19 +373,22 @@ class CalendarViewModel extends ChangeNotifier {
     );
   }
 
-  /// Delete today's recurrence (add today to exception dates)
-  Future<void> deleteTodayRecurrence(TaskModel task) async {
-    final today = DateTime.now();
-    final todayOnly = DateTime(today.year, today.month, today.day);
+  /// Delete a specific occurrence (add to exception dates)
+  /// occurrenceDate: The specific date to delete (if null, uses today)
+  Future<void> deleteTodayRecurrence(TaskModel task, {DateTime? occurrenceDate}) async {
+    // Use occurrenceDate if provided, otherwise use selected day or today
+    final dateToDelete = occurrenceDate != null 
+        ? _only(occurrenceDate) 
+        : (_selectedDay != null ? _only(_selectedDay!) : _only(DateTime.now()));
     
     // Check if already in exception dates
     final existingExceptions = List<DateTime>.from(task.exceptionDates);
     final isAlreadyException = existingExceptions.any((d) => 
-      d.year == todayOnly.year && d.month == todayOnly.month && d.day == todayOnly.day
+      _isSameDay(d, dateToDelete)
     );
     
     if (!isAlreadyException) {
-      existingExceptions.add(todayOnly);
+      existingExceptions.add(dateToDelete);
       
       await repo.updateTask(
         task.userId,

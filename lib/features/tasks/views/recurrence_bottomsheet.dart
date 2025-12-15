@@ -52,7 +52,7 @@ class _RecurrenceSheetView extends StatelessWidget {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.white24,
+                color: Colors.white70,
                 borderRadius: BorderRadius.circular(999),
               ),
             ),

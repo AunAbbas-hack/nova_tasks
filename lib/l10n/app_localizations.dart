@@ -1013,19 +1013,19 @@ abstract class AppLocalizations {
   /// No description provided for @recurrenceForever.
   ///
   /// In en, this message translates to:
-  /// **'forever'**
+  /// **'Forever'**
   String get recurrenceForever;
 
   /// No description provided for @recurrenceUntil.
   ///
   /// In en, this message translates to:
-  /// **'until'**
+  /// **'Until'**
   String get recurrenceUntil;
 
   /// No description provided for @recurrenceForOccurrences.
   ///
   /// In en, this message translates to:
-  /// **'for {count} occurrences'**
+  /// **'for {count} Occurrences'**
   String recurrenceForOccurrences(Object count);
 
   /// No description provided for @recurrenceCancel.
@@ -1091,7 +1091,7 @@ abstract class AppLocalizations {
   /// No description provided for @recurrenceAfterOccurrences.
   ///
   /// In en, this message translates to:
-  /// **'After N occurrences'**
+  /// **'After N Occurrences'**
   String get recurrenceAfterOccurrences;
 
   /// No description provided for @completedTasksText.

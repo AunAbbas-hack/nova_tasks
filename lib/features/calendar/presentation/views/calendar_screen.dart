@@ -110,6 +110,17 @@ class _CalendarView extends StatelessWidget {
                       : Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            Center(
+                              child: Container(
+                                width: 40,
+                                height: 4,
+                                decoration: BoxDecoration(
+                                  color: Colors.white70,
+                                  borderRadius: BorderRadius.circular(999),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
                             // ... Aapka baki content same rahega ...
                             AppText(
                               titleText,
@@ -145,28 +156,33 @@ class _CalendarView extends StatelessWidget {
                                             occurrenceDate = task.date;
                                           }
                                         }
-                                        return TaskCard(
-                                          task: task,
-                                          occurrenceDate: occurrenceDate,
-                                          onToggleComplete: (task, {occurrenceDate}) {
-                                            vm.toggleComplete(task, occurrenceDate: occurrenceDate);
-                                          },
-                                          onDelete: (task) async {
-                                            await vm.repo.deleteTask(task.userId, task.id);
-                                          },
-                                          onDeleteRecurring: (task, option) async {
-                                            switch (option) {
-                                              case RecurringDeleteOption.deleteAll:
-                                                await vm.deleteAllRecurrences(task);
-                                                break;
-                                              case RecurringDeleteOption.deleteUpcoming:
-                                                await vm.deleteUpcomingRecurrences(task);
-                                                break;
-                                              case RecurringDeleteOption.deleteToday:
-                                                await vm.deleteTodayRecurrence(task);
-                                                break;
-                                            }
-                                          },
+                                        return Column(
+                                          children:[ TaskCard(
+                                            task: task,
+                                            occurrenceDate: occurrenceDate,
+                                            onToggleComplete: (task, {occurrenceDate}) {
+                                              vm.toggleComplete(task, occurrenceDate: occurrenceDate);
+                                            },
+                                            onDelete: (task) async {
+                                              await vm.repo.deleteTask(task.userId, task.id);
+                                            },
+                                            onDeleteRecurring: (task, option) async {
+                                              switch (option) {
+                                                case RecurringDeleteOption.deleteAll:
+                                                  await vm.deleteAllRecurrences(task);
+                                                  break;
+                                                case RecurringDeleteOption.deleteUpcoming:
+                                                  await vm.deleteUpcomingRecurrences(task, occurrenceDate: occurrenceDate);
+                                                  break;
+                                                case RecurringDeleteOption.deleteToday:
+                                                  await vm.deleteTodayRecurrence(task, occurrenceDate: occurrenceDate);
+                                                  break;
+                                              }
+                                            },
+                                          ),
+                                            // const SizedBox(height: 3),
+                                            Divider(color: Colors.white10,)
+                                          ]
                                         );
                                       },
                                     ),

@@ -195,14 +195,17 @@ class TaskDetailViewModel extends ChangeNotifier {
     await repo.deleteTask(_task.userId, _task.id);
   }
 
-  /// Delete upcoming recurrences (set UNTIL date to today)
+  /// Delete upcoming recurrences (set UNTIL date to yesterday to keep today)
   Future<void> deleteUpcomingRecurrences() async {
     if (_task.recurrenceRule == null || _task.recurrenceRule!.isEmpty) {
       return;
     }
 
+    // Keep today and delete from tomorrow onwards
+    // So UNTIL should be set to today (since UNTIL is inclusive)
     final today = DateTime.now();
-    final untilDateStr = '${today.year.toString().padLeft(4, '0')}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+    final todayOnly = DateTime(today.year, today.month, today.day);
+    final untilDateStr = '${todayOnly.year.toString().padLeft(4, '0')}-${todayOnly.month.toString().padLeft(2, '0')}-${todayOnly.day.toString().padLeft(2, '0')}';
     
     // Parse existing recurrence rule
     final parts = _task.recurrenceRule!.split(';').map((e) => e.split('=')).toList();
@@ -210,7 +213,7 @@ class TaskDetailViewModel extends ChangeNotifier {
     // Remove existing UNTIL if present
     parts.removeWhere((part) => part.isNotEmpty && part[0] == 'UNTIL');
     
-    // Add new UNTIL date
+    // Add new UNTIL date (today, which is inclusive)
     parts.add(['UNTIL', untilDateStr]);
     
     final newRecurrenceRule = parts.map((part) => part.join('=')).join(';');
