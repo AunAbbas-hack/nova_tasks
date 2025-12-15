@@ -60,9 +60,17 @@ class _RecurrenceSheetView extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child:  AppText(loc.cancelAction,color: AppColors.primary,)
+                Container(
+                  height: 40,
+                  width: 75,
+                  decoration: BoxDecoration(
+                    color: AppColors.elevatedCard,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child:  AppText(loc.cancelAction,color: Colors.white,)
+                  ),
                 ),
                  Text(
                   loc.recurrenceSetTitle,
@@ -72,10 +80,19 @@ class _RecurrenceSheetView extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                TextButton(
-                  onPressed: () =>
-                      Navigator.pop(context, vm.settings), // ✅ return settings
-                  child:  AppText(loc.saveAction,color: AppColors.primary,),
+                Container(
+                  height: 40,
+                  width: 75,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: TextButton(
+
+                    onPressed: () =>
+                        Navigator.pop(context, vm.settings), // ✅ return settings
+                    child:  AppText(loc.saveAction,color: Colors.white,),
+                  ),
                 ),
               ],
             ),

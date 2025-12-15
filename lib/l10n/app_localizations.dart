@@ -1171,6 +1171,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Overdue Task'**
   String get overdueTask;
+
+  /// No description provided for @deleteRecurringEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Recurring Task'**
+  String get deleteRecurringEvent;
+
+  /// No description provided for @recurringTaskDeletePrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'This is a recurring task. What would you like to delete?'**
+  String get recurringTaskDeletePrompt;
+
+  /// No description provided for @deleteOptionAllRecurrences.
+  ///
+  /// In en, this message translates to:
+  /// **'All Tasks'**
+  String get deleteOptionAllRecurrences;
+
+  /// No description provided for @deleteOptionUpcomingRecurrences.
+  ///
+  /// In en, this message translates to:
+  /// **'This and following tasks'**
+  String get deleteOptionUpcomingRecurrences;
+
+  /// No description provided for @deleteOptionTodayTask.
+  ///
+  /// In en, this message translates to:
+  /// **'This task'**
+  String get deleteOptionTodayTask;
 }
 
 class _AppLocalizationsDelegate

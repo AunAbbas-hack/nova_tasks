@@ -565,4 +565,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get overdueTask => 'Overdue Task';
+
+  @override
+  String get deleteRecurringEvent => 'Delete Recurring Task';
+
+  @override
+  String get recurringTaskDeletePrompt =>
+      'This is a recurring task. What would you like to delete?';
+
+  @override
+  String get deleteOptionAllRecurrences => 'All Tasks';
+
+  @override
+  String get deleteOptionUpcomingRecurrences => 'This and following tasks';
+
+  @override
+  String get deleteOptionTodayTask => 'This task';
 }

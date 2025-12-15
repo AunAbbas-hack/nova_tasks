@@ -1,8 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import 'package:nova_tasks/data/models/task_model.dart';
 import 'package:nova_tasks/data/models/subtask_model.dart';
 import 'package:nova_tasks/data/repositories/task_repository.dart';
+import 'package:nova_tasks/features/tasks/viewmodels/recurrence_bottomsheet_viewmodel.dart';
 
 class TaskDetailViewModel extends ChangeNotifier {
   TaskDetailViewModel({
@@ -186,5 +188,202 @@ class TaskDetailViewModel extends ChangeNotifier {
 
   Future<void> deleteTask() async {
     await repo.deleteTask(_task.userId, _task.id);
+  }
+
+  /// Delete all recurrences of this task
+  Future<void> deleteAllRecurrences() async {
+    await repo.deleteTask(_task.userId, _task.id);
+  }
+
+  /// Delete upcoming recurrences (set UNTIL date to today)
+  Future<void> deleteUpcomingRecurrences() async {
+    if (_task.recurrenceRule == null || _task.recurrenceRule!.isEmpty) {
+      return;
+    }
+
+    final today = DateTime.now();
+    final untilDateStr = '${today.year.toString().padLeft(4, '0')}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+    
+    // Parse existing recurrence rule
+    final parts = _task.recurrenceRule!.split(';').map((e) => e.split('=')).toList();
+    
+    // Remove existing UNTIL if present
+    parts.removeWhere((part) => part.isNotEmpty && part[0] == 'UNTIL');
+    
+    // Add new UNTIL date
+    parts.add(['UNTIL', untilDateStr]);
+    
+    final newRecurrenceRule = parts.map((part) => part.join('=')).join(';');
+    
+    _task = _task.copyWith(recurrenceRule: newRecurrenceRule);
+    notifyListeners();
+    
+    await repo.updateTask(
+      _task.userId,
+      _task.id,
+      {'recurrenceRule': newRecurrenceRule},
+    );
+  }
+
+  /// Delete today's recurrence (add today to exception dates)
+  Future<void> deleteTodayRecurrence() async {
+    final today = DateTime.now();
+    final todayOnly = DateTime(today.year, today.month, today.day);
+    
+    // Check if already in exception dates
+    final existingExceptions = List<DateTime>.from(_task.exceptionDates);
+    final isAlreadyException = existingExceptions.any((d) => 
+      d.year == todayOnly.year && d.month == todayOnly.month && d.day == todayOnly.day
+    );
+    
+    if (!isAlreadyException) {
+      existingExceptions.add(todayOnly);
+      
+      _task = _task.copyWith(exceptionDates: existingExceptions);
+      notifyListeners();
+      
+      await repo.updateTask(
+        _task.userId,
+        _task.id,
+        {'exceptionDates': existingExceptions.map((d) => Timestamp.fromDate(d)).toList()},
+      );
+    }
+  }
+
+  // ---------- Recurrence encode/decode ----------
+
+  RecurrenceSettings? getRecurrenceSettings() {
+    if (_task.recurrenceRule == null || _task.recurrenceRule!.isEmpty) {
+      return null;
+    }
+    return _decodeRecurrence(_task.recurrenceRule!);
+  }
+
+  String _encodeRecurrence(RecurrenceSettings r) {
+    final buffer = StringBuffer();
+
+    switch (r.frequency) {
+      case RecurrenceFrequency.daily:
+        buffer.write('F=DAILY');
+        break;
+      case RecurrenceFrequency.weekly:
+        buffer.write('F=WEEKLY');
+        if (r.weekDays.isNotEmpty) {
+          final days = r.weekDays.toList()..sort();
+          buffer.write(';BYDAY=${days.join(",")}');
+        }
+        break;
+      case RecurrenceFrequency.monthly:
+        buffer.write('F=MONTHLY');
+        break;
+      case RecurrenceFrequency.yearly:
+        buffer.write('F=YEARLY');
+        break;
+    }
+
+    switch (r.endType) {
+      case RecurrenceEndType.never:
+        break;
+      case RecurrenceEndType.onDate:
+        if (r.endDate != null) {
+          final d = r.endDate!;
+          final year = d.year.toString();
+          final month = d.month.toString().padLeft(2, '0');
+          final day = d.day.toString().padLeft(2, '0');
+          buffer.write(';UNTIL=$year-$month-$day');
+        }
+        break;
+      case RecurrenceEndType.afterCount:
+        if (r.endCount != null) {
+          buffer.write(';COUNT=${r.endCount}');
+        }
+        break;
+    }
+
+    return buffer.toString();
+  }
+
+  RecurrenceSettings _decodeRecurrence(String rule) {
+    final parts = rule.split(';');
+    RecurrenceFrequency freq = RecurrenceFrequency.daily;
+    Set<int> weekDays = {};
+    RecurrenceEndType endType = RecurrenceEndType.never;
+    DateTime? endDate;
+    int? endCount;
+
+    for (final part in parts) {
+      if (part.startsWith('F=')) {
+        final f = part.substring(2);
+        switch (f) {
+          case 'DAILY':
+            freq = RecurrenceFrequency.daily;
+            break;
+          case 'WEEKLY':
+            freq = RecurrenceFrequency.weekly;
+            break;
+          case 'MONTHLY':
+            freq = RecurrenceFrequency.monthly;
+            break;
+          case 'YEARLY':
+            freq = RecurrenceFrequency.yearly;
+            break;
+        }
+      } else if (part.startsWith('BYDAY=')) {
+        final days = part.substring(6).split(',');
+        weekDays = days
+            .where((e) => e.isNotEmpty)
+            .map((e) => int.tryParse(e) ?? 1)
+            .toSet();
+      } else if (part.startsWith('UNTIL=')) {
+        final dateStr = part.substring(6);
+        final dParts = dateStr.split('-');
+        if (dParts.length == 3) {
+          final y = int.tryParse(dParts[0]) ?? DateTime.now().year;
+          final m = int.tryParse(dParts[1]) ?? 1;
+          final d = int.tryParse(dParts[2]) ?? 1;
+          endDate = DateTime(y, m, d);
+          endType = RecurrenceEndType.onDate;
+        }
+      } else if (part.startsWith('COUNT=')) {
+        final c = int.tryParse(part.substring(6));
+        if (c != null) {
+          endCount = c;
+          endType = RecurrenceEndType.afterCount;
+        }
+      }
+    }
+
+    return RecurrenceSettings(
+      frequency: freq,
+      weekDays: weekDays,
+      endType: endType,
+      endDate: endDate,
+      endCount: endCount,
+    );
+  }
+
+  /// Update recurrence settings
+  Future<void> updateRecurrence(RecurrenceSettings settings) async {
+    final newRule = _encodeRecurrence(settings);
+    _task = _task.copyWith(recurrenceRule: newRule);
+    notifyListeners();
+
+    await repo.updateTask(
+      _task.userId,
+      _task.id,
+      {'recurrenceRule': newRule},
+    );
+  }
+
+  /// Stop recurrence (remove recurrence rule)
+  Future<void> stopRecurrence() async {
+    _task = _task.copyWith(recurrenceRule: '');
+    notifyListeners();
+
+    await repo.updateTask(
+      _task.userId,
+      _task.id,
+      {'recurrenceRule': ''},
+    );
   }
 }

@@ -252,5 +252,10 @@
   "time_format": "hh:mm a",
   "time_am": "AM",
   "time_pm": "PM",
-  "overdueTask": "Overdue Task"
+  "overdueTask": "Overdue Task",
+  "deleteRecurringEvent":"Delete Recurring Task",
+  "recurringTaskDeletePrompt": "This is a recurring task. What would you like to delete?",
+  "deleteOptionAllRecurrences": "All Tasks",
+  "deleteOptionUpcomingRecurrences": "This and following tasks",
+  "deleteOptionTodayTask": "This task"
 }

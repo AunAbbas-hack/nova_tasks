@@ -324,6 +324,62 @@ class CalendarViewModel extends ChangeNotifier {
     }
   }
 
+  // ------------------- DELETE METHODS FOR RECURRING TASKS -------------------
+
+  /// Delete all recurrences of this task
+  Future<void> deleteAllRecurrences(TaskModel task) async {
+    await repo.deleteTask(task.userId, task.id);
+  }
+
+  /// Delete upcoming recurrences (set UNTIL date to today)
+  Future<void> deleteUpcomingRecurrences(TaskModel task) async {
+    if (task.recurrenceRule == null || task.recurrenceRule!.isEmpty) {
+      return;
+    }
+
+    final today = DateTime.now();
+    final untilDateStr = '${today.year.toString().padLeft(4, '0')}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+    
+    // Parse existing recurrence rule
+    final parts = task.recurrenceRule!.split(';').map((e) => e.split('=')).toList();
+    
+    // Remove existing UNTIL if present
+    parts.removeWhere((part) => part.isNotEmpty && part[0] == 'UNTIL');
+    
+    // Add new UNTIL date
+    parts.add(['UNTIL', untilDateStr]);
+    
+    final newRecurrenceRule = parts.map((part) => part.join('=')).join(';');
+    
+    await repo.updateTask(
+      task.userId,
+      task.id,
+      {'recurrenceRule': newRecurrenceRule},
+    );
+  }
+
+  /// Delete today's recurrence (add today to exception dates)
+  Future<void> deleteTodayRecurrence(TaskModel task) async {
+    final today = DateTime.now();
+    final todayOnly = DateTime(today.year, today.month, today.day);
+    
+    // Check if already in exception dates
+    final existingExceptions = List<DateTime>.from(task.exceptionDates);
+    final isAlreadyException = existingExceptions.any((d) => 
+      d.year == todayOnly.year && d.month == todayOnly.month && d.day == todayOnly.day
+    );
+    
+    if (!isAlreadyException) {
+      existingExceptions.add(todayOnly);
+      
+      await repo.updateTask(
+        task.userId,
+        task.id,
+        {'exceptionDates': existingExceptions.map((d) => Timestamp.fromDate(d)).toList()},
+      );
+    }
+  }
+
   // ------------------- HELPERS -------------------
 
   static DateTime _only(DateTime d) => DateTime(d.year, d.month, d.day);

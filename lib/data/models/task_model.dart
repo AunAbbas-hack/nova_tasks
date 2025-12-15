@@ -20,6 +20,7 @@ class TaskModel {
   final DateTime updatedAt;
   final DateTime? completedAt;
   final List<DateTime> completedDates; // For recurring tasks - tracks which specific dates are completed
+  final List<DateTime> exceptionDates; // For recurring tasks - tracks which specific dates are deleted/excluded
   final DateTime? dueAt;
   final bool reminder24Sent;
   final bool reminder60Sent;
@@ -43,6 +44,7 @@ class TaskModel {
     this.subtasks = const [],
     this.completedAt,
       this.completedDates = const [],
+      this.exceptionDates = const [],
     required this.createdAt,
     required this.updatedAt,
     this.dueAt,
@@ -85,6 +87,9 @@ class TaskModel {
       category: data['category'] as String? ?? 'general',
       completedAt: (data['completedAt'] as Timestamp?)?.toDate(),
       completedDates: (data['completedDates'] as List<dynamic>? ?? [])
+          .map((e) => (e as Timestamp).toDate())
+          .toList(),
+      exceptionDates: (data['exceptionDates'] as List<dynamic>? ?? [])
           .map((e) => (e as Timestamp).toDate())
           .toList(),
       recurrenceRule: data['recurrenceRule'] as String?,
@@ -145,6 +150,10 @@ class TaskModel {
     if (completedDates.isNotEmpty) {
       map['completedDates'] = completedDates.map((d) => Timestamp.fromDate(d)).toList();
     }
+    
+    if (exceptionDates.isNotEmpty) {
+      map['exceptionDates'] = exceptionDates.map((d) => Timestamp.fromDate(d)).toList();
+    }
 
     return map;
   }
@@ -158,6 +167,7 @@ class TaskModel {
     String? category,
     Object? completedAt=_notProvided,
     List<DateTime>? completedDates,
+    List<DateTime>? exceptionDates,
     String? recurrenceRule,
     String? parentTaskId,
     bool? hasAttachment,
@@ -183,6 +193,7 @@ class TaskModel {
       category: category ?? this.category,
       completedAt: completedAt == _notProvided ? this.completedAt : (completedAt as DateTime?),
       completedDates: completedDates ?? this.completedDates,
+      exceptionDates: exceptionDates ?? this.exceptionDates,
       recurrenceRule: recurrenceRule ?? this.recurrenceRule,
       parentTaskId: parentTaskId ?? this.parentTaskId,
       hasAttachment: hasAttachment ?? this.hasAttachment,

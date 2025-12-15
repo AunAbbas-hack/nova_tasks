@@ -565,4 +565,21 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get overdueTask => 'زائد المیعاد';
+
+  @override
+  String get deleteRecurringEvent =>
+      'بار بار دہرائے جانے والے ٹاسک کو حذف کریں۔';
+
+  @override
+  String get recurringTaskDeletePrompt =>
+      'یہ ایک دہرایا جانے والا کام ہے۔ آپ کیا ڈیلیٹ کرنا چاہیں گے؟';
+
+  @override
+  String get deleteOptionAllRecurrences => 'تمام کام';
+
+  @override
+  String get deleteOptionUpcomingRecurrences => 'یہ اور اس کے بعد کے کام';
+
+  @override
+  String get deleteOptionTodayTask => 'یہ کام';
 }

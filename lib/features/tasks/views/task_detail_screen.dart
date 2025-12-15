@@ -8,6 +8,14 @@ import 'package:nova_tasks/data/models/task_model.dart';
 import 'package:nova_tasks/data/repositories/task_repository.dart';
 import 'package:nova_tasks/features/tasks/viewmodels/task_detail_viewmodel.dart';
 import 'package:nova_tasks/features/tasks/views/add_task_screen.dart';
+import 'package:nova_tasks/features/tasks/views/recurrence_bottomsheet.dart';
+import 'package:nova_tasks/features/tasks/viewmodels/recurrence_bottomsheet_viewmodel.dart';
+
+enum RecurringDeleteOption {
+  deleteAll,
+  deleteUpcoming,
+  deleteToday,
+}
 
 class TaskDetailScreen extends StatelessWidget {
   const TaskDetailScreen({super.key, required this.task});
@@ -41,6 +49,37 @@ class _TaskDetailView extends StatelessWidget {
     final dateStr = DateFormat('MMM d, yyyy').format(completedAt);
     final timeStr = DateFormat('HH:mm').format(completedAt);
     return '$dateStr - $timeStr';
+  }
+
+  String _formatRecurrenceSummary(TaskDetailViewModel vm) {
+    final settings = vm.getRecurrenceSettings();
+    if (settings == null) return 'No recurrence';
+
+    final buffer = StringBuffer('Repeats ');
+
+    switch (settings.frequency) {
+      case RecurrenceFrequency.daily:
+        buffer.write('Daily');
+        break;
+      case RecurrenceFrequency.weekly:
+        if (settings.weekDays.isEmpty) {
+          buffer.write('Weekly');
+        } else {
+          const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+          final days = settings.weekDays.toList()..sort();
+          final dayList = days.map((w) => dayNames[w - 1]).join(', ');
+          buffer.write('Every $dayList');
+        }
+        break;
+      case RecurrenceFrequency.monthly:
+        buffer.write('Monthly');
+        break;
+      case RecurrenceFrequency.yearly:
+        buffer.write('Yearly');
+        break;
+    }
+
+    return buffer.toString();
   }
 
   Color _priorityColor(String priority) {
@@ -242,45 +281,67 @@ class _TaskDetailView extends StatelessWidget {
                   // Delete
                   IconButton(
                     onPressed: () async {
-                      final confirm = await showDialog<bool>(
-                        context: context,
-                        builder: (_) => AlertDialog(
-                          backgroundColor: const Color(0xFF1A1F2B),
-                          title:  Text(
-                            loc.deleteTaskTitle ,
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          content:  Text(
-                            loc.deleteTaskMessage,
-                            style: TextStyle(color: Colors.white70),
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () =>
-                                  Navigator.pop(context, false),
-                              child:  Text(loc.cancelAction),
+                      // If recurring task, show options dialog
+                      if (isRecurring) {
+                        final option = await _showRecurringDeleteDialog(context, loc);
+                        if (option == null || !context.mounted) return;
+                        
+                        switch (option) {
+                          case RecurringDeleteOption.deleteAll:
+                            await vm.deleteAllRecurrences();
+                            break;
+                          case RecurringDeleteOption.deleteUpcoming:
+                            await vm.deleteUpcomingRecurrences();
+                            break;
+                          case RecurringDeleteOption.deleteToday:
+                            await vm.deleteTodayRecurrence();
+                            break;
+                        }
+                        
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                        }
+                      } else {
+                        // Non-recurring task - show simple confirmation
+                        final confirm = await showDialog<bool>(
+                          context: context,
+                          builder: (_) => AlertDialog(
+                            backgroundColor: const Color(0xFF1A1F2B),
+                            title:  Text(
+                              loc.deleteTaskTitle ,
+                              style: TextStyle(color: Colors.white),
                             ),
-                            TextButton(
-                              onPressed: () =>
-                                  Navigator.pop(context, true),
-                              child:  Text(
-                                loc.deleteAction,
-                                style: TextStyle(
-                                  color: Colors.redAccent,
+                            content:  Text(
+                              loc.deleteTaskMessage,
+                              style: TextStyle(color: Colors.white70),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () =>
+                                    Navigator.pop(context, false),
+                                child:  Text(loc.cancelAction),
+                              ),
+                              TextButton(
+                                onPressed: () =>
+                                    Navigator.pop(context, true),
+                                child:  Text(
+                                  loc.deleteAction,
+                                  style: TextStyle(
+                                    color: Colors.redAccent,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ) ??
-                          false;
+                            ],
+                          ),
+                        ) ??
+                            false;
 
-                      if (!confirm) return;
+                        if (!confirm) return;
 
-                      await vm.deleteTask();
-                      if (context.mounted) {
-                        Navigator.pop(context);
-
+                        await vm.deleteTask();
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                        }
                       }
                     },
                     icon: const Icon(Icons.delete, color: Colors.redAccent),
@@ -384,6 +445,142 @@ class _TaskDetailView extends StatelessWidget {
                     ),
 
                     const SizedBox(height: 24),
+
+                    // Recurrence Details (only show if recurring)
+                    if (isRecurring) ...[
+                      AppText(
+                        'Recurrence Details',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF11151F),
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.repeat,
+                                  color: Theme.of(context).colorScheme.primary,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        _formatRecurrenceSummary(vm),
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      if (vm.getRecurrenceSettings()?.endDate != null) ...[
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          'Until ${DateFormat('MMM d, yyyy').format(vm.getRecurrenceSettings()!.endDate!)}',
+                                          style: const TextStyle(
+                                            color: Colors.white70,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: TextButton(
+                                    onPressed: () async {
+                                      final currentSettings = vm.getRecurrenceSettings();
+                                      final result = await showRecurrenceBottomSheet(
+                                        context,
+                                        initial: currentSettings,
+                                      );
+                                      if (result != null && context.mounted) {
+                                        await vm.updateRecurrence(result);
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(content: Text('Recurrence updated')),
+                                          );
+                                        }
+                                      }
+                                    },
+                                    style: TextButton.styleFrom(
+                                      foregroundColor: Theme.of(context).colorScheme.primary,
+                                      padding: const EdgeInsets.symmetric(vertical: 12),
+                                    ),
+                                    child: const Text('Edit Recurrence'),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: OutlinedButton(
+                                    onPressed: () async {
+                                      final confirm = await showDialog<bool>(
+                                        context: context,
+                                        builder: (_) => AlertDialog(
+                                          backgroundColor: const Color(0xFF1A1F2B),
+                                          title: const Text(
+                                            'Stop Recurrence',
+                                            style: TextStyle(color: Colors.white),
+                                          ),
+                                          content: const Text(
+                                            'Are you sure you want to stop this recurrence? This will remove the recurrence pattern but keep the task.',
+                                            style: TextStyle(color: Colors.white70),
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () => Navigator.pop(context, false),
+                                              child: Text(loc.cancelAction),
+                                            ),
+                                            TextButton(
+                                              onPressed: () => Navigator.pop(context, true),
+                                              child: const Text(
+                                                'Stop',
+                                                style: TextStyle(color: Colors.redAccent),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ) ?? false;
+
+                                      if (confirm && context.mounted) {
+                                        await vm.stopRecurrence();
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(content: Text('Recurrence stopped')),
+                                          );
+                                        }
+                                      }
+                                    },
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: Colors.white70,
+                                      side: const BorderSide(color: Colors.white24),
+                                      padding: const EdgeInsets.symmetric(vertical: 12),
+                                    ),
+                                    child: const Text('Stop Recurrence'),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                    ],
 
                     // Subtasks
                     Row(
@@ -547,11 +744,12 @@ class _SubtasksSectionState extends State<_SubtasksSection> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: TextField(
+                      textCapitalization: TextCapitalization.sentences,
                       controller: _subtaskController,
                       autofocus: true,
                       style: const TextStyle(color: Colors.white),
                       decoration: InputDecoration(
-                        hintText: 'Enter subtask',
+                        hintText: loc.enterSubTask,
                         hintStyle: const TextStyle(color: Colors.white54),
                         border: InputBorder.none,
                         enabledBorder: InputBorder.none,
@@ -561,10 +759,10 @@ class _SubtasksSectionState extends State<_SubtasksSection> {
                         focusedErrorBorder: InputBorder.none,
                         contentPadding: EdgeInsets.zero,
                       ),
-                      onSubmitted: (_) async {
+                      onSubmitted: (_)  {
                         final text = _subtaskController.text.trim();
                         if (text.isNotEmpty) {
-                          await vm.addSubtask(text);
+                           vm.addSubtask(text);
                           _subtaskController.clear();
                           // Keep textfield open - viewmodel already handles this
                         } else {
@@ -584,10 +782,10 @@ class _SubtasksSectionState extends State<_SubtasksSection> {
               const SizedBox(height: 8),
               // Add subtasks button
               TextButton(
-                onPressed: () async {
+                onPressed: ()  {
                   final text = _subtaskController.text.trim();
                   if (text.isNotEmpty) {
-                    await vm.addSubtask(text);
+                     vm.addSubtask(text);
                     _subtaskController.clear();
                     // Keep textfield open - viewmodel already handles this
                   } else {
@@ -681,4 +879,96 @@ class _InfoRow extends StatelessWidget {
     );
   }
 
+}
+
+// ================== RECURRING DELETE DIALOG ==================
+
+Future<RecurringDeleteOption?> _showRecurringDeleteDialog(
+  BuildContext context,
+  AppLocalizations loc,
+) async {
+  RecurringDeleteOption? selectedOption;
+  
+  return await showDialog<RecurringDeleteOption>(
+    context: context,
+    builder: (dialogContext) => StatefulBuilder(
+      builder: (context, setState) => AlertDialog(
+        backgroundColor: const Color(0xFF1A1F2B),
+        title: Text(
+          loc.deleteRecurringEvent,
+          style: const TextStyle(color: Colors.white),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Delete all recurrences
+            RadioListTile<RecurringDeleteOption>(
+              contentPadding: EdgeInsets.zero,
+              title:  Text(
+                loc.deleteOptionAllRecurrences,
+                style: TextStyle(color: Colors.white),
+              ),
+              value: RecurringDeleteOption.deleteAll,
+              groupValue: selectedOption,
+              onChanged: (value) {
+                setState(() {
+                  selectedOption = value;
+                });
+              },
+              activeColor: Colors.redAccent,
+            ),
+            // Delete upcoming recurrences
+            RadioListTile<RecurringDeleteOption>(
+              contentPadding: EdgeInsets.zero,
+              title:  Text(
+              loc.deleteOptionUpcomingRecurrences,
+                style: TextStyle(color: Colors.white),
+              ),
+              value: RecurringDeleteOption.deleteUpcoming,
+              groupValue: selectedOption,
+              onChanged: (value) {
+                setState(() {
+                  selectedOption = value;
+                });
+              },
+              activeColor: Colors.orange,
+            ),
+            // Delete today's task
+            RadioListTile<RecurringDeleteOption>(
+              contentPadding: EdgeInsets.zero,
+              title:  Text(
+                loc.deleteOptionTodayTask,
+                style: TextStyle(color: Colors.white),
+              ),
+              value: RecurringDeleteOption.deleteToday,
+              groupValue: selectedOption,
+              onChanged: (value) {
+                setState(() {
+                  selectedOption = value;
+                });
+              },
+              activeColor: Colors.blue,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              loc.cancelAction,
+              style: const TextStyle(color: Colors.white70),
+            ),
+          ),
+          TextButton(
+            onPressed: selectedOption == null
+                ? null
+                : () => Navigator.pop(context, selectedOption),
+
+            child: Text(loc.deleteAction,style: TextStyle(color: Colors.red),),
+          ),
+        ],
+      ),
+    ),
+  );
 }

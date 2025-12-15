@@ -6,9 +6,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:nova_tasks/core/widgets/app_text.dart';
 import 'package:nova_tasks/data/models/task_model.dart';
 import 'package:nova_tasks/data/repositories/task_repository.dart';
-import 'package:nova_tasks/features/tasks/views/task_detail_screen.dart';
 import 'package:nova_tasks/features/tasks/widgets/task_card.dart';
-import 'package:nova_tasks/features/home/presentation/viewmodels/home_viewmodel.dart';
 
 import '../../../../l10n/app_localizations.dart';
 import '../../../tasks/views/add_task_screen.dart';
@@ -50,10 +48,6 @@ class _CalendarView extends StatelessWidget {
     final titleText = isRange
         ? '${loc.tasksFrom} ${formatFull(vm.rangeStart!,context)} – ${formatFull(vm.rangeEnd!,context)}'
         : '${loc.tasksFor} ${formatFull(vm.selectedDay ?? vm.focusedDay,context)}';
-
-    final subtitleText = isRange
-        ? '${vm.visibleTasksCount} ${loc.tasksInThisRange}'
-        : '${vm.visibleTasksCount} ${loc.tasksForThisDay}';
 
     return Scaffold(
       floatingActionButton: FloatingActionButton(
@@ -159,6 +153,19 @@ class _CalendarView extends StatelessWidget {
                                           },
                                           onDelete: (task) async {
                                             await vm.repo.deleteTask(task.userId, task.id);
+                                          },
+                                          onDeleteRecurring: (task, option) async {
+                                            switch (option) {
+                                              case RecurringDeleteOption.deleteAll:
+                                                await vm.deleteAllRecurrences(task);
+                                                break;
+                                              case RecurringDeleteOption.deleteUpcoming:
+                                                await vm.deleteUpcomingRecurrences(task);
+                                                break;
+                                              case RecurringDeleteOption.deleteToday:
+                                                await vm.deleteTodayRecurrence(task);
+                                                break;
+                                            }
                                           },
                                         );
                                       },

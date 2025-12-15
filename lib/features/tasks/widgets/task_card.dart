@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:nova_tasks/features/tasks/views/task_detail_screen.dart';
@@ -10,6 +11,12 @@ import 'package:nova_tasks/features/tasks/views/add_task_screen.dart';
 
 import '../../../l10n/app_localizations.dart';
 
+enum RecurringDeleteOption {
+  deleteAll,
+  deleteUpcoming,
+  deleteToday,
+}
+
 class TaskCard extends StatelessWidget {
   const TaskCard({
     super.key,
@@ -17,12 +24,14 @@ class TaskCard extends StatelessWidget {
     this.occurrenceDate,
     this.onToggleComplete,
     this.onDelete,
+    this.onDeleteRecurring,
   });
 
   final TaskModel task;
   final DateTime? occurrenceDate; // For recurring tasks - the specific date this occurrence is for
   final void Function(TaskModel task, {DateTime? occurrenceDate})? onToggleComplete;
   final Future<void> Function(TaskModel task)? onDelete;
+  final Future<void> Function(TaskModel task, RecurringDeleteOption option)? onDeleteRecurring;
 
   @override
   Widget build(BuildContext context) {
@@ -183,7 +192,16 @@ class TaskCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(6),
                       ),
                     ),
-                    const SizedBox(width: 2),
+                    // Subtask icon - show only if subtasks exist
+                    if (task.subtasks.isNotEmpty) ...[
+                      const SizedBox(width: 4),
+                      Icon(
+                        Icons.checklist,
+                        size: 22,
+                        color: Colors.white54,
+                      ),
+                    ],
+                    const SizedBox(width: 6),
                     AppText(
                       formattedTime.toString(),
                       fontSize: 12,
@@ -221,14 +239,37 @@ class TaskCard extends StatelessWidget {
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
                       onPressed: () async {
-                        final confirm = await _confirmDelete(context);
-                        if (!confirm) return;
+                        // If recurring task, show options dialog
+                        if (isRecurring) {
+                          final option = await _showRecurringDeleteDialog(context, loc);
+                          if (option == null || !context.mounted) return;
+                          
+                          if (onDeleteRecurring != null) {
+                            await onDeleteRecurring!(task, option);
+                          } else if (homeVm != null) {
+                            switch (option) {
+                              case RecurringDeleteOption.deleteAll:
+                                await homeVm!.deleteAllRecurrences(task);
+                                break;
+                              case RecurringDeleteOption.deleteUpcoming:
+                                await homeVm!.deleteUpcomingRecurrences(task);
+                                break;
+                              case RecurringDeleteOption.deleteToday:
+                                await homeVm!.deleteTodayRecurrence(task);
+                                break;
+                            }
+                          }
+                        } else {
+                          // Non-recurring task - show simple confirmation
+                          final confirm = await _confirmDelete(context);
+                          if (!confirm) return;
 
-                        // Use callback if provided, otherwise use HomeViewModel
-                        if (onDelete != null) {
-                          await onDelete!(task);
-                        } else if (homeVm != null) {
-                          await homeVm!.repo.deleteTask(task.userId, task.id);
+                          // Use callback if provided, otherwise use HomeViewModel
+                          if (onDelete != null) {
+                            await onDelete!(task);
+                          } else if (homeVm != null) {
+                            await homeVm!.repo.deleteTask(task.userId, task.id);
+                          }
                         }
 
                         if (context.mounted) {
@@ -308,5 +349,95 @@ class TaskCard extends StatelessWidget {
         false;
   }
 
+  static Future<RecurringDeleteOption?> _showRecurringDeleteDialog(
+    BuildContext context,
+    AppLocalizations loc,
+  ) async {
+    RecurringDeleteOption? selectedOption;
+    
+    return await showDialog<RecurringDeleteOption>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          backgroundColor: const Color(0xFF1A1F2B),
+          title: Text(
+            loc.deleteRecurringEvent,
+            style: const TextStyle(color: Colors.white),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+
+              // Delete all recurrences
+              RadioListTile<RecurringDeleteOption>(
+                contentPadding: EdgeInsets.zero,
+                title:  Text(
+                 loc.deleteOptionAllRecurrences ,
+                  style: TextStyle(color: Colors.white),
+                ),
+                value: RecurringDeleteOption.deleteAll,
+                groupValue: selectedOption,
+                onChanged: (value) {
+                  setState(() {
+                    selectedOption = value;
+                  });
+                },
+                activeColor: Colors.redAccent,
+              ),
+              // Delete upcoming recurrences
+              RadioListTile<RecurringDeleteOption>(
+                contentPadding: EdgeInsets.zero,
+                title:  Text(
+                loc.deleteOptionUpcomingRecurrences,
+                  style: TextStyle(color: Colors.white),
+                ),
+                value: RecurringDeleteOption.deleteUpcoming,
+                groupValue: selectedOption,
+                onChanged: (value) {
+                  setState(() {
+                    selectedOption = value;
+                  });
+                },
+                activeColor: Colors.orange,
+              ),
+              // Delete today's task
+              RadioListTile<RecurringDeleteOption>(
+                contentPadding: EdgeInsets.zero,
+                title:  Text(
+                loc.deleteOptionTodayTask,
+                  style: TextStyle(color: Colors.white),
+                ),
+                value: RecurringDeleteOption.deleteToday,
+                groupValue: selectedOption,
+                onChanged: (value) {
+                  setState(() {
+                    selectedOption = value;
+                  });
+                },
+                activeColor: Colors.blue,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                loc.cancelAction,
+                style: const TextStyle(color: Colors.white70),
+              ),
+            ),
+            TextButton(
+              onPressed: selectedOption == null
+                  ? null
+                  : () => Navigator.pop(context, selectedOption),
+
+              child: Text(loc.deleteAction,style: TextStyle(color: Colors.red),),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
 }

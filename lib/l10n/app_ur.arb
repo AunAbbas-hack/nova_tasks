@@ -252,5 +252,10 @@
   "time_am": "صبح",
   "time_pm": "شام",
   "date_format": "MMM d, yyyy",
-  "time_format": "hh:mm a"
+  "time_format": "hh:mm a",
+  "deleteRecurringEvent":"بار بار دہرائے جانے والے ٹاسک کو حذف کریں۔",
+  "recurringTaskDeletePrompt": "یہ ایک دہرایا جانے والا کام ہے۔ آپ کیا ڈیلیٹ کرنا چاہیں گے؟",
+  "deleteOptionAllRecurrences": "تمام کام",
+  "deleteOptionUpcomingRecurrences": "یہ اور اس کے بعد کے کام",
+  "deleteOptionTodayTask": "یہ کام"
 }
