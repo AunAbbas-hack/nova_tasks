@@ -136,6 +136,7 @@
   "filterTitleShow": "دکھائیں",
   "filterAllTasks": "تمام (آج + زائد المیعاد + آنے والے)",
   "filterOverdueTasks": "زائد المیعاد ٹاسک",
+  "overdueTask": "زائد المیعاد",
   "filterTodayTasks": "آج کے ٹاسک",
   "filterUpcomingTasks": "آنے والے ٹاسک",
   "filterCancelButton": "منسوخ کریں",

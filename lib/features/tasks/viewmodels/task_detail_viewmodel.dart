@@ -164,6 +164,7 @@ class TaskDetailViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+
   Future<void> deleteSubtask(int index) async {
     if (index < 0 || index >= _task.subtasks.length) return;
 

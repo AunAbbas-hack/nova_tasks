@@ -251,5 +251,6 @@
   "date_format": "MMM d, yyyy",
   "time_format": "hh:mm a",
   "time_am": "AM",
-  "time_pm": "PM"
+  "time_pm": "PM",
+  "overdueTask": "Overdue Task"
 }

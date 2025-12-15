@@ -562,4 +562,7 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get time_pm => 'شام';
+
+  @override
+  String get overdueTask => 'زائد المیعاد';
 }

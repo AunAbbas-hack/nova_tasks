@@ -24,15 +24,56 @@ class HomeViewModel extends ChangeNotifier {
   List<TaskModel> get tasks => _tasks;
 
   /// Completed tasks (those with a non-null completedAt or recurring tasks with completed dates)
+  /// If a date is selected, only shows completed tasks for that specific date
   List<TaskModel> get completedTasks {
-    return _tasks.where((t) {
-      // Non-recurring tasks: check completedAt
-      if (!_isRecurring(t)) {
-        return t.completedAt != null;
+    final List<TaskModel> completed = [];
+    
+    for (final t in _tasks) {
+      if (_isRecurring(t)) {
+        // For recurring tasks, check completedDates
+        if (_selectedDate != null) {
+          // If date is selected, only show if this specific date is completed
+          final dateOnly = _only(_selectedDate!);
+          final isDateCompleted = t.completedDates.any((d) => _isSameDay(d, dateOnly));
+          if (isDateCompleted) {
+            // Create a "virtual" task for this specific completed occurrence
+            completed.add(t.copyWith(
+              completedAt: dateOnly,
+              date: dateOnly,
+            ));
+          }
+        } else {
+          // If no date selected, show all completed occurrences
+          if (t.completedDates.isNotEmpty) {
+            for (final completedDate in t.completedDates) {
+              completed.add(t.copyWith(
+                completedAt: completedDate,
+                date: completedDate,
+              ));
+            }
+          }
+        }
+      } else {
+        // For non-recurring tasks, check completedAt
+        if (t.completedAt != null) {
+          if (_selectedDate != null) {
+            // If date is selected, only show if completed on that date
+            final dateOnly = _only(_selectedDate!);
+            final completedDateOnly = _only(t.completedAt!);
+            if (_isSameDay(completedDateOnly, dateOnly)) {
+              completed.add(t);
+            }
+          } else {
+            // If no date selected, show all completed tasks
+            completed.add(t);
+          }
+        }
       }
-      // Recurring tasks: check if any date is completed
-      return t.completedDates.isNotEmpty;
-    }).toList();
+    }
+    
+    // Sort completed tasks by their completion date (most recent first)
+    completed.sort((a, b) => (b.completedAt ?? DateTime(0)).compareTo(a.completedAt ?? DateTime(0)));
+    return completed;
   }
 
   bool isLoading = true;
@@ -101,18 +142,6 @@ class HomeViewModel extends ChangeNotifier {
 
   /// Public helper for UI
   bool isRecurring(TaskModel t) => _isRecurring(t);
-
-  /// Recurrence rule ko dekh kar decide karta hai ke
-  /// *is day* pe yeh task show hona chahiye ya nahi.
-  ///
-  /// Supported rules:
-  ///  F=DAILY
-  ///  F=WEEKLY;BYDAY=1,3,5  (1 = Mon ... 7 = Sun)
-  ///  F=MONTHLY
-  ///  F=YEARLY
-  ///  UNTIL=2023-12-31     (end date)
-  ///  COUNT=10             (number of occurrences)
-  // In home_viewmodel.dart, update the _occursOn method:
 
 bool _occursOn(TaskModel task, DateTime day) {
   try {
@@ -437,16 +466,56 @@ bool _occursOn(TaskModel task, DateTime day) {
     return _baseFiltered(); // date + category already applied
   }
 
-  /// 2) Today tasks (global / show-all view)
+  /// 2) Today tasks (global / show-all view) - includes completed tasks, sorted by time
   List<TaskModel> get todayTasks {
-    final base = _baseFiltered();
-    return base.where((t) => _occursOn(t, _todayOnly)).toList();
+    final today = _todayOnly;
+    
+    // Get all tasks (including completed) that occur today
+    final allTodayTasks = _tasks.where((t) {
+      // Category filter
+      if (_selectedCategory != 'All' && t.category != _selectedCategory) {
+        return false;
+      }
+      
+      // Check if task occurs today
+      return _occursOn(t, today);
+    }).toList();
+    
+    // Sort by time (completed tasks at the end, then by time)
+    allTodayTasks.sort((a, b) {
+      // First, separate completed and incomplete
+      final aIsCompleted = _isRecurring(a) 
+          ? a.completedDates.any((d) => _isSameDay(d, today))
+          : a.completedAt != null;
+      final bIsCompleted = _isRecurring(b)
+          ? b.completedDates.any((d) => _isSameDay(d, today))
+          : b.completedAt != null;
+      
+      // Incomplete tasks come first
+      if (aIsCompleted != bIsCompleted) {
+        return aIsCompleted ? 1 : -1;
+      }
+      
+      // Then sort by time
+      final aTime = _parseTaskDateTime(a.date, a.time);
+      final bTime = _parseTaskDateTime(b.date, b.time);
+      return aTime.compareTo(bTime);
+    });
+    
+    return allTodayTasks;
   }
 
-  /// 3) Overdue (sirf non-recurring)
+  /// 3) Overdue (sirf non-recurring) - sorted by time
   List<TaskModel> get overdueTasks {
     final base = _baseFiltered();
-    return base.where(_isTaskOverdue).toList();
+    final overdue = base.where(_isTaskOverdue).toList();
+    // Sort by time (earliest first)
+    overdue.sort((a, b) {
+      final aTime = _parseTaskDateTime(a.date, a.time);
+      final bTime = _parseTaskDateTime(b.date, b.time);
+      return aTime.compareTo(bTime);
+    });
+    return overdue;
   }
 
   /// 4) Upcoming (grouped by date, recurring + non-recurring)
@@ -474,6 +543,15 @@ bool _occursOn(TaskModel task, DateTime day) {
       }
     }
 
+    // Sort tasks within each date by time
+    for (final key in map.keys) {
+      map[key]!.sort((a, b) {
+        final aTime = _parseTaskDateTime(a.date, a.time);
+        final bTime = _parseTaskDateTime(b.date, b.time);
+        return aTime.compareTo(bTime);
+      });
+    }
+
     final sortedKeys = map.keys.toList()..sort();
     final ordered = <DateTime, List<TaskModel>>{};
     for (final k in sortedKeys) {
@@ -484,17 +562,64 @@ bool _occursOn(TaskModel task, DateTime day) {
 
   /// 5) Flat list for Overdue/Today/Upcoming (Show All subset)
   List<TaskModel> get currentFlatTasks {
-    final base = _baseFiltered();
-
     switch (_subset) {
       case HomeFilterSubset.all:
-        return base;
+        return _baseFiltered();
       case HomeFilterSubset.today:
-        return base.where(_isToday).toList();
+        // Today: include completed tasks, sorted by time
+        final today = _todayOnly;
+        final allTodayTasks = _tasks.where((t) {
+          // Category filter
+          if (_selectedCategory != 'All' && t.category != _selectedCategory) {
+            return false;
+          }
+          // Check if task occurs today
+          return _occursOn(t, today);
+        }).toList();
+        
+        // Sort by time (completed tasks at the end, then by time)
+        allTodayTasks.sort((a, b) {
+          final aIsCompleted = _isRecurring(a) 
+              ? a.completedDates.any((d) => _isSameDay(d, today))
+              : a.completedAt != null;
+          final bIsCompleted = _isRecurring(b)
+              ? b.completedDates.any((d) => _isSameDay(d, today))
+              : b.completedAt != null;
+          
+          if (aIsCompleted != bIsCompleted) {
+            return aIsCompleted ? 1 : -1;
+          }
+          
+          final aTime = _parseTaskDateTime(a.date, a.time);
+          final bTime = _parseTaskDateTime(b.date, b.time);
+          return aTime.compareTo(bTime);
+        });
+        
+        return allTodayTasks;
       case HomeFilterSubset.overdue:
-        return base.where(_isTaskOverdue).toList();
+        // Overdue: exclude completed tasks, sorted by time
+        final base = _baseFiltered();
+        final overdue = base.where(_isTaskOverdue).toList();
+        overdue.sort((a, b) {
+          final aTime = _parseTaskDateTime(a.date, a.time);
+          final bTime = _parseTaskDateTime(b.date, b.time);
+          return aTime.compareTo(bTime);
+        });
+        return overdue;
       case HomeFilterSubset.upcoming:
-        return base.where(_isUpcoming).toList();
+        // Upcoming: exclude completed tasks, sorted by time
+        final base = _baseFiltered();
+        final upcoming = base.where(_isUpcoming).toList();
+        upcoming.sort((a, b) {
+          // First by date
+          final dateCompare = _only(a.date).compareTo(_only(b.date));
+          if (dateCompare != 0) return dateCompare;
+          // Then by time
+          final aTime = _parseTaskDateTime(a.date, a.time);
+          final bTime = _parseTaskDateTime(b.date, b.time);
+          return aTime.compareTo(bTime);
+        });
+        return upcoming;
     }
   }
 

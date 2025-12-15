@@ -95,23 +95,7 @@ class CalendarViewModel extends ChangeNotifier {
 
   void _addTaskToDate(TaskModel task, DateTime date) {
     final key = _only(date);
-    final dateOnly = _only(date);
-    
-    // For recurring tasks, check if this specific date is completed
-    final isRecurring = task.recurrenceRule?.trim().isNotEmpty ?? false;
-    if (isRecurring) {
-      final isDateCompleted = task.completedDates.any((d) => _isSameDay(d, dateOnly));
-      if (isDateCompleted) {
-        // Don't add completed recurring tasks to the list
-        return;
-      }
-    } else {
-      // For non-recurring tasks, check completedAt
-      if (task.completedAt != null) {
-        return;
-      }
-    }
-    
+    // Add all tasks (including completed ones) - they will show with checked state in UI
     _tasksByDate.putIfAbsent(key, () => []).add(task);
   }
 

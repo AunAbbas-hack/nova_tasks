@@ -562,4 +562,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get time_pm => 'PM';
+
+  @override
+  String get overdueTask => 'Overdue Task';
 }

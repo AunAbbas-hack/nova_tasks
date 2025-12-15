@@ -426,19 +426,19 @@ void _openShowAllSheet(BuildContext context, HomeViewModel vm) {
             top: false,
             child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
                   // Handle
-                  Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.white24,
-                      borderRadius: BorderRadius.circular(999),
-                    ),
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.white24,
+                    borderRadius: BorderRadius.circular(999),
                   ),
-                  const SizedBox(height: 16),
+                ),
+                const SizedBox(height: 16),
 
                   // Title
                   AppText(
@@ -446,7 +446,7 @@ void _openShowAllSheet(BuildContext context, HomeViewModel vm) {
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
                   ),
-                  const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
                   // Filter options - scrollable if needed
                   ...options.map((option) {
@@ -481,9 +481,9 @@ void _openShowAllSheet(BuildContext context, HomeViewModel vm) {
                                 width: 1,
                               ),
                             ),
-                            child: Row(
-                              children: [
-                                Expanded(
+                  child: Row(
+                    children: [
+                      Expanded(
                                   child: AppText(
                                     title,
                                     fontSize: 16,
@@ -491,13 +491,13 @@ void _openShowAllSheet(BuildContext context, HomeViewModel vm) {
                                     color: isSelected
                                         ? theme.colorScheme.primary
                                         : Colors.white,
-                                  ),
+                          ),
                                 ),
                               ],
                             ),
                           ),
                         ),
-                      ),
+                        ),
                     );
                   }),
 
@@ -506,21 +506,21 @@ void _openShowAllSheet(BuildContext context, HomeViewModel vm) {
                   // Save button
                   SizedBox(
                     width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
+                        child: ElevatedButton(
+                          onPressed: () {
                         if (temp != null) {
                           vm.setSubset(temp!);
                         }
-                        Navigator.pop(context);
-                      },
+                            Navigator.pop(context);
+                          },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: theme.colorScheme.primary,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
-                        ),
                       ),
+                    ),
                       child: Text(
                         loc.filterApplyButton,
                         style: const TextStyle(
@@ -528,14 +528,14 @@ void _openShowAllSheet(BuildContext context, HomeViewModel vm) {
                           fontWeight: FontWeight.w600,
                           color: Colors.white,
                         ),
+                    ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          );
-        },
+            );
+          },
       );
     },
   );
@@ -660,16 +660,9 @@ class _CompletedTasksExpansionTile extends StatelessWidget {
             color: Colors.white70,
           ),
           children: completedTasks.map((task) {
-            // For recurring tasks, use the most recent completed date, otherwise use task date
-            final isRecurring = task.recurrenceRule?.trim().isNotEmpty ?? false;
-            DateTime? occurrenceDate;
-            if (isRecurring && task.completedDates.isNotEmpty) {
-              // Sort dates descending and use the most recent one
-              final sortedDates = List<DateTime>.from(task.completedDates)..sort((a, b) => b.compareTo(a));
-              occurrenceDate = sortedDates.first;
-            } else {
-              occurrenceDate = task.date;
-            }
+            // Use task.date directly since completedTasks getter already sets it correctly
+            // For recurring tasks, it's set to the specific completed date
+            // For non-recurring tasks, it's the original task date
             return Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: GestureDetector(
@@ -683,7 +676,7 @@ class _CompletedTasksExpansionTile extends StatelessWidget {
                 },
                 child: TaskCard(
                   task: task,
-                  occurrenceDate: occurrenceDate,
+                  occurrenceDate: task.date,
                 ),
               ),
             );

@@ -15,14 +15,24 @@ class TaskCard extends StatelessWidget {
     super.key,
     required this.task,
     this.occurrenceDate,
+    this.onToggleComplete,
+    this.onDelete,
   });
 
   final TaskModel task;
   final DateTime? occurrenceDate; // For recurring tasks - the specific date this occurrence is for
+  final void Function(TaskModel task, {DateTime? occurrenceDate})? onToggleComplete;
+  final Future<void> Function(TaskModel task)? onDelete;
 
   @override
   Widget build(BuildContext context) {
-    final homeVm = context.read<HomeViewModel>();
+    // Try to get HomeViewModel if available, otherwise use callbacks
+    HomeViewModel? homeVm;
+    try {
+      homeVm = context.read<HomeViewModel>();
+    } catch (_) {
+      // HomeViewModel not available, will use callbacks
+    }
     final loc=AppLocalizations.of(context)!;
 
     String localizeAmPm(String timeString) {
@@ -156,11 +166,16 @@ class TaskCard extends StatelessWidget {
                     Checkbox(
                       value: isCompleted,
                       onChanged: (_) {
-                        // For recurring tasks, pass the occurrence date
-                        if (isRecurring && occurrenceDate != null) {
-                          homeVm.toggleComplete(task, occurrenceDate: occurrenceDate);
-                        } else {
-                          homeVm.toggleComplete(task);
+                        // Use callback if provided, otherwise use HomeViewModel
+                        if (onToggleComplete != null) {
+                          onToggleComplete!(task, occurrenceDate: occurrenceDate);
+                        } else if (homeVm != null) {
+                          // For recurring tasks, pass the occurrence date
+                          if (isRecurring && occurrenceDate != null) {
+                            homeVm!.toggleComplete(task, occurrenceDate: occurrenceDate);
+                          } else {
+                            homeVm!.toggleComplete(task);
+                          }
                         }
                       },
                       activeColor: priorityColor,
@@ -209,7 +224,12 @@ class TaskCard extends StatelessWidget {
                         final confirm = await _confirmDelete(context);
                         if (!confirm) return;
 
-                        await homeVm.repo.deleteTask(task.userId, task.id);
+                        // Use callback if provided, otherwise use HomeViewModel
+                        if (onDelete != null) {
+                          await onDelete!(task);
+                        } else if (homeVm != null) {
+                          await homeVm!.repo.deleteTask(task.userId, task.id);
+                        }
 
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -233,13 +253,13 @@ class TaskCard extends StatelessWidget {
   static Color _priorityColor(String priority) {
     switch (priority.toLowerCase()) {
       case 'low':
-        return  Colors.blueGrey; // blue
+        return  Colors.blueGrey;
       case 'medium':
-        return const Color(0xFF60A5FA); // amber
+        return const Color(0xFF60A5FA);
       case 'high':
-        return Colors.orange; // pink
+        return Colors.orange;
       case 'urgent':
-        return const Color(0xFFEF4444); // red
+        return const Color(0xFFEF4444);
       default:
         return const Color(0xFF60A5FA);
     }

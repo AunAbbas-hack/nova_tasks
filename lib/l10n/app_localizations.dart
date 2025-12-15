@@ -1165,6 +1165,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'PM'**
   String get time_pm;
+
+  /// No description provided for @overdueTask.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue Task'**
+  String get overdueTask;
 }
 
 class _AppLocalizationsDelegate

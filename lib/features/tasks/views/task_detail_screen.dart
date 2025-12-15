@@ -37,6 +37,12 @@ class _TaskDetailView extends StatelessWidget {
     return '$dateStr - ${task.time}';
   }
 
+  String _formatCompletedAt(DateTime completedAt) {
+    final dateStr = DateFormat('MMM d, yyyy').format(completedAt);
+    final timeStr = DateFormat('HH:mm').format(completedAt);
+    return '$dateStr - $timeStr';
+  }
+
   Color _priorityColor(String priority) {
     switch (priority.toLowerCase()) {
       case 'low':
@@ -63,6 +69,48 @@ class _TaskDetailView extends StatelessWidget {
     }
   }
 
+  /// Parse task time string (12h or 24h format) and combine with date
+  DateTime? _parseTaskDateTime(DateTime baseDate, String timeStr) {
+    timeStr = timeStr.trim();
+    if (timeStr.isEmpty) return null;
+
+    final year = baseDate.year;
+    final month = baseDate.month;
+    final day = baseDate.day;
+
+    // Check if 24h format (e.g., "14:30")
+    final is24hFormat = RegExp(r'^\d{1,2}:\d{2}$').hasMatch(timeStr);
+    
+    if (is24hFormat) {
+      final parts = timeStr.split(':');
+      final hour = int.tryParse(parts[0]) ?? 0;
+      final minute = int.tryParse(parts[1]) ?? 0;
+      return DateTime(year, month, day, hour, minute);
+    }
+
+    // Check if 12h format (e.g., "2:30 PM" or "2:30PM")
+    final regex12h = RegExp(r'^(\d{1,2}):(\d{2})\s*([AaPp][Mm])$');
+    final match = regex12h.firstMatch(timeStr);
+
+    if (match != null) {
+      int hour = int.parse(match.group(1)!);
+      final minute = int.parse(match.group(2)!);
+      final period = match.group(3)!.toUpperCase(); // "AM" or "PM"
+
+      // Convert to 24h format
+      if (period == "PM" && hour < 12) {
+        hour += 12;
+      }
+      if (period == "AM" && hour == 12) {
+        hour = 0;
+      }
+
+      return DateTime(year, month, day, hour, minute);
+    }
+
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<TaskDetailViewModel>();
@@ -72,6 +120,27 @@ class _TaskDetailView extends StatelessWidget {
     final priorityColor = _priorityColor(task.priority);
     final categoryColor = _categoryColor(task.category);
     final loc=AppLocalizations.of(context)!;
+    
+    // Check if task was overdue (only for completed, non-recurring tasks)
+    // Check both date and time
+    bool wasOverdue = false;
+    if (task.completedAt != null && !isRecurring) {
+      final now = DateTime.now();
+      DateTime? taskDateTime;
+      
+      // Parse task date + time
+      if (task.time.isNotEmpty) {
+        taskDateTime = _parseTaskDateTime(task.date, task.time);
+      } else {
+        // If no time, use end of day (23:59:59)
+        taskDateTime = DateTime(task.date.year, task.date.month, task.date.day, 23, 59, 59);
+      }
+      
+      // Compare with current time
+      if (taskDateTime != null) {
+        wasOverdue = taskDateTime.isBefore(now);
+      }
+    }
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
@@ -100,16 +169,33 @@ class _TaskDetailView extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: AppText(
-                        task.title,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: vm.isCompleted
-                            ? Colors.white54
-                            : Colors.white,
-                        decoration: vm.isCompleted
-                            ? TextDecoration.lineThrough
-                            : null,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: AppText(
+                              task.title,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: vm.isCompleted
+                                  ? Colors.white54
+                                  : Colors.white,
+                              decoration: vm.isCompleted
+                                  ? TextDecoration.lineThrough
+                                  : null,
+                            ),
+                          ),
+                          // Show "overdue" text only for completed overdue tasks
+                          if (wasOverdue)
+                            Padding(
+                              padding: const EdgeInsets.only(left: 8),
+                              child: AppText(loc.overdueTask
+                                ,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.redAccent,
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                     if(isRecurring)
@@ -227,10 +313,20 @@ class _TaskDetailView extends StatelessWidget {
                             label: loc.dueDateLabel,
                             value: _formatDue(task),
                           ),
+                          // Show "Completed At" if task is overdue and completed
+                          if (wasOverdue && task.completedAt != null) ...[
+                            const SizedBox(height: 16),
+                            _InfoRow(
+                              icon: Icons.check_circle_rounded,
+                              iconBg: const Color(0xFF22C55E),
+                              label: 'Completed At',
+                              value: _formatCompletedAt(task.completedAt!),
+                            ),
+                          ],
                           const SizedBox(height: 16),
                           _InfoRow(
                             icon: Icons.flag_rounded,
-                            iconBg: const Color(0xFFB91C1C),
+                            iconBg: priorityColor,
                             label: loc.priorityLabel,
                             value: task.priority[0].toUpperCase() +
                                 task.priority.substring(1),
@@ -239,7 +335,7 @@ class _TaskDetailView extends StatelessWidget {
                           const SizedBox(height: 16),
                           _InfoRow(
                             icon: Icons.local_offer_rounded,
-                            iconBg: const Color(0xFF15803D),
+                            iconBg: categoryColor,
                             label: loc.categoryLabel,
                             valueWidget: Container(
                               padding: const EdgeInsets.symmetric(

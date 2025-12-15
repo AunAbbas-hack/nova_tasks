@@ -2,7 +2,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:nova_tasks/core/utils/language/change_language.dart';
 import 'package:nova_tasks/features/auth/viewmodels/signup_viewmodel.dart';
 import 'package:nova_tasks/features/me/presentation/viewmodels/settings_viewmodel.dart';
 import 'package:nova_tasks/firebase_options.dart';

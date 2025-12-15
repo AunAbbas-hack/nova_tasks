@@ -79,11 +79,11 @@ class TaskRepository {
       debugPrint('   Document ID: ${task.id}');
       debugPrint('   Title: ${task.title}');
       
-      await _fire
-          .collection('users')
-          .doc(task.userId)
-          .collection('tasks')
-          .doc(task.id)
+    await _fire
+        .collection('users')
+        .doc(task.userId)
+        .collection('tasks')
+        .doc(task.id)
           .set(data);
       
       debugPrint('✅ Firestore: Task saved successfully');

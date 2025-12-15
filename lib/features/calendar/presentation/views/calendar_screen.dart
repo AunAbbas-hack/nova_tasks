@@ -7,6 +7,8 @@ import 'package:nova_tasks/core/widgets/app_text.dart';
 import 'package:nova_tasks/data/models/task_model.dart';
 import 'package:nova_tasks/data/repositories/task_repository.dart';
 import 'package:nova_tasks/features/tasks/views/task_detail_screen.dart';
+import 'package:nova_tasks/features/tasks/widgets/task_card.dart';
+import 'package:nova_tasks/features/home/presentation/viewmodels/home_viewmodel.dart';
 
 import '../../../../l10n/app_localizations.dart';
 import '../../../tasks/views/add_task_screen.dart';
@@ -134,9 +136,32 @@ class _CalendarView extends StatelessWidget {
                                           scrollController,
                                       itemCount: tasks.length,
                                       separatorBuilder: (_, __) =>
-                                          const Divider(color: Colors.white10),
-                                      itemBuilder: (context, index) =>
-                                          _CalendarTaskTile(task: tasks[index]),
+                                          const SizedBox(height: 12),
+                                      itemBuilder: (context, index) {
+                                        final task = tasks[index];
+                                        // Determine occurrence date for recurring tasks
+                                        DateTime? occurrenceDate;
+                                        if (task.recurrenceRule?.trim().isNotEmpty ?? false) {
+                                          // For recurring tasks, use selectedDay if single day is selected
+                                          // Otherwise use task.date for range selection
+                                          if (vm.selectedDay != null) {
+                                            occurrenceDate = vm.selectedDay;
+                                          } else if (vm.isRangeActive) {
+                                            // For range, use task.date as occurrence date
+                                            occurrenceDate = task.date;
+                                          }
+                                        }
+                                        return TaskCard(
+                                          task: task,
+                                          occurrenceDate: occurrenceDate,
+                                          onToggleComplete: (task, {occurrenceDate}) {
+                                            vm.toggleComplete(task, occurrenceDate: occurrenceDate);
+                                          },
+                                          onDelete: (task) async {
+                                            await vm.repo.deleteTask(task.userId, task.id);
+                                          },
+                                        );
+                                      },
                                     ),
                             ),
                           ],
@@ -301,12 +326,58 @@ class _NovaTableCalendar extends StatelessWidget {
       calendarBuilders: CalendarBuilders(
         markerBuilder: (context, day, events) {
           if (events.isEmpty) return const SizedBox.shrink();
-          return const Positioned(
+          
+          // Get unique priorities from tasks for this day
+          final tasks = events.cast<TaskModel>();
+          final uniquePriorities = <String>{};
+          for (final task in tasks) {
+            if (task.priority.isNotEmpty) {
+              uniquePriorities.add(task.priority.toLowerCase());
+            }
+          }
+          
+          if (uniquePriorities.isEmpty) {
+            // If no priority, show default marker
+            return const Positioned(
+              bottom: 4,
+              child: Icon(
+                Icons.circle,
+                size: 5,
+                color: Color(0xFF60A5FA),
+              ),
+            );
+          }
+          
+          // If only one priority, show single marker
+          if (uniquePriorities.length == 1) {
+            final priority = uniquePriorities.first;
+            return Positioned(
+              bottom: 4,
+              child: Icon(
+                Icons.circle,
+                size: 5,
+                color: _priorityColor(priority),
+              ),
+            );
+          }
+          
+          // Multiple priorities - show multiple markers in a row
+          return Positioned(
             bottom: 4,
-            child: Icon(
-              Icons.circle,
-              size: 5,
-              color: Color(0xFFF97316),
+            left: 0,
+            right: 0,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: uniquePriorities.map((priority) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 1.5),
+                  child: Icon(
+                    Icons.circle,
+                    size: 5,
+                    color: _priorityColor(priority),
+                  ),
+                );
+              }).toList(),
             ),
           );
         },
@@ -314,103 +385,24 @@ class _NovaTableCalendar extends StatelessWidget {
     );
   }
 }
-// ================== TASK TILE (LIST) ==================
-
-class _CalendarTaskTile extends StatelessWidget {
-  const _CalendarTaskTile({required this.task});
-
-  final TaskModel task;
-
-  @override
-  Widget build(BuildContext context) {
-    final vm = context.watch<CalendarViewModel>();
-    final isRecurring = task.recurrenceRule?.trim().isNotEmpty ?? false;
-    
-    // For recurring tasks, check if the specific date is completed
-    bool isDone = false;
-    if (isRecurring && vm.selectedDay != null) {
-      final dateOnly = DateTime(vm.selectedDay!.year, vm.selectedDay!.month, vm.selectedDay!.day);
-      isDone = task.completedDates.any((d) => 
-        d.year == dateOnly.year && d.month == dateOnly.month && d.day == dateOnly.day
-      );
-    } else {
-      isDone = task.completedAt != null;
-    }
-
-    final timeText = task.time.isEmpty
-        ? ''
-        : task.time; // you can format if storing 24h etc.
-
-    return InkWell(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute<void>(builder: (_) => TaskDetailScreen(task: task)),
-        );
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        child: Row(
-          children: [
-            // Checkbox-like circle
-            GestureDetector(
-              onTap: () {
-                // For recurring tasks, pass the selected day
-                if (isRecurring && vm.selectedDay != null) {
-                  vm.toggleComplete(task, occurrenceDate: vm.selectedDay);
-                } else {
-                  vm.toggleComplete(task);
-                }
-              },
-              child: Container(
-                width: 24,
-                height: 24,
-                decoration: BoxDecoration(
-                  color: isDone
-                      ? Theme.of(context).colorScheme.primary
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: isDone ? Colors.transparent : Colors.white38,
-                    width: 2,
-                  ),
-                ),
-                child: isDone
-                    ? const Icon(Icons.check, size: 16, color: Colors.white)
-                    : null,
-              ),
-            ),
-            const SizedBox(width: 16),
-
-            // Title + time
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  AppText(
-                    task.title,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: isDone ? Colors.white54 : Colors.white,
-                    decoration: isDone ? TextDecoration.lineThrough : null,
-                  ),
-                  if (timeText.isNotEmpty) ...[
-                    const SizedBox(height: 4),
-                    AppText(timeText, color: Colors.white54),
-                  ],
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 // ================== HELPERS ==================
 
-
+/// Priority color helper (same as TaskCard)
+Color _priorityColor(String priority) {
+  switch (priority.toLowerCase()) {
+    case 'low':
+      return Colors.blueGrey;
+    case 'medium':
+      return const Color(0xFF60A5FA);
+    case 'high':
+      return Colors.orange;
+    case 'urgent':
+      return const Color(0xFFEF4444);
+    default:
+      return const Color(0xFF60A5FA);
+  }
+}
 
 /// Returns formatted date like "October 26" using localized month names
 String formatFull(DateTime date, BuildContext context) {
